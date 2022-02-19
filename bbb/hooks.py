@@ -14,7 +14,8 @@ app_license = "MIT"
 
 # include js, css files in header of desk.html
 # app_include_css = "/assets/bbb/css/bbb.css"
-# app_include_js = "/assets/bbb/js/bbb.js"
+# app_include_js = ["assets/js/custom-point-of-sale.min.js"]
+
 
 # include js, css files in header of web template
 # web_include_css = "/assets/bbb/css/bbb.css"
@@ -28,7 +29,12 @@ app_license = "MIT"
 # webform_include_css = {"doctype": "public/css/doctype.css"}
 
 # include js in page
-# page_js = {"page" : "public/js/file.js"}
+page_js = {
+    # "pos" : "public/js/pos_controller.js",
+    # "point-of-sale": "public/js/pos_controller.js",
+    "point-of-sale": "public/js/point_of_sale.js",
+
+}
 
 # include js in doctype views
 # doctype_js = {"doctype" : "public/js/doctype.js"}
@@ -152,24 +158,24 @@ app_license = "MIT"
 # --------------------
 
 user_data_fields = [
-	{
-		"doctype": "{doctype_1}",
-		"filter_by": "{filter_by}",
-		"redact_fields": ["{field_1}", "{field_2}"],
-		"partial": 1,
-	},
-	{
-		"doctype": "{doctype_2}",
-		"filter_by": "{filter_by}",
-		"partial": 1,
-	},
-	{
-		"doctype": "{doctype_3}",
-		"strict": False,
-	},
-	{
-		"doctype": "{doctype_4}"
-	}
+    {
+        "doctype": "{doctype_1}",
+        "filter_by": "{filter_by}",
+        "redact_fields": ["{field_1}", "{field_2}"],
+        "partial": 1,
+    },
+    {
+        "doctype": "{doctype_2}",
+        "filter_by": "{filter_by}",
+        "partial": 1,
+    },
+    {
+        "doctype": "{doctype_3}",
+        "strict": False,
+    },
+    {
+        "doctype": "{doctype_4}"
+    }
 ]
 
 # Authentication and authorization
@@ -178,4 +184,3 @@ user_data_fields = [
 # auth_hooks = [
 # 	"bbb.auth.validate"
 # ]
-
