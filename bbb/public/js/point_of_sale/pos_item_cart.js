@@ -50,6 +50,7 @@ erpnext.PointOfSale.ItemCart = class {
 
 	init_cart_components() {
 		this.$component.append(
+			// `<button class="btn btn-success ignore_pricing_rule_btn">Ignore Pricing Rule</button>
 			`<div class="cart-container">
 				<div class="abs-cart-container">
 					<div class="cart-label">Item Cart</div>
@@ -644,14 +645,14 @@ erpnext.PointOfSale.ItemCart = class {
 
 
 
-			frappe.db.get_value('Item', item_data.item_code, 'standard_rate')
-				.then(r => {
-					// item_mrp = r.message.standard_rate;
-				})
+			// frappe.db.get_value('Item', item_data.item_code, 'standard_rate')
+			// 	.then(r => {
+			// 		// item_mrp = r.message.standard_rate;
+			// 	})
 			return `
 				<div class="item-qty-rate">
-					<div class="item-qty"><span>${item_data.rate || 0}</span></div>
-					<div class="item-qty"><span>${item_data.rate || 0}</span></div>
+					<div class="item-mrp"><span>${item_data.mrp || 0}</span></div>
+					<div class="item-row-rate"><span>${item_data.rate || 0}</span></div>
 					<div class="item-qty"><span>${item_data.qty || 0}</span></div>
 					<div class="item-rate-amount">
 						<div class="item-rate">${format_currency(item_data.amount, currency)}</div>
@@ -1042,7 +1043,6 @@ erpnext.PointOfSale.ItemCart = class {
 		this.$cart_items_wrapper.html('');
 		if (frm.doc.items.length) {
 			frm.doc.items.forEach(item => {
-				console.log("======>>>>", item);
 				this.update_item_html(item);
 			});
 		} else {

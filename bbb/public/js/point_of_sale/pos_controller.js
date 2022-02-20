@@ -465,8 +465,9 @@ erpnext.PointOfSale.Controller = class {
 		const page = $('<div>');
 		const frm = _frm || new frappe.ui.form.Form(doctype, page, false);
 		const name = frappe.model.make_new_doc_and_get_name(doctype, true);
+		// frm.doc.ignore_pricing_rule = 1
+		console.log(frm)
 		frm.refresh(name);
-
 		return frm;
 	}
 
@@ -490,6 +491,7 @@ erpnext.PointOfSale.Controller = class {
 		if (this.company && !this.frm.doc.company) this.frm.doc.company = this.company;
 		if (this.pos_profile && !this.frm.doc.pos_profile) this.frm.doc.pos_profile = this.pos_profile;
 		if (!this.frm.doc.company) return;
+		console.log(this.pos_profile);
 
 		return this.frm.trigger("set_pos_data");
 	}
@@ -533,7 +535,7 @@ erpnext.PointOfSale.Controller = class {
 				if (!item_code)
 					return;
 
-				const new_item = { item_code, batch_no, mrp, rate, [field]: value };
+				const new_item = { item_code, batch_no, rate, mrp, [field]: value };
 
 				if (serial_no) {
 					await this.check_serial_no_availablilty(item_code, this.frm.doc.set_warehouse, serial_no);
@@ -590,7 +592,6 @@ erpnext.PointOfSale.Controller = class {
 					&& (!has_batch_no || (has_batch_no && i.batch_no === batch_no))
 					&& (i.uom === uom)
 					// && (i.rate == rate)
-					&& (i.mrp == mrp)
 			);
 		}
 
@@ -644,7 +645,7 @@ erpnext.PointOfSale.Controller = class {
 				message: __('Item Code: {0} is not available under warehouse {1}.', [bold_item_code, bold_warehouse])
 			})
 		} else if (available_qty < qty_needed) {
-			frappe.show_alert({
+			frappe.throw({
 				message: __('Stock quantity not enough for Item Code: {0} under warehouse {1}. Available quantity {2}.', [bold_item_code, bold_warehouse, bold_available_qty]),
 				indicator: 'orange'
 			});
@@ -708,4 +709,8 @@ erpnext.PointOfSale.Controller = class {
 			})
 			.catch(e => console.log(e));
 	}
+
+	// $('.ignore_pricing_rule_btn').('on'click', function() {
+
+	// }
 };
