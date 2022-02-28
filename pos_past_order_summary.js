@@ -203,6 +203,10 @@ erpnext.PointOfSale.PastOrderSummary = class {
 
 	print_receipt() {
 		const frm = this.events.get_frm();
+
+		// inserting the printing log
+		this.insert_invoice_print_log();
+
 		frappe.utils.print(
 			this.doc.doctype,
 			this.doc.name,
@@ -210,6 +214,23 @@ erpnext.PointOfSale.PastOrderSummary = class {
 			this.doc.letter_head,
 			this.doc.language || frappe.boot.lang
 		);
+	}
+
+	insert_invoice_print_log(){
+		// inserting invoice printing log
+		frappe.db.insert({
+			"doctype": "Printing Log",
+			"date": frappe.datetime.get_today(),
+			"customer_name": this.doc.customer_name,
+			"customer": this.doc.customer,
+			"email": this.doc.contact_email,
+			"location": this.doc.pos_profile,
+			"mobile_number": this.doc.contact_mobile,
+			"invoice_number": this.doc.name,
+
+		}).then(function(doc) {
+			console.log(doc);
+		});
 	}
 
 	attach_shortcuts() {

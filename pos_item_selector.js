@@ -99,14 +99,14 @@ erpnext.PointOfSale.ItemSelector = class {
 							<img
 								onerror="cur_pos.item_selector.handle_broken_image(this)"
 								class="h-full" src="${item_image}"
-								alt="${frappe.get_abbr(item.item_name)}"
+								alt="${item.item_name}"
 								style="object-fit: cover;">
 						</div>`;
 			} else {
 				return `<div class="item-qty-pill">
 							<span class="indicator-pill whitespace-nowrap ${indicator_color}">${qty_to_display}</span>
 						</div>
-						<div class="item-display abbr">${frappe.get_abbr(item.item_name)}</div>`;
+						<div class="item-display abbr">${item.item_name}</div>`;
 			}
 		}
 
@@ -227,6 +227,7 @@ erpnext.PointOfSale.ItemSelector = class {
 			let uom = unescape($item.attr('data-uom'));
 			let mrp = unescape($item.attr('data-mrp'));
 			let rate = unescape($item.attr('data-rate'));
+			let title = unescape($item.attr('title'));
 
 			// escape(undefined) returns "undefined" then unescape returns "undefined"
 			batch_no = batch_no === "undefined" ? undefined : batch_no;
@@ -235,11 +236,12 @@ erpnext.PointOfSale.ItemSelector = class {
 			uom = uom === "undefined" ? undefined : uom;
 			rate = rate === "undefined" ? undefined : rate;
 			mrp = mrp === "undefined" ? undefined : mrp;
+			title = title === "undefined" ? undefined : title;
 
 			me.events.item_selected({
 				field: 'qty',
 				value: "+1",
-				item: { item_code, batch_no, serial_no, uom, rate, mrp }
+				item: { item_code, batch_no, serial_no, uom, rate, mrp, title}
 			});
 			me.set_search_value('');
 		});

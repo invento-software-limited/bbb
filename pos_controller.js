@@ -503,6 +503,7 @@ erpnext.PointOfSale.Controller = class {
 		let item_row = undefined;
 		try {
 			let { field, value, item } = args;
+			console.log(args);
 			item_row = this.get_item_from_frm(item);
 			const item_row_exists = !$.isEmptyObject(item_row);
 
@@ -524,11 +525,13 @@ erpnext.PointOfSale.Controller = class {
 					this.update_cart_html(item_row);
 				}
 
+				this.insert_search_product_log(item_code, item_row.title)
+
 			} else {
 				if (!this.frm.doc.customer)
 					return this.raise_customer_selection_alert();
 
-				const { item_code, batch_no, serial_no, rate, mrp } = item;
+				const { item_code, batch_no, serial_no, rate, mrp, title } = item;
 
 				if (!item_code)
 					return;
@@ -557,6 +560,8 @@ erpnext.PointOfSale.Controller = class {
 
 				if (this.check_serial_batch_selection_needed(item_row))
 					this.edit_item_details_of(item_row);
+
+				this.insert_search_product_log(item_code, title);
 			}
 
 		} catch (error) {
@@ -565,6 +570,25 @@ erpnext.PointOfSale.Controller = class {
 			frappe.dom.unfreeze();
 			return item_row;
 		}
+	}
+
+	insert_search_product_log(item_code, item_name){
+		console.log(this.frm.doc);
+		console.log(item_name);
+
+		frappe.db.insert({
+			"doctype": "Product Search log",
+			"date": frappe.datetime.get_today(),
+			"customer_name": this.frm.doc.customer_name,
+			"customer": this.frm.doc.customer,
+			"email": this.frm.doc.contact_email,
+			"location": this.frm.doc.pos_profile,
+			"product_code": item_code,
+			"product_name": item_name.replace('%20', ' ')
+
+		}).then(function(doc) {
+			console.log(doc);
+		});
 	}
 
 	raise_customer_selection_alert() {
@@ -576,7 +600,7 @@ erpnext.PointOfSale.Controller = class {
 		frappe.utils.play_sound("error");
 	}
 
-	get_item_from_frm({ name, item_code, batch_no, uom, rate, mrp }) {
+	get_item_from_frm({ name, item_code, batch_no, uom, rate, mrp, title }) {
 		let item_row = null;
 		if (name) {
 			item_row = this.frm.doc.items.find(i => i.name == name);
@@ -591,6 +615,7 @@ erpnext.PointOfSale.Controller = class {
 					&& (i.uom === uom)
 					&& (i.rate == rate)
 					&& (i.mrp == mrp)
+					&& (i.title == title)
 			);
 		}
 
