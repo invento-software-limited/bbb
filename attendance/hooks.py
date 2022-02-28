@@ -100,7 +100,12 @@ app_license = "MIT"
 # Scheduled Tasks
 # ---------------
 
-# scheduler_events = {
+scheduler_events = {
+	"cron": {
+		"10 11 * * *": [
+			"attendance.attendance.doctype.bi_attendance.api.sync_attendance_data"
+		]
+	}
 # 	"all": [
 # 		"attendance.tasks.all"
 # 	],
@@ -116,7 +121,7 @@ app_license = "MIT"
 # 	"monthly": [
 # 		"attendance.tasks.monthly"
 # 	]
-# }
+}
 
 # Testing
 # -------

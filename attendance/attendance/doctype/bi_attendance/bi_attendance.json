@@ -1,0 +1,125 @@
+{
+ "actions": [],
+ "allow_rename": 1,
+ "creation": "2022-02-23 13:20:41.545405",
+ "doctype": "DocType",
+ "editable_grid": 1,
+ "engine": "InnoDB",
+ "field_order": [
+  "attendance_id",
+  "attendance_date",
+  "employee_id",
+  "employee_name",
+  "location_id",
+  "distance",
+  "location_latitude",
+  "location_longitude",
+  "clock_in_time",
+  "check_in_time",
+  "check_out_time",
+  "check_in_image_path",
+  "check_out_image_path",
+  "amended_from"
+ ],
+ "fields": [
+  {
+   "fieldname": "attendance_id",
+   "fieldtype": "Int",
+   "label": "Attendance ID"
+  },
+  {
+   "fieldname": "attendance_date",
+   "fieldtype": "Date",
+   "label": "Attendance Date"
+  },
+  {
+   "fieldname": "employee_id",
+   "fieldtype": "Int",
+   "label": "Employee ID"
+  },
+  {
+   "fieldname": "employee_name",
+   "fieldtype": "Data",
+   "label": "Employee Name"
+  },
+  {
+   "fieldname": "location_id",
+   "fieldtype": "Int",
+   "label": "Location ID"
+  },
+  {
+   "fieldname": "distance",
+   "fieldtype": "Float",
+   "label": "Distance"
+  },
+  {
+   "fieldname": "location_latitude",
+   "fieldtype": "Float",
+   "label": "Location Lattitude"
+  },
+  {
+   "fieldname": "location_longitude",
+   "fieldtype": "Float",
+   "label": "Location Longitude"
+  },
+  {
+   "fieldname": "clock_in_time",
+   "fieldtype": "Data",
+   "label": "Clock In Time"
+  },
+  {
+   "fieldname": "check_in_time",
+   "fieldtype": "Data",
+   "label": "Check In Time"
+  },
+  {
+   "fieldname": "check_out_time",
+   "fieldtype": "Data",
+   "label": "Check Out TIme"
+  },
+  {
+   "fieldname": "check_in_image_path",
+   "fieldtype": "Data",
+   "label": "Check In Image"
+  },
+  {
+   "fieldname": "check_out_image_path",
+   "fieldtype": "Data",
+   "label": "Check Out Time"
+  },
+  {
+   "fieldname": "amended_from",
+   "fieldtype": "Link",
+   "label": "Amended From",
+   "no_copy": 1,
+   "options": "BI Attendance",
+   "print_hide": 1,
+   "read_only": 1
+  }
+ ],
+ "index_web_pages_for_search": 1,
+ "is_submittable": 1,
+ "links": [],
+ "modified": "2022-02-24 11:09:47.338745",
+ "modified_by": "Administrator",
+ "module": "Attendance",
+ "name": "BI Attendance",
+ "owner": "Administrator",
+ "permissions": [
+  {
+   "create": 1,
+   "delete": 1,
+   "email": 1,
+   "export": 1,
+   "print": 1,
+   "read": 1,
+   "report": 1,
+   "role": "System Manager",
+   "share": 1,
+   "write": 1
+  }
+ ],
+ "sort_field": "modified",
+ "sort_order": "DESC",
+ "track_changes": 1
+}
