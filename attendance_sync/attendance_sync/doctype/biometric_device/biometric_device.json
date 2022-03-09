@@ -1,0 +1,59 @@
+{
+ "actions": [],
+ "allow_rename": 1,
+ "autoname": "BIO-DEV-.####",
+ "creation": "2022-03-08 16:16:37.234713",
+ "doctype": "DocType",
+ "editable_grid": 1,
+ "engine": "InnoDB",
+ "field_order": [
+  "device_id",
+  "device_ip",
+  "punch_direction",
+  "clear_from_device_on_fetch"
+ ],
+ "fields": [
+  {
+   "fieldname": "device_id",
+   "fieldtype": "Data",
+   "in_list_view": 1,
+   "label": "Device ID",
+   "reqd": 1
+  },
+  {
+   "fieldname": "device_ip",
+   "fieldtype": "Data",
+   "in_list_view": 1,
+   "label": "Device IP",
+   "reqd": 1
+  },
+  {
+   "fieldname": "punch_direction",
+   "fieldtype": "Select",
+   "in_list_view": 1,
+   "label": "Punch Direction",
+   "options": "IN\nOUT\nAUTO\nNone",
+   "reqd": 1
+  },
+  {
+   "default": "0",
+   "fieldname": "clear_from_device_on_fetch",
+   "fieldtype": "Check",
+   "in_list_view": 1,
+   "label": "Clear Log From Device",
+   "reqd": 1
+  }
+ ],
+ "index_web_pages_for_search": 1,
+ "istable": 1,
+ "links": [],
+ "modified": "2022-03-08 17:08:17.503250",
+ "modified_by": "Administrator",
+ "module": "Attendance Sync",
+ "name": "Biometric Device",
+ "owner": "Administrator",
+ "permissions": [],
+ "sort_field": "modified",
+ "sort_order": "DESC",
+ "track_changes": 1
+}

@@ -1,0 +1,82 @@
+{
+ "actions": [],
+ "allow_rename": 1,
+ "autoname": "API-CONF-.###",
+ "creation": "2022-03-08 15:57:27.595038",
+ "doctype": "DocType",
+ "editable_grid": 1,
+ "engine": "InnoDB",
+ "field_order": [
+  "api_key",
+  "api_secret",
+  "api_url",
+  "import_start_date",
+  "biometric_devices",
+  "shift_types"
+ ],
+ "fields": [
+  {
+   "fieldname": "api_key",
+   "fieldtype": "Data",
+   "in_list_view": 1,
+   "label": "API Key",
+   "reqd": 1
+  },
+  {
+   "fieldname": "api_secret",
+   "fieldtype": "Data",
+   "in_list_view": 1,
+   "label": "API Secret",
+   "reqd": 1
+  },
+  {
+   "fieldname": "api_url",
+   "fieldtype": "Data",
+   "in_list_view": 1,
+   "label": "API URL",
+   "reqd": 1
+  },
+  {
+   "fieldname": "biometric_devices",
+   "fieldtype": "Table",
+   "label": "Biometric Devices",
+   "options": "Biometric Device"
+  },
+  {
+   "fieldname": "shift_types",
+   "fieldtype": "Table",
+   "label": "Shift Types",
+   "options": "Shift Config"
+  },
+  {
+   "description": "format: 20220301",
+   "fieldname": "import_start_date",
+   "fieldtype": "Data",
+   "label": "Import Start Date"
+  }
+ ],
+ "index_web_pages_for_search": 1,
+ "links": [],
+ "modified": "2022-03-09 15:25:22.190908",
+ "modified_by": "Administrator",
+ "module": "Attendance Sync",
+ "name": "Attendance API Config",
+ "owner": "Administrator",
+ "permissions": [
+  {
+   "create": 1,
+   "delete": 1,
+   "email": 1,
+   "export": 1,
+   "print": 1,
+   "read": 1,
+   "report": 1,
+   "role": "System Manager",
+   "share": 1,
+   "write": 1
+  }
+ ],
+ "sort_field": "modified",
+ "sort_order": "DESC",
+ "track_changes": 1
+}

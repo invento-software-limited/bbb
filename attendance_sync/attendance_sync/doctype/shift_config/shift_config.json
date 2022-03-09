@@ -1,0 +1,40 @@
+{
+ "actions": [],
+ "allow_rename": 1,
+ "autoname": "SHIFT-.###",
+ "creation": "2022-03-08 16:39:42.058685",
+ "doctype": "DocType",
+ "editable_grid": 1,
+ "engine": "InnoDB",
+ "field_order": [
+  "shift_type_name",
+  "related_devices"
+ ],
+ "fields": [
+  {
+   "fieldname": "shift_type_name",
+   "fieldtype": "Data",
+   "in_list_view": 1,
+   "label": "Shift Type Name",
+   "reqd": 1
+  },
+  {
+   "fieldname": "related_devices",
+   "fieldtype": "Data",
+   "label": "Related Devices",
+   "reqd": 1
+  }
+ ],
+ "index_web_pages_for_search": 1,
+ "istable": 1,
+ "links": [],
+ "modified": "2022-03-08 17:01:44.546564",
+ "modified_by": "Administrator",
+ "module": "Attendance Sync",
+ "name": "Shift Config",
+ "owner": "Administrator",
+ "permissions": [],
+ "sort_field": "modified",
+ "sort_order": "DESC",
+ "track_changes": 1
+}

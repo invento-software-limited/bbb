@@ -4,3 +4,5 @@
 *.swp
 tags
 attendance_sync/docs/current
+attendance_sync/logs/
+attendance_sync/logs/*
