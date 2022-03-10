@@ -11,12 +11,14 @@ from logging.handlers import RotatingFileHandler
 from zk import ZK, const
 from pathlib import Path
 
+# to get the current location's path
+BASE_DIR = str(Path(__file__).resolve().parent)
+
+""" ====================== Config Class Start ==================== """
+
 attendance_config = frappe.get_last_doc("Attendance API Config")
 
-BASE_DIR = str(Path(__file__).resolve().parent)
-# file_path = str(BASE_DIR) + '/utils/medical_record_validations.json'
-
-class Config():
+class APIConfig():
     # ERPNext related configs
     ERPNEXT_API_KEY = attendance_config.api_key
     ERPNEXT_API_SECRET = attendance_config.api_secret
@@ -56,31 +58,27 @@ EMPLOYEE_NOT_FOUND_ERROR_MESSAGE = "No Employee found for the given employee fie
 device_punch_values_IN = [0,4]
 device_punch_values_OUT = [1,5]
 
-# possible area of further developemt
-    # Real-time events - setup getting events pushed from the machine rather then polling.
-        #- this is documented as 'Real-time events' in the ZKProtocol manual.
 
-# Notes:
-# Status Keys in status.json
-#  - lift_off_timestamp
-#  - mission_accomplished_timestamp
-#  - <device_id>_pull_timestamp
-#  - <device_id>_push_timestamp
-#  - <shift_type>_sync_timestamp
-
-if not os.path.exists(Config.LOGS_DIRECTORY):
+if not os.path.exists(APIConfig.LOGS_DIRECTORY):
     # the directory not exists it will create a new directory
-    os.mkdir(Config.LOGS_DIRECTORY)
+    os.mkdir(APIConfig.LOGS_DIRECTORY)
 
-class Status():
-    file_path = Config.LOGS_DIRECTORY + '/data.json'
+
+""" ====================== Invento DB Start =========================== """
+
+class InventoDB():
+    file_path = APIConfig.LOGS_DIRECTORY + '/data.json'
+
+    # Notes:
+    # Status Keys in status.json
+    #  - lift_off_timestamp
+    #  - mission_accomplished_timestamp
+    #  - <device_id>_pull_timestamp
+    #  - <device_id>_push_timestamp
+    #  - <shift_type>_sync_timestamp
 
     def startupCheck(self):
-        if os.path.isfile(self.file_path) and os.access(self.file_path, os.R_OK):
-            # checks if file exists
-            print("File exists and is readable")
-        else:
-            print("Either file is missing or is not readable, creating file...")
+        if not os.path.isfile(self.file_path) and not os.access(self.file_path, os.R_OK):
             with io.open(self.file_path, 'w') as db_file:
                 db_file.write(json.dumps({}))
 
@@ -99,32 +97,30 @@ class Status():
         data[key] = value
         json_object = json.dumps(data, indent=4)
 
-        # Writing to sample.json
         with open(self.file_path, "w") as outfile:
             outfile.write(json_object)
             outfile.close()
         return value
 
-status = Status()
+""" ======================== Invento DB Start =========================== """
+
+
+# defining a Status object
+status = InventoDB()
 status.startupCheck()
 
-config = Config()
+# defining a Config object
+config = APIConfig()
+
+
+""" ======================= Main Function's Block Start =============================== """
 
 @frappe.whitelist()
 def sync_biometric_attendance():
     frappe.msgprint("==> Attendance Syncing...")
 
-    print("=========>>>>", config.ERPNEXT_API_KEY)
-    print("=========>>>>", config.ERPNEXT_API_SECRET)
-    print("=========>>>>", config.ERPNEXT_URL)
-    print("=========>>>>", config.IMPORT_START_DATE)
-    print("=========>>>>", config.devices)
-    print("=========>>>>", config.shift_type_device_mapping)
-
-
     """Takes care of checking if it is time to pull data based on config,
     then calling the relevent functions to pull data and push to EPRNext.
-
     """
     try:
         last_lift_off_timestamp = _safe_convert_date(status.get('lift_off_timestamp'), "%Y-%m-%d %H:%M:%S.%f")
@@ -406,6 +402,9 @@ error_logger = setup_logger('error_logger', '/'.join([config.LOGS_DIRECTORY, 'er
 info_logger = setup_logger('info_logger', '/'.join([config.LOGS_DIRECTORY, 'logs.log']))
 # status = pickledb.load('/'.join([config.LOGS_DIRECTORY, 'status.json']), True)
 
+""" ============================== Main Function Block End ============================================ """
+
+""" ============== Timer Function =============== """
 def infinite_loop(sleep_time=15):
     print("Service Running...")
     while True:
