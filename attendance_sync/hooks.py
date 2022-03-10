@@ -104,23 +104,23 @@ doctype_list_js = {
 # Scheduled Tasks
 # ---------------
 
-# scheduler_events = {
-# 	"all": [
-# 		"attendance_sync.tasks.all"
-# 	],
+scheduler_events = {
+	# "all": [
+	# 	"attendance_sync.tasks.all"
+	# ],
 # 	"daily": [
 # 		"attendance_sync.tasks.daily"
 # 	],
-# 	"hourly": [
-# 		"attendance_sync.tasks.hourly"
-# 	],
+	"hourly": [
+		"attendance_sync.erpnext_sync.sync_biometric_attendance"
+	],
 # 	"weekly": [
 # 		"attendance_sync.tasks.weekly"
 # 	]
 # 	"monthly": [
 # 		"attendance_sync.tasks.monthly"
 # 	]
-# }
+}
 
 # Testing
 # -------
