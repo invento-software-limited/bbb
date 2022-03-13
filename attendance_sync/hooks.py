@@ -112,7 +112,7 @@ scheduler_events = {
 # 		"attendance_sync.tasks.daily"
 # 	],
 	"hourly": [
-		"attendance_sync.erpnext_sync.sync_biometric_attendance"
+		"attendance_sync.tasks.hourly"
 	],
 # 	"weekly": [
 # 		"attendance_sync.tasks.weekly"
