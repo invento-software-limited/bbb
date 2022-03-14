@@ -23,6 +23,7 @@ erpnext.PointOfSale.ItemCart = class {
 		)
 
 		this.$component = this.wrapper.find('.customer-cart-container');
+
 	}
 
 	init_child_components() {
@@ -34,9 +35,17 @@ erpnext.PointOfSale.ItemCart = class {
 		this.$component.append(
 			`<div class="customer-section"></div>`
 		)
+		this.$component.append(`<div class="form-check" style="margin-top:10px">
+				  <input class="form-check-input" type="checkbox" value="" id="ignore_pricing_rule">
+				  <label class="form-check-label" for="ignore_pricing_rule">
+					Ignore Pricing Rule
+				  </label>
+				</div>`);
 		this.$customer_section = this.$component.find('.customer-section');
+		this.$ignore_pricing_rule = this.$component.find('#ignore_pricing_rule');
 		this.make_customer_selector();
 		// this.make_served_by_selector();
+
 	}
 
 	reset_customer_selector() {
@@ -162,6 +171,9 @@ erpnext.PointOfSale.ItemCart = class {
 		const me = this;
 		this.$customer_section.on('click', '.reset-customer-btn', function () {
 			me.reset_customer_selector();
+		});
+		this.$ignore_pricing_rule.on('click', '#ignore_pricing_rule', function (){
+			console.log('checked');
 		});
 
 		this.$customer_section.on('click', '.close-details-btn', function () {

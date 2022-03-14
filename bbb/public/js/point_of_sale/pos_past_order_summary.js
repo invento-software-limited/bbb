@@ -17,16 +17,16 @@ erpnext.PointOfSale.PastOrderSummary = class {
 		this.wrapper.append(
 			`<section class="past-order-summary">
 				<div class="no-summary-placeholder">
-					${__('Select an invoice to load summary data')}
+					Select an invoice to load summary data
 				</div>
 				<div class="invoice-summary-wrapper">
 					<div class="abs-container">
 						<div class="upper-section"></div>
-						<div class="label">${__('Items')}</div>
+						<div class="label">Items</div>
 						<div class="items-container summary-container"></div>
-						<div class="label">${__('Totals')}</div>
+						<div class="label">Totals</div>
 						<div class="totals-container summary-container"></div>
-						<div class="label">${__('Payments')}</div>
+						<div class="label">Payments</div>
 						<div class="payments-container summary-container"></div>
 						<div class="summary-btns"></div>
 					</div>
@@ -82,7 +82,7 @@ erpnext.PointOfSale.PastOrderSummary = class {
 		return `<div class="left-section">
 					<div class="customer-name">${doc.customer}</div>
 					<div class="customer-email">${this.customer_email}</div>
-					<div class="cashier">${__('Sold by')}: ${doc.owner}</div>
+					<div class="cashier">Sold by: ${doc.owner}</div>
 				</div>
 				<div class="right-section">
 					<div class="paid-amount">${format_currency(doc.paid_amount, doc.currency)}</div>
@@ -121,7 +121,7 @@ erpnext.PointOfSale.PastOrderSummary = class {
 
 	get_net_total_html(doc) {
 		return `<div class="summary-row-wrapper">
-					<div>${__('Net Total')}</div>
+					<div>Net Total</div>
 					<div>${format_currency(doc.net_total, doc.currency)}</div>
 				</div>`;
 	}
@@ -144,14 +144,14 @@ erpnext.PointOfSale.PastOrderSummary = class {
 
 	get_grand_total_html(doc) {
 		return `<div class="summary-row-wrapper grand-total">
-					<div>${__('Grand Total')}</div>
+					<div>Grand Total</div>
 					<div>${format_currency(doc.grand_total, doc.currency)}</div>
 				</div>`;
 	}
 
 	get_payment_html(doc, payment) {
 		return `<div class="summary-row-wrapper payments">
-					<div>${__(payment.mode_of_payment)}</div>
+					<div>${payment.mode_of_payment}</div>
 					<div>${format_currency(payment.amount, doc.currency)}</div>
 				</div>`;
 	}
@@ -203,6 +203,10 @@ erpnext.PointOfSale.PastOrderSummary = class {
 
 	print_receipt() {
 		const frm = this.events.get_frm();
+
+		// inserting the printing log
+		this.insert_invoice_print_log();
+
 		frappe.utils.print(
 			this.doc.doctype,
 			this.doc.name,
@@ -210,6 +214,23 @@ erpnext.PointOfSale.PastOrderSummary = class {
 			this.doc.letter_head,
 			this.doc.language || frappe.boot.lang
 		);
+	}
+
+	insert_invoice_print_log(){
+		// inserting invoice printing log
+		frappe.db.insert({
+			"doctype": "Printing Log",
+			"date": frappe.datetime.get_today(),
+			"customer_name": this.doc.customer_name,
+			"customer": this.doc.customer,
+			"email": this.doc.contact_email,
+			"location": this.doc.pos_profile,
+			"mobile_number": this.doc.contact_mobile,
+			"invoice_number": this.doc.name,
+
+		}).then(function(doc) {
+			console.log(doc);
+		});
 	}
 
 	attach_shortcuts() {
@@ -285,9 +306,8 @@ erpnext.PointOfSale.PastOrderSummary = class {
 			if (m.condition) {
 				m.visible_btns.forEach(b => {
 					const class_name = b.split(' ')[0].toLowerCase();
-					const btn = __(b);
 					this.$summary_btns.append(
-						`<div class="summary-btn btn btn-default ${class_name}-btn">${btn}</div>`
+						`<div class="summary-btn btn btn-default ${class_name}-btn">${b}</div>`
 					);
 				});
 			}

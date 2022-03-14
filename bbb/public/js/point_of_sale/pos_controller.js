@@ -465,9 +465,8 @@ erpnext.PointOfSale.Controller = class {
 		const page = $('<div>');
 		const frm = _frm || new frappe.ui.form.Form(doctype, page, false);
 		const name = frappe.model.make_new_doc_and_get_name(doctype, true);
-		// frm.doc.ignore_pricing_rule = 1
-		console.log(frm)
 		frm.refresh(name);
+
 		return frm;
 	}
 
@@ -491,7 +490,6 @@ erpnext.PointOfSale.Controller = class {
 		if (this.company && !this.frm.doc.company) this.frm.doc.company = this.company;
 		if (this.pos_profile && !this.frm.doc.pos_profile) this.frm.doc.pos_profile = this.pos_profile;
 		if (!this.frm.doc.company) return;
-		console.log(this.pos_profile);
 
 		return this.frm.trigger("set_pos_data");
 	}
@@ -505,6 +503,7 @@ erpnext.PointOfSale.Controller = class {
 		let item_row = undefined;
 		try {
 			let { field, value, item } = args;
+			console.log(args);
 			item_row = this.get_item_from_frm(item);
 			const item_row_exists = !$.isEmptyObject(item_row);
 
@@ -526,16 +525,18 @@ erpnext.PointOfSale.Controller = class {
 					this.update_cart_html(item_row);
 				}
 
+				this.insert_search_product_log(item_code, item_row.title)
+
 			} else {
 				if (!this.frm.doc.customer)
 					return this.raise_customer_selection_alert();
 
-				const { item_code, batch_no, serial_no, rate, mrp } = item;
+				const { item_code, batch_no, serial_no, rate, mrp, title } = item;
 
 				if (!item_code)
 					return;
 
-				const new_item = { item_code, batch_no, rate, mrp, [field]: value };
+				const new_item = { item_code, batch_no, mrp, rate, [field]: value };
 
 				if (serial_no) {
 					await this.check_serial_no_availablilty(item_code, this.frm.doc.set_warehouse, serial_no);
@@ -559,6 +560,8 @@ erpnext.PointOfSale.Controller = class {
 
 				if (this.check_serial_batch_selection_needed(item_row))
 					this.edit_item_details_of(item_row);
+
+				this.insert_search_product_log(item_code, title);
 			}
 
 		} catch (error) {
@@ -567,6 +570,25 @@ erpnext.PointOfSale.Controller = class {
 			frappe.dom.unfreeze();
 			return item_row;
 		}
+	}
+
+	insert_search_product_log(item_code, item_name){
+		console.log(this.frm.doc);
+		console.log(item_name);
+
+		frappe.db.insert({
+			"doctype": "Product Search log",
+			"date": frappe.datetime.get_today(),
+			"customer_name": this.frm.doc.customer_name,
+			"customer": this.frm.doc.customer,
+			"email": this.frm.doc.contact_email,
+			"location": this.frm.doc.pos_profile,
+			"product_code": item_code,
+			"product_name": item_name.replace('%20', ' ')
+
+		}).then(function(doc) {
+			console.log(doc);
+		});
 	}
 
 	raise_customer_selection_alert() {
@@ -578,7 +600,7 @@ erpnext.PointOfSale.Controller = class {
 		frappe.utils.play_sound("error");
 	}
 
-	get_item_from_frm({ name, item_code, batch_no, uom, rate, mrp }) {
+	get_item_from_frm({ name, item_code, batch_no, uom, rate, mrp, title }) {
 		let item_row = null;
 		if (name) {
 			item_row = this.frm.doc.items.find(i => i.name == name);
@@ -592,6 +614,8 @@ erpnext.PointOfSale.Controller = class {
 					&& (!has_batch_no || (has_batch_no && i.batch_no === batch_no))
 					&& (i.uom === uom)
 					// && (i.rate == rate)
+					// && (i.mrp == mrp)
+					// && (i.title == title)
 			);
 		}
 
@@ -645,7 +669,7 @@ erpnext.PointOfSale.Controller = class {
 				message: __('Item Code: {0} is not available under warehouse {1}.', [bold_item_code, bold_warehouse])
 			})
 		} else if (available_qty < qty_needed) {
-			frappe.throw({
+			frappe.show_alert({
 				message: __('Stock quantity not enough for Item Code: {0} under warehouse {1}. Available quantity {2}.', [bold_item_code, bold_warehouse, bold_available_qty]),
 				indicator: 'orange'
 			});
@@ -709,8 +733,4 @@ erpnext.PointOfSale.Controller = class {
 			})
 			.catch(e => console.log(e));
 	}
-
-	// $('.ignore_pricing_rule_btn').('on'click', function() {
-
-	// }
 };

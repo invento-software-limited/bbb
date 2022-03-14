@@ -47,6 +47,7 @@ erpnext.PointOfSale.ItemSelector = class {
 		}
 
 		this.get_items({}).then(({message}) => {
+			// console.log(message.items);
 			this.render_item_list(message.items);
 		});
 	}
@@ -78,7 +79,7 @@ erpnext.PointOfSale.ItemSelector = class {
 	get_item_html(item) {
 		const me = this;
 		// eslint-disable-next-line no-unused-vars
-		const { item_image, serial_no, batch_no, barcode, actual_qty, stock_uom, price_list_rate } = item;
+		const { item_image, serial_no, batch_no, barcode, actual_qty, mrp, stock_uom, price_list_rate } = item;
 		const indicator_color = actual_qty > 10 ? "green" : actual_qty <= 0 ? "red" : "orange";
 		const precision = flt(price_list_rate, 2) % 1 != 0 ? 2 : 0;
 
@@ -111,10 +112,9 @@ erpnext.PointOfSale.ItemSelector = class {
 
 		return (
 			`<div class="item-wrapper"
-				data-standard-rate="${escape(item.standard_rate)}"
 				data-item-code="${escape(item.item_code)}" data-serial-no="${escape(serial_no)}"
 				data-batch-no="${escape(batch_no)}" data-uom="${escape(stock_uom)}"
-				data-rate="${escape(price_list_rate || 0)}"
+				data-rate="${escape(price_list_rate || 0)}" data-mrp="${escape(mrp)}"
 				title="${item.item_name}">
 
 				${get_item_image_html()}
@@ -225,21 +225,23 @@ erpnext.PointOfSale.ItemSelector = class {
 			let batch_no = unescape($item.attr('data-batch-no'));
 			let serial_no = unescape($item.attr('data-serial-no'));
 			let uom = unescape($item.attr('data-uom'));
+			let mrp = unescape($item.attr('data-mrp'));
 			let rate = unescape($item.attr('data-rate'));
-			let mrp = unescape($item.attr('data-standard-rate'));
-			console.log($item);
+			let title = unescape($item.attr('title'));
 
 			// escape(undefined) returns "undefined" then unescape returns "undefined"
+			batch_no = batch_no === "undefined" ? undefined : batch_no;
 			batch_no = batch_no === "undefined" ? undefined : batch_no;
 			serial_no = serial_no === "undefined" ? undefined : serial_no;
 			uom = uom === "undefined" ? undefined : uom;
 			rate = rate === "undefined" ? undefined : rate;
 			mrp = mrp === "undefined" ? undefined : mrp;
+			title = title === "undefined" ? undefined : title;
 
 			me.events.item_selected({
 				field: 'qty',
 				value: "+1",
-				item: { item_code, batch_no, serial_no, uom, rate, mrp}
+				item: { item_code, batch_no, serial_no, uom, rate, mrp, title}
 			});
 			me.set_search_value('');
 		});
@@ -319,6 +321,7 @@ erpnext.PointOfSale.ItemSelector = class {
 					this.search_index[search_term] = items;
 				}
 				this.items = items;
+				// console.log(items);
 				this.render_item_list(items);
 				this.auto_add_item && this.items.length == 1 && this.add_filtered_item_to_cart();
 			});
@@ -339,11 +342,11 @@ erpnext.PointOfSale.ItemSelector = class {
 
 		minimize ?
 			this.$component.css('grid-column', 'span 2 / span 2') :
-			this.$component.css('grid-column', 'span 5 / span 5');
+			this.$component.css('grid-column', 'span 6 / span 6');
 
 		minimize ?
 			this.$items_container.css('grid-template-columns', 'repeat(1, minmax(0, 1fr))') :
-			this.$items_container.css('grid-template-columns', 'repeat(3, minmax(0, 1fr))');
+			this.$items_container.css('grid-template-columns', 'repeat(4, minmax(0, 1fr))');
 	}
 
 	toggle_component(show) {
