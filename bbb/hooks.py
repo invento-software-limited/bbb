@@ -101,13 +101,16 @@ page_js = {
 # ---------------
 # Hook on document methods and events
 
-# doc_events = {
-# 	"*": {
-# 		"on_update": "method",
-# 		"on_cancel": "method",
-# 		"on_trash": "method"
-#	}
-# }
+doc_events = {
+	"Item": {
+		"after_insert": "bbb.bbb.item.validate",
+		"on_update": "bbb.bbb.item.validate",
+	},
+    "Item Price": {
+        "after_insert": "bbb.bbb.item_price_list.validate",
+        "on_update": "bbb.bbb.item_price_list.validate",
+    }
+}
 
 # Scheduled Tasks
 # ---------------
