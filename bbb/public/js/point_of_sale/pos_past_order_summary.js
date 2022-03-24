@@ -216,23 +216,6 @@ erpnext.PointOfSale.PastOrderSummary = class {
 		);
 	}
 
-	insert_invoice_print_log(){
-		// inserting invoice printing log
-		frappe.db.insert({
-			"doctype": "Printing Log",
-			"date": frappe.datetime.get_today(),
-			"customer_name": this.doc.customer_name,
-			"customer": this.doc.customer,
-			"email": this.doc.contact_email,
-			"location": this.doc.pos_profile,
-			"mobile_number": this.doc.contact_mobile,
-			"invoice_number": this.doc.name,
-
-		}).then(function(doc) {
-			console.log(doc);
-		});
-	}
-
 	attach_shortcuts() {
 		const ctrl_label = frappe.utils.is_mac() ? '⌘' : 'Ctrl';
 		this.$summary_container.find('.print-btn').attr("title", `${ctrl_label}+P`);
@@ -422,5 +405,22 @@ erpnext.PointOfSale.PastOrderSummary = class {
 
 	toggle_component(show) {
 		show ? this.$component.css('display', 'flex') : this.$component.css('display', 'none');
+	}
+
+	insert_invoice_print_log(){
+		// inserting invoice printing log
+		frappe.db.insert({
+			"doctype": "Printing Log",
+			"date": frappe.datetime.get_today(),
+			"customer_name": this.doc.customer_name,
+			"customer": this.doc.customer,
+			"email": this.doc.contact_email,
+			"location": this.doc.pos_profile,
+			"mobile_number": this.doc.contact_mobile,
+			"invoice_number": this.doc.name,
+
+		}).then(function(doc) {
+			// console.log(doc);
+		});
 	}
 };

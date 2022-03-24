@@ -91,23 +91,34 @@ erpnext.PointOfSale.ItemSelector = class {
 		}
 
 		function get_item_image_html() {
-			if (!me.hide_images && item_image) {
-				return `<div class="item-qty-pill">
-							<span class="indicator-pill whitespace-nowrap ${indicator_color}">${qty_to_display}</span>
-						</div>
-						<div class="flex items-center justify-center h-32 border-b-grey text-6xl text-grey-100">
-							<img
-								onerror="cur_pos.item_selector.handle_broken_image(this)"
-								class="h-full" src="${item_image}"
-								alt="${frappe.get_abbr(item.item_name)}"
-								style="object-fit: cover;">
-						</div>`;
-			} else {
-				return `<div class="item-qty-pill">
-							<span class="indicator-pill whitespace-nowrap ${indicator_color}">${qty_to_display}</span>
-						</div>
-						<div class="item-display abbr">${frappe.get_abbr(item.item_name)}</div>`;
-			}
+			// if (!me.hide_images && item_image) {
+			// 	return `<div class="item-qty-pill">
+			// 				<span class="indicator-pill whitespace-nowrap ${indicator_color}">${qty_to_display}</span>
+			// 			</div>
+			// 			<div class="flex items-center justify-center h-32 border-b-grey text-6xl text-grey-100">
+			// 				<img
+			// 					onerror="cur_pos.item_selector.handle_broken_image(this)"
+			// 					class="h-full" src="${item_image}"
+			// 					alt="${frappe.get_abbr(item.item_name)}"
+			// 					style="object-fit: cover;">
+			// 			</div>`;
+			// } else {
+			// 	return `<div class="item-qty-pill">
+			// 				<span class="indicator-pill whitespace-nowrap ${indicator_color}">${qty_to_display}</span>
+			// 			</div>
+			// 			<div class="item-display abbr">${frappe.get_abbr(item.item_name)}</div>`;
+			// }
+
+					return `
+						<div class="item-qty-pill">
+									<span class="indicator-pill whitespace-nowrap ${indicator_color}">${qty_to_display}</span>
+								</div>
+					<div class="item-display">
+								<div class="item-name">
+									${frappe.ellipsis(item.item_name, 18)}
+								</div>
+							</div>`;
+			
 		}
 
 		return (
@@ -120,9 +131,10 @@ erpnext.PointOfSale.ItemSelector = class {
 				${get_item_image_html()}
 
 				<div class="item-detail">
+				<!--
 					<div class="item-name">
 						${frappe.ellipsis(item.item_name, 18)}
-					</div>
+					</div>-->
 					<div class="item-rate">${format_currency(price_list_rate, item.currency, precision) || 0}</div>
 				</div>
 			</div>`
@@ -238,10 +250,12 @@ erpnext.PointOfSale.ItemSelector = class {
 			mrp = mrp === "undefined" ? undefined : mrp;
 			title = title === "undefined" ? undefined : title;
 
+
 			me.events.item_selected({
 				field: 'qty',
 				value: "+1",
-				item: { item_code, batch_no, serial_no, uom, rate, mrp, title}
+				item: { item_code, batch_no, serial_no, uom, rate, mrp, title, update_rules: false},
+				item_quantity: 1
 			});
 			me.set_search_value('');
 		});
@@ -341,12 +355,12 @@ erpnext.PointOfSale.ItemSelector = class {
 			this.$component.find('.search-field').css('margin', '0px var(--margin-sm)');
 
 		minimize ?
-			this.$component.css('grid-column', 'span 2 / span 2') :
-			this.$component.css('grid-column', 'span 6 / span 6');
+			this.$component.css('grid-column', 'span 4 / span 4') :
+			this.$component.css('grid-column', 'span 2 / span 2');
 
 		minimize ?
-			this.$items_container.css('grid-template-columns', 'repeat(1, minmax(0, 1fr))') :
-			this.$items_container.css('grid-template-columns', 'repeat(4, minmax(0, 1fr))');
+			this.$items_container.css('grid-template-columns', 'repeat(3, minmax(0, 1fr))') :
+			this.$items_container.css('grid-template-columns', 'repeat(1, minmax(0, 1fr))');
 	}
 
 	toggle_component(show) {
