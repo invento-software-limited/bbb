@@ -45,14 +45,20 @@ erpnext.PointOfSale.ItemCart = class {
         this.$customer_header_section.append(
             `<div class="pricing-discount-section"></div>`
         );
+        this.$customer_header_section.append(
+            `<div class="menu-section"></div>`
+        );
+
 
         this.$customer_section = this.$customer_header_section.find('.customer-section');
         this.$served_by_section = this.$customer_header_section.find('.served-by-section');
         this.$pricing_discount_section = this.$customer_header_section.find('.pricing-discount-section');
+        this.$menu_section = this.$customer_header_section.find('.menu-section');
 
         this.make_customer_selector();
         this.make_discount_price_selector();
         this.make_served_by_selector();
+        this.make_menu_dropdown();
 
     }
 
@@ -76,7 +82,7 @@ erpnext.PointOfSale.ItemCart = class {
         this.$component.append(
             `<div class="cart-container">
 				<div class="abs-cart-container">
-					<div class="cart-label">Item Cart</div>
+<!--					<div class="cart-label">Item Cart</div>-->
 					<div class="cart-header">
 						<div class="name-header">Item</div>
 						<div class="mrp-header">MRP</div>
@@ -193,27 +199,28 @@ erpnext.PointOfSale.ItemCart = class {
             const show = me.$cart_container.is(':visible');
             me.toggle_customer_info(show);
         });
-/*
-        this.$cart_items_wrapper.on('click', '.cart-item-wrapper', function () {
-            const $cart_item = $(this);
+        /*
+                this.$cart_items_wrapper.on('click', '.cart-item-wrapper', function () {
+                    const $cart_item = $(this);
 
-            me.toggle_item_highlight(this);
+                    me.toggle_item_highlight(this);
 
-            const payment_section_hidden = !me.$totals_section.find('.edit-cart-btn').is(':visible');
-            if (!payment_section_hidden) {
-                // payment section is visible
-                // edit cart first and then open item details section
-                me.$totals_section.find(".edit-cart-btn").click();
-            }
+                    const payment_section_hidden = !me.$totals_section.find('.edit-cart-btn').is(':visible');
+                    if (!payment_section_hidden) {
+                        // payment section is visible
+                        // edit cart first and then open item details section
+                        me.$totals_section.find(".edit-cart-btn").click();
+                    }
 
-            const item_row_name = unescape($cart_item.attr('data-row-name'));
-            me.events.cart_item_clicked({name: item_row_name});
-            this.numpad_value = '';
-        });
-*/
+                    const item_row_name = unescape($cart_item.attr('data-row-name'));
+                    me.events.cart_item_clicked({name: item_row_name});
+                    this.numpad_value = '';
+                });
+        */
         this.$component.on('click', '.checkout-btn', function () {
             if ($(this).attr('style').indexOf('--blue-500') == -1) return;
 
+            me.wrapper.find('.customer-cart-container').css('grid-column', 'span 5 / span 5');
             me.events.checkout();
             me.toggle_checkout_btn(false);
             me.toggle_selector(false);
@@ -222,6 +229,8 @@ erpnext.PointOfSale.ItemCart = class {
         });
 
         this.$totals_section.on('click', '.edit-cart-btn', () => {
+
+            me.wrapper.find('.customer-cart-container').css('grid-column', 'span 6 / span 6');
             this.events.edit_cart();
             this.toggle_checkout_btn(true);
         });
@@ -269,7 +278,7 @@ erpnext.PointOfSale.ItemCart = class {
         frappe.ui.keys.add_shortcut({
             shortcut: "ctrl+enter",
             action: () => this.$component.find(".checkout-btn").click(),
-            condition: () => this.$component.is(":visible") && !this.$totals_section.find('.edit-cart-btn').is(':visible'),
+            condition: () => this.$component.is(":visible") && !this.$totals_section.find('.edit-cart-btn').is(':visible') && this.wrapper.find('.customer-cart-container').css('grid-column', 'span 5 / span 5'),
             description: __("Checkout Order / Submit Order / New Order"),
             ignore_inputs: true,
             page: cur_page.page.page
@@ -279,6 +288,7 @@ erpnext.PointOfSale.ItemCart = class {
             const item_cart_visible = this.$component.is(":visible");
             const checkout_btn_invisible = !this.$totals_section.find('.checkout-btn').is('visible');
             if (item_cart_visible && checkout_btn_invisible) {
+                this.wrapper.find('.customer-cart-container').css('grid-column', 'span 6 / span 6')
                 this.$component.find(".edit-cart-btn").click();
             }
         });
@@ -402,6 +412,7 @@ erpnext.PointOfSale.ItemCart = class {
                 fieldtype: 'Select',
                 options: ["Yes", "No"],
                 placeholder: __('Ignore Discount'),
+                default: 'No',
                 onchange: function () {
                     if (this.value) {
                         const frm = me.events.get_frm();
@@ -417,6 +428,56 @@ erpnext.PointOfSale.ItemCart = class {
             render_input: true,
         });
         this.ignore_discount_field.toggle_label(false);
+    }
+
+
+    make_menu_dropdown() {
+        // this.events.toggle_recent_order();
+        this.$menu_section.html(`
+               <div class="menu-dropdown-field">
+                    <div class="menu-btn-group">
+                        <button type="button" class="btn btn-default icon-btn" data-toggle="dropdown" aria-expanded="false" title=""
+                                data-original-title="Menu"><span>         <span class="menu-btn-group-label" data-label="">          <svg
+                                class="icon icon-sm">           <use xlink:href="#icon-dot-horizontal">           </use>          </svg>         </span>        </span>
+                        </button>
+                        <ul class="dropdown-menu dropdown-menu-right" role="menu">
+                            <li>
+                                <a class="grey-link dropdown-item" href="#" id="open_form_view">
+                    
+                                    <span class="menu-item-label" data-label="Reset Customizations"><span class="alt-underline">O</span>pen Form View</span>
+                                </a>
+                            </li>
+                            <li>
+                                <a class="grey-link dropdown-item toggle_recent_order-1" href="#" id="toggle_recent_order">
+                    
+                                    <span class="menu-item-label" data-label="Toggle Sidebar"><span class="alt-underline">T</span>oggle Recent Orders</span>
+                                </a>
+                            </li>
+                            <li>
+                                <a class="grey-link dropdown-item" href="#" id="save_draft_invoice">
+                    
+                                    <span class="menu-item-label" data-label="Toggle Sidebar"><span class="alt-underline">S</span>ave as Draft</span>
+                                </a>
+                            </li>
+                            <li>
+                                <a class="grey-link dropdown-item" href="#" id="close_pos">
+                    
+                                    <span class="menu-item-label" data-label="Toggle Sidebar"><span class="alt-underline">C</span>lose the POS</span>
+                                </a>
+                            </li>
+                        </ul>
+                    </div>
+                </div>
+		`);
+        const me = this;
+
+        // this.page.add_menu_item(__("Open Form View"), this.open_form_view.bind(this), false, 'Ctrl+F');
+        //
+        // this.page.add_menu_item(__("Toggle Recent Orders"), this.toggle_recent_order.bind(this), false, 'Ctrl+O');
+        //
+        // this.page.add_menu_item(__("Save as Draft"), this.save_draft_invoice.bind(this), false, 'Ctrl+S');
+        //
+        // this.page.add_menu_item(__('Close the POS'), this.close_pos.bind(this), false, 'Shift+Ctrl+C');
     }
 
     fetch_customer_details(customer) {
@@ -697,7 +758,8 @@ erpnext.PointOfSale.ItemCart = class {
 					<div class="item-row-rate"><span>${item_data.rate || 0}</span></div>
 					<div class="item-row-qty"><span>${item_data.qty || 0}</span></div>
 					<div class="item-row-amount">
-						<div class="item-rate">${format_currency(item_data.amount, currency)}</div>
+<!--						<div class="item-rate">${format_currency(item_data.amount, currency)}</div>-->
+						<div class="item-rate">${item_data.amount}</div>
 					</div>
 				</div>`
             // }
@@ -1129,7 +1191,7 @@ erpnext.PointOfSale.ItemCart = class {
         });
     }
 
-    check_out_validation(show){
+    check_out_validation(show) {
         if (!show) {
             this.$totals_section.find('.checkout-btn').css('display', 'none');
             this.$totals_section.find('.edit-cart-btn').css('display', 'none');
@@ -1138,7 +1200,8 @@ erpnext.PointOfSale.ItemCart = class {
             this.$totals_section.find('.edit-cart-btn').css('display', 'none');
         }
     }
-    toggle_selector(enabled){
+
+    toggle_selector(enabled) {
         this.$customer_section.find('.customer-section').setAttribute('disabled');
     }
 }

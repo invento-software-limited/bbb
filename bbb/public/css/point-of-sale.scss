@@ -194,7 +194,7 @@
 
 			> .customer-section {
 				@extend .pos-card;
-				width: 42%;
+				width: 40%;
 				display: flex;
 				margin-right:2%;
 				flex-direction: column;
@@ -320,7 +320,7 @@
 
 			> .served-by-section {
 				@extend .pos-card;
-				width: 30%;
+				width: 35%;
 				display: flex;
 				margin-right:2%;
 				flex-direction: column;
@@ -328,19 +328,35 @@
 				overflow: visible;
 
 			}
-		}
-		> .customer-header-section{
-			display: flex;
 			> .pricing-discount-section {
 				@extend .pos-card;
-				width: 24%;
+				width: 20%;
 				display: flex;
 				flex-direction: column;
+				margin-right:2%;
 				padding: var(--padding-md) var(--padding-lg);
 				overflow: visible;
 
 			}
+			> .menu-section {
+				@extend .pos-card;
+				width: 5%;
+				display: flex;
+				flex-direction: column;
+				padding: var(--padding-md) var(--padding-lg);
+				overflow: visible;
+				//position: absolute;
+
+				> .menu-dropdown-field{
+					display: flex;
+					justify-content: center;
+					//position: absolute !important;
+					//top: 30%;
+					//left: 21%;
+				}
+			}
 		}
+
 
 		> .cart-container {
 			@extend .pos-card;
@@ -833,7 +849,7 @@
 
 	> .payment-container {
 		@extend .pos-card;
-		grid-column: span 4 / span 4;
+		grid-column: span 5 / span 5;
 		display: none;
 		flex-direction: column;
 		padding: var(--padding-lg);

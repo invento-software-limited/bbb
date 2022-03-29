@@ -5,8 +5,11 @@ erpnext.PointOfSale.Controller = class {
 
         this.check_opening_entry();
         this.item_list = [];
-    }
+        $(".page-head").css("display", "none");
+        $(".page-body").css("margin-top", "20px");
 
+
+    }
     fetch_opening_entry() {
         return frappe.call("erpnext.selling.page.point_of_sale.point_of_sale.check_opening_entry", {"user": frappe.session.user});
     }
@@ -139,8 +142,8 @@ erpnext.PointOfSale.Controller = class {
     make_app() {
         this.prepare_dom();
         this.prepare_components();
-        this.prepare_menu();
         this.make_new_invoice();
+        this.prepare_menu();
     }
 
     prepare_dom() {
@@ -161,15 +164,32 @@ erpnext.PointOfSale.Controller = class {
     }
 
     prepare_menu() {
+        var me = this;
         this.page.clear_menu();
 
-        this.page.add_menu_item(__("Open Form View"), this.open_form_view.bind(this), false, 'Ctrl+F');
-
-        this.page.add_menu_item(__("Toggle Recent Orders"), this.toggle_recent_order.bind(this), false, 'Ctrl+O');
-
-        this.page.add_menu_item(__("Save as Draft"), this.save_draft_invoice.bind(this), false, 'Ctrl+S');
-
-        this.page.add_menu_item(__('Close the POS'), this.close_pos.bind(this), false, 'Shift+Ctrl+C');
+        $('#open_form_view').bind('click', function (e){
+            e.preventDefault();
+            me.open_form_view();
+        });
+        $('#toggle_recent_order').bind('click', function (e){
+            e.preventDefault();
+            me.toggle_recent_order();
+        });
+        $('#save_draft_invoice').bind('click', function (e){
+            e.preventDefault();
+            me.save_draft_invoice();
+        });
+        $('#close_pos').bind('click', function (e){
+            e.preventDefault();
+            me.close_pos();
+        });
+        // this.page.add_menu_item(__("Open Form View"), this.open_form_view.bind(this), false, 'Ctrl+F');
+        //
+        // this.page.find('.toggle_recent_order').bind(this.toggle_recent_order.bind(this), false, 'Ctrl+O');
+        //
+        // this.page.add_menu_item(__("Save as Draft"), this.save_draft_invoice.bind(this), false, 'Ctrl+S');
+        //
+        // this.page.add_menu_item(__('Close the POS'), this.close_pos.bind(this), false, 'Shift+Ctrl+C');
     }
 
     open_form_view() {
@@ -262,6 +282,10 @@ erpnext.PointOfSale.Controller = class {
                 set_cart_item: args => this.item_list.push(args),
                 on_cart_update: args => this.on_cart_update(args),
                 item_selected: args => this.on_cart_update(args),
+                open_form_view: () => this.open_form_view(),
+                toggle_recent_order: () => this.toggle_recent_order(),
+                save_draft_invoice: () => this.save_draft_invoice(),
+                close_pos: () => this.close_pos(),
 
             }
         })
@@ -505,7 +529,9 @@ erpnext.PointOfSale.Controller = class {
     }
 
     set_pos_profile_status() {
-        this.page.set_indicator(this.pos_profile, "blue");
+        // this.page.set_indicator(this.pos_profile, "blue");
+        // this.page.body.find('.page-head').css('display', 'none');
+
     }
 
     async on_cart_update(args) {
@@ -547,8 +573,8 @@ erpnext.PointOfSale.Controller = class {
                 if (!this.frm.doc.customer)
                     return this.raise_customer_selection_alert();
 
-                if (!this.frm.doc.served_by)
-                    return this.raise_served_by_selection_alert();
+                // if (!this.frm.doc.served_by)
+                //     return this.raise_served_by_selection_alert();
 
 
                 if (!item_code)

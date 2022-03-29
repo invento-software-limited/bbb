@@ -24,7 +24,9 @@ erpnext.PointOfSale.ItemSelector = class {
 		this.wrapper.append(
 			`<section class="items-selector">
 				<div class="filter-section">
-					<div class="label">${__('All Items')}</div>
+<!--					<div class="label">${__(this.pos_profile)}</div>-->
+					<div class="label"><span class="indicator-pill whitespace-nowrap blue"><span>${this.pos_profile}</span></span></div>
+					
 					<div class="search-field"></div>
 					<div class="item-group-field"></div>
 				</div>
