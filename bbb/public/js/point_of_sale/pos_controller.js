@@ -183,6 +183,10 @@ erpnext.PointOfSale.Controller = class {
             e.preventDefault();
             me.close_pos();
         });
+        $('.recent_order_back_button').bind('click', function (e){
+            e.preventDefault();
+            me.toggle_recent_order();
+        });
         // this.page.add_menu_item(__("Open Form View"), this.open_form_view.bind(this), false, 'Ctrl+F');
         //
         // this.page.find('.toggle_recent_order').bind(this.toggle_recent_order.bind(this), false, 'Ctrl+O');

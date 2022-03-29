@@ -44,7 +44,24 @@
 		font-weight: 700;
 		font-size: var(--text-lg);
 	}
+	.recent_order_label {
+		display: flex;
+		justify-content: space-between;
 
+		> .recent_order_heading {
+			display: flex;
+			align-items: center;
+			font-weight: 700;
+			font-size: var(--text-lg);
+		}
+
+		> .recent_order_back_button {
+			display: flex;
+			align-items: center;
+			font-weight: 700;
+			font-size: var(--text-md);
+		}
+	}
 	.pos-card {
 		background-color: var(--fg-color);
 		box-shadow: var(--shadow-base);
