@@ -706,14 +706,15 @@ erpnext.PointOfSale.ItemCart = class {
         }
 
         $item_to_update.html(
-            `${get_item_image_html()}
-			<div class="item-name-desc">
-				<div class="item-name">
-					${item_data.item_name}
-				</div>
-<!--				${get_description_html()}-->
-			</div>
-			${get_rate_discount_html()}`
+			`<div class="item-name-desc">
+                <div class="item-image-name-dec">
+			        ${get_item_image_html()}
+			        <div class="item-name">
+					    ${frappe.ellipsis(item_data.item_name, 20)}
+				    </div>
+                </div>
+                ${get_rate_discount_html()}
+			</div>`
         )
 
         set_dynamic_rate_header_width();
@@ -753,15 +754,13 @@ erpnext.PointOfSale.ItemCart = class {
             // 		// item_mrp = r.message.standard_rate;
             // 	})
             return `
-				<div class="item-qty-rate">
 					<div class="item-row-mrp"><span>${item_data.mrp || 0}</span></div>
 					<div class="item-row-rate"><span>${item_data.rate || 0}</span></div>
 					<div class="item-row-qty"><span>${item_data.qty || 0}</span></div>
 					<div class="item-row-amount">
 <!--						<div class="item-rate">${format_currency(item_data.amount, currency)}</div>-->
 						<div class="item-rate">${item_data.amount}</div>
-					</div>
-				</div>`
+					</div>`
             // }
         }
 
@@ -1137,6 +1136,7 @@ erpnext.PointOfSale.ItemCart = class {
 
     load_invoice() {
         const frm = this.events.get_frm();
+        console.log(frm);
         frm.events.item_list = [];
 
         this.attach_refresh_field_event(frm);

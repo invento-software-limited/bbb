@@ -540,6 +540,7 @@ erpnext.PointOfSale.Controller = class {
 
     async on_cart_update(args) {
         frappe.dom.freeze();
+        let me = this;
         let item_row = undefined;
         try {
             let {field, value, item, item_quantity} = args;
@@ -554,7 +555,6 @@ erpnext.PointOfSale.Controller = class {
             if (item_row_exists) {
                 if (update_rules === false) {
                     let objIndex = this.item_list.findIndex((obj => obj.item_code === item_code));
-                    console.log(objIndex, item_code, this.item_list)
                     this.item_list[objIndex].item_quantity = this.item_list[objIndex].item_quantity + 1;
                 }
                 if (field === 'qty')
@@ -567,7 +567,9 @@ erpnext.PointOfSale.Controller = class {
 
                 if (this.is_current_item_being_edited(item_row) || from_selector) {
                     await frappe.model.set_value(item_row.doctype, item_row.name, field, value);
-                    this.update_cart_html(item_row);
+
+
+                    await this.update_rounded_total(item_row);
                 }
 
                 // this.insert_search_product_log(item_code, item_row.title)
@@ -583,7 +585,6 @@ erpnext.PointOfSale.Controller = class {
 
                 if (!item_code)
                     return;
-
                 const new_item = {item_code, batch_no, mrp, rate, [field]: value};
 
                 if (serial_no) {
@@ -604,7 +605,9 @@ erpnext.PointOfSale.Controller = class {
 
                 await this.trigger_new_item_events(item_row);
 
-                this.update_cart_html(item_row);
+                await this.update_rounded_total(item_row);
+
+
 
                 if (this.item_details.$component.is(':visible'))
                     this.edit_item_details_of(item_row);
@@ -621,18 +624,41 @@ erpnext.PointOfSale.Controller = class {
                         item_code:item_code
                     })
                 }
-                console
                 this.insert_search_product_log(item_code, title);
             }
 
         } catch (error) {
             console.log(error);
         } finally {
-            frappe.dom.unfreeze();
             return item_row;
         }
     }
+    update_rounded_total(item_row){
+        let grand_total = this.frm.doc.grand_total
+        frappe.call({
+            method: 'bbb.bbb.controllers.utils.pos_invoice_rounded_total',
+            args: {
+                num: grand_total,
+            },
+            // freeze the screen until the request is completed
+            freeze: true,
+            callback: (r) => {
+                // on success
 
+                frappe.dom.unfreeze();
+                let data = r.message
+
+                frappe.model.set_value(this.frm.doctype, this.frm.docname, 'rounded_total', r.message.rounded_total);
+                frappe.model.set_value(this.frm.doctype, this.frm.docname, 'rounding_adjustment', r.message.rounding_adjustment);
+                console.log("result ", data, this);
+                this.update_cart_html(item_row);
+                frappe.dom.unfreeze();
+
+
+
+            },
+        })
+    }
     insert_search_product_log(item_code, item_name) {
         // console.log(this.frm.doc);
         // console.log(item_name);
