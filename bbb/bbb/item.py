@@ -3,7 +3,7 @@ import frappe
 
 def after_insert(doc, method):
     # For Standard Selling
-    if doc.standard_rate is None:
+    if doc.standard_rate is None or doc.standard_rate == 0:
         item_price = frappe.new_doc('Item Price')
         item_price.item_code = doc.item_code
         item_price.price_list_rate = 0
@@ -21,11 +21,13 @@ def after_insert(doc, method):
 
 
 def on_update(doc, method):
-    if doc.standard_rate:
-        frappe.db.sql("""update `tabItem Price` set price_list_rate={} where item_code='{}' and selling=1""".format(
-            doc.standard_rate, doc.item_code))
+    selling_price = frappe.get_doc('Item Price', {'item_code': doc.item_code, 'selling': 1})
+    buying_price = frappe.get_doc('Item Price', {'item_code': doc.item_code, 'buying': 1})
 
-    if doc.buying_rate:
-        frappe.db.sql(
-            """update `tabItem Price` set price_list_rate={} where item_code='{}' and buying=1""".format(
-                doc.buying_rate, doc.item_code))
+    # For selling price
+    selling_price.price_list_rate = doc.standard_rate if doc.standard_rate else 0
+    selling_price.save()
+
+    # For buying price
+    buying_price.price_list_rate = doc.buying_rate if doc.buying_rate else 0
+    buying_price.save()
