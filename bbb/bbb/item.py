@@ -2,6 +2,15 @@ import frappe
 
 
 def after_insert(doc, method):
+    # For Standard Selling
+    if doc.standard_rate is None:
+        item_price = frappe.new_doc('Item Price')
+        item_price.item_code = doc.item_code
+        item_price.price_list_rate = 0
+        item_price.price_list = 'Standard Selling'
+        item_price.selling = 1
+        item_price.save()
+
     # For Standard Buying
     item_price = frappe.new_doc('Item Price')
     item_price.item_code = doc.item_code
