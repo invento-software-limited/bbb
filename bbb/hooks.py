@@ -37,7 +37,7 @@ page_js = {
 }
 
 # include js in doctype views
-# doctype_js = {"doctype" : "public/js/doctype.js"}
+# doctype_js = {"POS Invoice": 'public/js/point_of_sale.js'}
 # doctype_list_js = {"doctype" : "public/js/doctype_list.js"}
 # doctype_tree_js = {"doctype" : "public/js/doctype_tree.js"}
 # doctype_calendar_js = {"doctype" : "public/js/doctype_calendar.js"}
@@ -102,14 +102,18 @@ page_js = {
 # Hook on document methods and events
 
 doc_events = {
-	"Item": {
-		"after_insert": "bbb.bbb.item.validate",
-		"on_update": "bbb.bbb.item.validate",
-	},
+    "Item": {
+        "after_insert": "bbb.bbb.item.after_insert",
+        "on_update": "bbb.bbb.item.on_update",
+    },
     "Item Price": {
-        "after_insert": "bbb.bbb.item_price_list.validate",
-        "on_update": "bbb.bbb.item_price_list.validate",
-    }
+        "after_insert": "bbb.bbb.item_price_list.after_insert_or_on_update",
+        "on_update": "bbb.bbb.item_price_list.after_insert_or_on_update",
+    },
+    # "POS Invoice": {
+    #     "before_submit": "bbb.bbb.pos_invoice.before_submit",
+    # },
+
 }
 
 # Scheduled Tasks

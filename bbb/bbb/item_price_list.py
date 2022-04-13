@@ -1,7 +1,7 @@
 import frappe
 
 
-def validate(doc, method):
+def after_insert_or_on_update(doc, method):
     if doc.selling == 1:
         frappe.db.sql(
             """update `tabItem` set standard_rate={} where item_code='{}'""".format(doc.price_list_rate, doc.item_code))
