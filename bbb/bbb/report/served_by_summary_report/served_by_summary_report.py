@@ -25,7 +25,7 @@ def get_columns():
          "convertible": "rate", "options": "currency"},
         {"label": _("Total Sell Disc"), "fieldname": "total_discount", "fieldtype": "Currency", "width": 180,
          "convertible": "rate", "options": "currency"},
-        {"label": _("Total Disc %"), "fieldname": "discount_percentage", "fieldtype": "Text", "width": 150,},
+        {"label": _("Total Disc %"), "fieldname": "discount_percentage", "fieldtype": "Text", "width": 150, },
         {"label": _("Ranking"), "fieldname": "ranking", "fieldtype": "Currency", "width": 120,
          "convertible": "rate", "options": "currency"},
     ]
@@ -53,13 +53,13 @@ def get_invoice_data(filters):
     			sales_invoice.grand_total, sales_invoice.served_by, sales_invoice.total_taxes_and_charges as vat, sales_invoice.name, 
     			sales_invoice_item.price_list_rate as unit_price, sales_invoice_item.rate as selling_rate,
     			sales_invoice_item.qty as quantity,
-    			(sales_invoice_item.qty * sales_invoice_item.price_list_rate) as mrp_total,
-    			((sales_invoice_item.qty * sales_invoice_item.price_list_rate) - (sales_invoice_item.rate * sales_invoice_item.qty)) as discount,
-    			(sales_invoice_item.amount - sales_invoice_item.net_amount) as special_discount,
+    			(sales_invoice_item.qty * item.standard_rate) as mrp_total,
+    			((sales_invoice_item.qty * item.standard_rate) - (sales_invoice_item.rate * sales_invoice_item.qty)) as discount,
+    			sales_invoice.discount_amount as special_discount,
     			 sales_invoice_item.net_amount, sales_invoice_item.amount as total_amount, sales_invoice.customer_name, 
     			 sales_invoice.total, sales_invoice.grand_total, sales_invoice.total_taxes_and_charges, sales_invoice.net_total
-    		from `tabSales Invoice` sales_invoice, `tabSales Invoice Item` sales_invoice_item
-    		where sales_invoice.name = sales_invoice_item.parent
+    		from `tabSales Invoice` sales_invoice, `tabSales Invoice Item` sales_invoice_item, `tabItem` item
+    		where sales_invoice.name = sales_invoice_item.parent and item.item_code = sales_invoice_item.item_code
     			and sales_invoice.docstatus = 1 and %s
     		order by sales_invoice.name
     		""" % (conditions), as_dict=1)
@@ -70,15 +70,15 @@ def get_invoice_data(filters):
             pos_data = data.get(result.get('served_by'))
             pos_data['mrp_total'] = pos_data['mrp_total'] + result['mrp_total']
             pos_data['discount'] = pos_data['discount'] + result['discount']
-            pos_data['special_discount'] = pos_data['special_discount'] + result['special_discount']
             pos_data['total_item_qty'] = pos_data['total_item_qty'] + result['quantity']
-
 
             if result.get('name') != pos_data.get('name'):
                 pos_data['number_of_invoice'] += 1
                 pos_data['net_total'] = pos_data['net_total'] + result['net_total']
+                pos_data['special_discount'] = pos_data['special_discount'] + result['special_discount']
                 pos_data['total'] = pos_data['total'] + result['total']
-                pos_data['total_taxes_and_charges'] = pos_data['total_taxes_and_charges'] + result['total_taxes_and_charges']
+                pos_data['total_taxes_and_charges'] = pos_data['total_taxes_and_charges'] + result[
+                    'total_taxes_and_charges']
                 pos_data['grand_total'] = pos_data['grand_total'] + result['grand_total']
                 pos_data['name'] = result.get('name')
 
@@ -91,9 +91,10 @@ def get_invoice_data(filters):
     for key, invoice_data in data.items():
         total_discount = float(invoice_data['discount']) + float(invoice_data['special_discount'])
         invoice_data['basket_value'] = (
-                    float(invoice_data['grand_total']) / float(invoice_data['number_of_invoice']))
+                float(invoice_data['grand_total']) / float(invoice_data['number_of_invoice']))
         invoice_data['total_discount'] = total_discount
-        invoice_data['total_sell_final'] = invoice_data['grand_total']
-        invoice_data['discount_percentage'] = str(float("{:.2f}".format((total_discount / invoice_data['total']) * 100)))
+        invoice_data['total_sell_final'] = invoice_data['net_total']
+        invoice_data['discount_percentage'] = str(
+            float("{:.2f}".format((total_discount / invoice_data['total']) * 100)))
         pos_wise_list_data.append(invoice_data)
     return pos_wise_list_data

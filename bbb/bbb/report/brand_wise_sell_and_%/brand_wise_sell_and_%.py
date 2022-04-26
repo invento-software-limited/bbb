@@ -46,15 +46,14 @@ def get_invoice_data(filters):
     query_result = frappe.db.sql("""
     		select
     			sales_invoice.grand_total, sales_invoice.served_by, sales_invoice.total_qty as unit_qty, sales_invoice.name, 
-    			sales_invoice_item.price_list_rate as unit_price, sales_invoice_item.rate as selling_rate,
+    			item.standard_rate as unit_price, sales_invoice_item.rate as selling_rate,
     			sales_invoice_item.qty as quantity, sales_invoice_item.brand,
-    			(sales_invoice_item.qty * sales_invoice_item.price_list_rate) as mrp_total,
-    			((sales_invoice_item.qty * sales_invoice_item.price_list_rate) - (sales_invoice_item.rate * sales_invoice_item.qty)) as discount,
+    			(sales_invoice_item.qty * item.standard_rate) as mrp_total,
     			(sales_invoice_item.amount - sales_invoice_item.net_amount) as special_discount,
     			 sales_invoice_item.net_amount, sales_invoice_item.amount as total_amount, sales_invoice.customer_name, 
     			 sales_invoice.total, sales_invoice.grand_total, sales_invoice.total_taxes_and_charges, sales_invoice.net_total
-    		from `tabSales Invoice` sales_invoice, `tabSales Invoice Item` sales_invoice_item
-    		where sales_invoice.name = sales_invoice_item.parent
+    		from `tabSales Invoice` sales_invoice, `tabSales Invoice Item` sales_invoice_item, `tabItem` item
+    		where sales_invoice.name = sales_invoice_item.parent and item.item_code = sales_invoice_item.item_code
     			and sales_invoice.docstatus = 1 and %s
     		order by sales_invoice.name
     		""" % (conditions), as_dict=1)
@@ -64,7 +63,7 @@ def get_invoice_data(filters):
         if data.get(result.get('brand')):
             pos_data = data.get(result.get('brand'))
             pos_data['mrp_total'] = pos_data['mrp_total'] + result['mrp_total']
-            pos_data['discount'] = pos_data['discount'] + result['discount']
+            # pos_data['discount'] = pos_data['discount'] + result['discount']
             pos_data['special_discount'] = pos_data['special_discount'] + result['special_discount']
             pos_data['total_item_qty'] = pos_data['total_item_qty'] + result['quantity']
 
@@ -81,21 +80,21 @@ def get_invoice_data(filters):
 
         else:
             result['number_of_invoice'] = 1
-            result['total_sell_amount'] =  result['grand_total']
+            result['total_sell_amount'] = result['grand_total']
             result['total_item_qty'] = result['quantity']
             data[result.get('brand')] = result
 
     pos_wise_list_data = []
     for key, invoice_data in data.items():
-        total_discount = float(invoice_data['discount']) + float(invoice_data['special_discount'])
+        discount = invoice_data['mrp_total'] - invoice_data['net_total']
+        total_discount = discount + invoice_data['special_discount']
         invoice_data['basket_value'] = (
                 float(invoice_data['grand_total']) / float(invoice_data['number_of_invoice']))
         invoice_data['total_discount'] = total_discount
         invoice_data['total_sell_final'] = invoice_data['grand_total']
-        invoice_data['sales_ratio'] = "{:.2f}".format((invoice_data['grand_total'] / invoice_data['total_sell_amount']) * 100)
+        invoice_data['sales_ratio'] = "{:.2f}".format(
+            (invoice_data['grand_total'] / invoice_data['total_sell_amount']) * 100)
         invoice_data['discount_percentage'] = str(
             float("{:.2f}".format((total_discount / invoice_data['total']) * 100)))
         pos_wise_list_data.append(invoice_data)
-
-
     return pos_wise_list_data
