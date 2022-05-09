@@ -369,7 +369,6 @@ erpnext.PointOfSale.PastOrderSummary = class {
 
 		max_width += 1;
 		if (max_width == 1) max_width = "";
-
 		this.$items_container.find(".item-rate-disc").css("width", max_width);
 	}
 
@@ -408,6 +407,7 @@ erpnext.PointOfSale.PastOrderSummary = class {
 	}
 
 	insert_invoice_print_log(){
+		console.log("==========>>>",this.doc);
 		// inserting invoice printing log
 		frappe.db.insert({
 			"doctype": "Printing Log",
@@ -418,6 +418,8 @@ erpnext.PointOfSale.PastOrderSummary = class {
 			"location": this.doc.pos_profile,
 			"mobile_number": this.doc.contact_mobile,
 			"invoice_number": this.doc.name,
+			"served_by": this.doc.served_by,
+			"company": this.doc.company
 
 		}).then(function(doc) {
 			// console.log(doc);

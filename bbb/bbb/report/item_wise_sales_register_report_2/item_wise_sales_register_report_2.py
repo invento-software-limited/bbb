@@ -59,8 +59,7 @@ def get_columns():
     return [
         {"label": _("Invoice Date"), "fieldname": "posting_date", "width": 100},
         {"label": _("Invoice Time"), "fieldname": "posting_time", "width": 100},
-        {"label": _("Invoice No."), "fieldname": "parent", "fieldtype": "Link", "options": "Sales Invoice",
-         "width": 200},
+        {"label": _("Invoice No."), "fieldname": "parent", "fieldtype": "Link", "options": "Sales Invoice", "width": 200},
         {"label": _("Customer"), "fieldname": "customer", "fieldtype": "Link", "options": "Customer", "width": 150},
         {"label": _("Mobile Number"), "fieldname": "contact_mobile", "width": 120},
         {"label": _("Branch"), "fieldname": "pos_profile", "fieldtype": "Link", "options": "POS Profile", "width": 175},
