@@ -111,7 +111,7 @@ doc_events = {
         "on_update": "bbb.bbb.item_price_list.after_insert_or_on_update",
     },
     # "POS Invoice": {
-    #     "before_submit": "bbb.bbb.pos_invoice.before_submit",
+    #     "after_insert": "bbb.bbb.pos_invoice.after_insert",
     # },
 
 }
