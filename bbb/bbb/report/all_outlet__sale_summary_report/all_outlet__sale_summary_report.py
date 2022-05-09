@@ -33,11 +33,11 @@ def get_columns():
         {"label": _("Total Discount"), "fieldname": "total_discount", "fieldtype": "Currency", "width": 120,
          "convertible": "rate", "options": "currency"},
         {"label": _("Discount %"), "fieldname": "discount_percentage", "fieldtype": "Text", "width": 120},
-        {"label": _("Cash"), "fieldname": "cash_amount", "fieldtype": "Currency", "width": 120,
+        {"label": _("Cash"), "fieldname": "Cash", "fieldtype": "Currency", "width": 120,
          "convertible": "rate", "options": "currency"},
         {"label": _("Card"), "fieldname": "card_amount", "fieldtype": "Currency", "width": 120,
          "convertible": "rate", "options": "currency"},
-        {"label": _("Mobile Banking"), "fieldname": "cash_amount", "fieldtype": "Currency", "width": 120,
+        {"label": _("Mobile Banking"), "fieldname": "Bkash", "fieldtype": "Currency", "width": 120,
          "convertible": "rate", "options": "currency"},
         {"label": _("Rounding"), "fieldname": "cash_amount", "fieldtype": "Currency", "width": 120,
          "convertible": "rate", "options": "currency"},
@@ -79,6 +79,28 @@ def get_invoice_data(filters):
     		order by sales_invoice.name
     		""" % (conditions), as_dict=1)
 
+    payment_result = frappe.db.sql("""
+    		select
+    			 sales_invoice.pos_profile, sales_invoice.name, payment.amount as payment_amount, payment.type as payment_type
+    		from `tabSales Invoice` sales_invoice, `tabSales Invoice Payment` payment
+    		where payment.parent = sales_invoice.name
+    			and sales_invoice.docstatus = 1 and %s
+    		order by sales_invoice.name
+    		""" % (conditions), as_dict=1)
+
+    payments = {}
+    for payment in payment_result:
+        if payment.get('pos_profile') in payments:
+            pos_payment = payments.get(payment.get('pos_profile'))
+
+            if pos_payment.get(payment.get('payment_type')):
+                pos_payment[payment.get('payment_type')] = pos_payment[payment.get('payment_type')] + payment.get(
+                    'payment_amount')
+            else:
+                pos_payment[payment.get('payment_type')] = payment.get('payment_amount')
+        else:
+            payments[payment.get('pos_profile')] = {payment.get('payment_type'): payment.get('payment_amount')}
+
     data = {}
     for result in query_result:
         if data.get(result.get('pos_profile')):
@@ -103,6 +125,8 @@ def get_invoice_data(filters):
 
     pos_wise_list_data = []
     for key, invoice_data in data.items():
+        payment_data = payments.get(key, {})
+        invoice_data.update(payment_data)
         total_discount = float(invoice_data['discount']) + float(invoice_data['special_discount'])
         invoice_data['basket_value'] = (
                 float(invoice_data['grand_total']) / float(invoice_data['number_of_invoice']))
