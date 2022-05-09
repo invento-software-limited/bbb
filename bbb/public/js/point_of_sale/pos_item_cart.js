@@ -1201,7 +1201,7 @@ erpnext.PointOfSale.ItemCart = class {
         }
     }
 
-    toggle_selector(enabled) {
-        this.$customer_section.find('.customer-section').setAttribute('disabled');
-    }
+    // toggle_selector(enabled) {
+    //     this.$customer_section.find('.customer-section').setAttribute('disabled');
+    // }
 }
