@@ -10,6 +10,7 @@ erpnext.PointOfSale.Controller = class {
 
 
     }
+
     fetch_opening_entry() {
         return frappe.call("erpnext.selling.page.point_of_sale.point_of_sale.check_opening_entry", {"user": frappe.session.user});
     }
@@ -167,23 +168,23 @@ erpnext.PointOfSale.Controller = class {
         var me = this;
         this.page.clear_menu();
 
-        $('#open_form_view').bind('click', function (e){
+        $('#open_form_view').bind('click', function (e) {
             e.preventDefault();
             me.open_form_view();
         });
-        $('#toggle_recent_order').bind('click', function (e){
+        $('#toggle_recent_order').bind('click', function (e) {
             e.preventDefault();
             me.toggle_recent_order();
         });
-        $('#save_draft_invoice').bind('click', function (e){
+        $('#save_draft_invoice').bind('click', function (e) {
             e.preventDefault();
             me.save_draft_invoice();
         });
-        $('#close_pos').bind('click', function (e){
+        $('#close_pos').bind('click', function (e) {
             e.preventDefault();
             me.close_pos();
         });
-        $('.recent_order_back_button').bind('click', function (e){
+        $('.recent_order_back_button').bind('click', function (e) {
             e.preventDefault();
             me.toggle_recent_order();
         });
@@ -379,19 +380,46 @@ erpnext.PointOfSale.Controller = class {
                 },
 
                 submit_invoice: () => {
-                    this.frm.savesubmit()
-                        .then((r) => {
-                            this.toggle_components(false);
-                            this.order_summary.toggle_component(true);
-                            this.order_summary.load_summary_of(this.frm.doc, true);
-                            frappe.show_alert({
-                                indicator: 'green',
-                                message: __('POS invoice {0} created succesfully', [r.doc.name])
-                            });
-                            this.print_receipt(this.frm)
-                            
-                        })
+                    frappe.run_serially([
+                        () => this.get_naming_series(this),
+                        () => this.process_submit()
+                    ]);
+
+
                 }
+            }
+        });
+    }
+
+    process_submit() {
+        this.frm.savesubmit()
+            .then((r) => {
+                this.toggle_components(false);
+                this.order_summary.toggle_component(true);
+                this.order_summary.load_summary_of(this.frm.doc, true);
+                frappe.show_alert({
+                    indicator: 'green',
+                    message: __('POS invoice {0} created successfully', [r.doc.name])
+                });
+                this.print_receipt(this.frm)
+                frappe.ui.toolbar.clear_cache()
+
+            })
+    }
+
+    get_naming_series(me) {
+        frappe.call({
+            method: 'frappe.client.get_value',
+            args: {
+                'doctype': 'POS Profile',
+                'filters': {'name': this.pos_profile},
+                'fieldname': [
+                    '_naming_series',
+                ]
+            },
+            callback: function (r) {
+                me.frm.doc.naming_series = r.message._naming_series;
+                me.frm.refresh(me.frm.doc.name);
             }
         });
     }
@@ -567,12 +595,12 @@ erpnext.PointOfSale.Controller = class {
 
                 if (this.is_current_item_being_edited(item_row) || from_selector) {
                     await frappe.model.set_value(item_row.doctype, item_row.name, field, value);
+                    this.update_cart_html(item_row);
 
-
-                    await this.update_rounded_total(item_row);
+                    // await this.update_rounded_total(item_row);
                 }
 
-                // this.insert_search_product_log(item_code, item_row.title)
+                this.insert_search_product_log(item_code, item_row.title)
 
 
             } else {
@@ -605,9 +633,8 @@ erpnext.PointOfSale.Controller = class {
 
                 await this.trigger_new_item_events(item_row);
 
-                await this.update_rounded_total(item_row);
-
-
+                // await this.update_rounded_total(item_row);
+                this.update_cart_html(item_row);
 
                 if (this.item_details.$component.is(':visible'))
                     this.edit_item_details_of(item_row);
@@ -621,7 +648,7 @@ erpnext.PointOfSale.Controller = class {
                         value: "+1",
                         item: {item_code, batch_no, serial_no, uom, rate, mrp, title, update_rules: true},
                         item_quantity: item_quantity,
-                        item_code:item_code
+                        item_code: item_code
                     })
                 }
                 this.insert_search_product_log(item_code, title);
@@ -630,10 +657,12 @@ erpnext.PointOfSale.Controller = class {
         } catch (error) {
             console.log(error);
         } finally {
+			frappe.dom.unfreeze();
             return item_row;
         }
     }
-    update_rounded_total(item_row){
+
+    update_rounded_total(item_row) {
         let grand_total = this.frm.doc.grand_total
         frappe.call({
             method: 'bbb.bbb.controllers.utils.pos_invoice_rounded_total',
@@ -645,20 +674,27 @@ erpnext.PointOfSale.Controller = class {
             callback: (r) => {
                 // on success
 
-                frappe.dom.unfreeze();
-                let data = r.message
-
+                // frappe.dom.unfreeze();
+                // let data = r.message
                 frappe.model.set_value(this.frm.doctype, this.frm.docname, 'rounded_total', r.message.rounded_total);
                 frappe.model.set_value(this.frm.doctype, this.frm.docname, 'rounding_adjustment', r.message.rounding_adjustment);
-                console.log("result ", data, this);
+                frappe.model.set_value(this.frm.doctype, this.frm.docname, 'base_rounded_total', r.message.rounded_total);
+                frappe.model.set_value(this.frm.doctype, this.frm.docname, 'base_rounding_adjustment', r.message.rounding_adjustment);
+                frappe.model.set_value(this.frm.doctype, this.frm.docname, 'paid_amount', r.message.rounded_total);
+                frappe.model.set_value(this.frm.doctype, this.frm.docname, 'base_paid_amount', r.message.rounded_total);
+
                 this.update_cart_html(item_row);
+                // console.log(this.wrapper.find('.pay-amount')[0]);
+                // this.wrapper.find('.pay-amount').each(function (){
+                //     console.log(this);
+                // })
+                this.frm.refresh(this.frm.doc.name);
                 frappe.dom.unfreeze();
-
-
 
             },
         })
     }
+
     insert_search_product_log(item_code, item_name) {
         // console.log(this.frm.doc);
         // console.log(item_name);
@@ -686,6 +722,7 @@ erpnext.PointOfSale.Controller = class {
         });
         frappe.utils.play_sound("error");
     }
+
     raise_served_by_selection_alert() {
         frappe.dom.unfreeze();
         frappe.show_alert({
@@ -753,8 +790,8 @@ erpnext.PointOfSale.Controller = class {
 
     async check_stock_availability(item_row, qty_needed, warehouse) {
         const available_qty = (await this.get_available_stock(item_row.item_code, warehouse)).message;
-
         frappe.dom.unfreeze();
+        console.log(available_qty, qty_needed, warehouse);
         const bold_item_code = item_row.item_code.bold();
         const bold_warehouse = warehouse.bold();
         const bold_available_qty = available_qty.toString().bold()
@@ -829,34 +866,36 @@ erpnext.PointOfSale.Controller = class {
             })
             .catch(e => console.log(e));
     }
-    insert_invoice_print_log(){
-		// inserting invoice printing log
-		frappe.db.insert({
-			"doctype": "Printing Log",
-			"date": frappe.datetime.get_today(),
-			"customer_name": this.frm.doc.customer_name,
-			"customer": this.frm.doc.customer,
-			"email": this.frm.doc.contact_email,
-			"location": this.frm.doc.pos_profile,
-			"mobile_number": this.frm.doc.contact_mobile,
-			"invoice_number": this.frm.doc.name,
 
-		}).then(function(doc) {
-			// console.log(doc);
-		});
-	}
+    insert_invoice_print_log() {
+        // inserting invoice printing log
+        frappe.db.insert({
+            "doctype": "Printing Log",
+            "date": frappe.datetime.get_today(),
+            "customer_name": this.frm.doc.customer_name,
+            "customer": this.frm.doc.customer,
+            "email": this.frm.doc.contact_email,
+            "location": this.frm.doc.pos_profile,
+            "mobile_number": this.frm.doc.contact_mobile,
+            "invoice_number": this.frm.doc.name,
+
+        }).then(function (doc) {
+            // console.log(doc);
+        });
+    }
+
     print_receipt() {
-		const frm = this.frm
+        const frm = this.frm
 
-		// inserting the printing log
-		this.insert_invoice_print_log()
+        // inserting the printing log
+        this.insert_invoice_print_log()
 
-		frappe.utils.print(
-			this.frm.doc.doctype,
-			this.frm.doc.name,
-			this.frm.pos_print_format,
-			this.frm.doc.letter_head,
-			this.frm.doc.language || frappe.boot.lang
-		);
-	}
+        frappe.utils.print(
+            this.frm.doc.doctype,
+            this.frm.doc.name,
+            this.frm.pos_print_format,
+            this.frm.doc.letter_head,
+            this.frm.doc.language || frappe.boot.lang
+        );
+    }
 };
