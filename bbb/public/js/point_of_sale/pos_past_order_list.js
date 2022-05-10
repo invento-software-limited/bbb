@@ -54,7 +54,7 @@ erpnext.PointOfSale.PastOrderList = class {
 			df: {
 				label: __('Search'),
 				fieldtype: 'Data',
-				placeholder: __('Search by invoice id or customer name')
+				placeholder: __('Search by invoice id')
 			},
 			parent: this.$component.find('.search-field'),
 			render_input: true,
@@ -91,7 +91,8 @@ erpnext.PointOfSale.PastOrderList = class {
 			args: { search_term, status },
 			callback: (response) => {
 				frappe.dom.unfreeze();
-				response.message.forEach(invoice => {
+				var invoice_data = response.message.slice(0,3);
+				invoice_data.forEach((invoice, index) => {
 					const invoice_html = this.get_invoice_html(invoice);
 					this.$invoices_container.append(invoice_html);
 				});
