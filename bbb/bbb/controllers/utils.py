@@ -149,7 +149,7 @@ def get_default_naming_series(doctype):
 @frappe.whitelist()
 def str_to_datetime(posting_date, posting_time):
     p_datetime = posting_date + " " + posting_time
-    posting_datetime = datetime.datetime.strptime(p_datetime, '%Y-%m-%d %H:%M:%S.%f')
+    posting_datetime = datetime.datetime.strptime(p_datetime, '%d-%m-%Y %H:%M:%S')
     datetime_format = datetime.datetime.strftime(posting_datetime, '%Y-%m-%d %I:%M %p')
     return datetime_format
 
