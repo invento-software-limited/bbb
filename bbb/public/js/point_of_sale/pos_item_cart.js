@@ -66,8 +66,6 @@ erpnext.PointOfSale.ItemCart = class {
         const frm = this.events.get_frm();
         frm.set_value('customer', '');
         this.make_customer_selector();
-        this.make_discount_price_selector();
-
         this.customer_field.set_focus();
     }
 
@@ -75,6 +73,7 @@ erpnext.PointOfSale.ItemCart = class {
         const frm = this.events.get_frm();
         frm.set_value('served_by', '');
         frm.set_value('ignore_pricing_rule', 0);
+        this.make_served_by_selector();
         this.make_discount_price_selector();
     }
 
@@ -398,6 +397,7 @@ erpnext.PointOfSale.ItemCart = class {
             render_input: true,
         });
         this.served_by_field.toggle_label(false);
+        this.served_by_field.set_focus();
     }
 
     make_discount_price_selector() {
@@ -428,6 +428,7 @@ erpnext.PointOfSale.ItemCart = class {
             render_input: true,
         });
         this.ignore_discount_field.toggle_label(false);
+        this.ignore_discount_field.set_focus();
     }
 
 
@@ -593,6 +594,7 @@ erpnext.PointOfSale.ItemCart = class {
         } else {
             // reset customer selector
             this.reset_customer_selector();
+            this.reset_served_by_and_discount_selector();
         }
 
         function get_customer_description() {
@@ -1136,11 +1138,9 @@ erpnext.PointOfSale.ItemCart = class {
 
     load_invoice() {
         const frm = this.events.get_frm();
-        console.log(frm);
         frm.events.item_list = [];
 
         this.attach_refresh_field_event(frm);
-
         this.fetch_customer_details(frm.doc.customer).then(() => {
             this.events.customer_details_updated(this.customer_info);
             this.update_customer_section();
