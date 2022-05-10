@@ -209,7 +209,7 @@ erpnext.PointOfSale.Controller = class {
 
     save_draft_invoice() {
         if (!this.$components_wrapper.is(":visible")) return;
-
+        this.get_naming_series(this);
         if (this.frm.doc.items.length == 0) {
             frappe.show_alert({
                 message: __("You must add atleast one item to save it as draft."),
