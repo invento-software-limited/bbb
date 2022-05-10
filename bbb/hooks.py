@@ -115,7 +115,15 @@ doc_events = {
     # },
 
 }
-
+jenv = {
+    "methods": [
+        "str_to_datetime:bbb.bbb.controllers.utils.str_to_datetime",
+        "get_current_datetime:bbb.bbb.controllers.utils.get_current_datetime",
+        "get_invoice_total_discount_amount:bbb.bbb.controllers.utils.get_invoice_total_discount_amount",
+        "get_item_total_discount_amount:bbb.bbb.controllers.utils.get_item_total_discount_amount",
+        "get_invoice_before_discount_amount:bbb.bbb.controllers.utils.get_invoice_before_discount_amount",
+    ]
+}
 # Scheduled Tasks
 # ---------------
 

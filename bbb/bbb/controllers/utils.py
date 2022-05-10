@@ -159,3 +159,46 @@ def get_current_datetime():
     now = datetime.datetime.now()
     current_datetime = datetime.datetime.strftime(now, '%Y-%m-%d %I:%M %p')
     return current_datetime
+
+
+@frappe.whitelist()
+def get_item_discount_amount(qty, discount_rate):
+    discount_amount = float(qty) * float(discount_rate)
+    return discount_amount
+
+
+@frappe.whitelist()
+def get_invoice_total_discount_amount(doctype, docname):
+    invoice = frappe.get_doc(doctype, docname)
+    items = invoice.items
+    item_total_discount = 0
+    for item in items:
+        mrp_amount = float(item.qty) * float(item.price_list_rate)
+        total_amount = float(item.qty) * float(item.rate)
+        item_total_discount += (mrp_amount - total_amount)
+
+    total_discount = item_total_discount + invoice.discount_amount
+    return total_discount
+
+
+@frappe.whitelist()
+def get_item_total_discount_amount(doctype, docname):
+    invoice = frappe.get_doc(doctype, docname)
+    items = invoice.items
+    item_total_discount = 0
+    for item in items:
+        mrp_amount = float(item.qty) * float(item.price_list_rate)
+        total_amount = float(item.qty) * float(item.rate)
+        item_total_discount += (mrp_amount - total_amount)
+    return item_total_discount
+
+
+@frappe.whitelist()
+def get_invoice_before_discount_amount(doctype, docname):
+    invoice = frappe.get_doc(doctype, docname)
+    items = invoice.items
+    total_mrp_amount = 0
+    for item in items:
+        mrp_amount = float(item.qty) * float(item.price_list_rate)
+        total_mrp_amount += mrp_amount
+    return total_mrp_amount
