@@ -43,6 +43,7 @@ def get_conditions(filters):
 
 def get_invoice_data(filters):
     conditions = get_conditions(filters)
+    invoice_type = filters.get('switch_invoice', "Sales Invoice")
     query_result = frappe.db.sql("""
     		select
     			sales_invoice.grand_total, sales_invoice.served_by, sales_invoice.total_qty as unit_qty, sales_invoice.name, 
@@ -52,11 +53,11 @@ def get_invoice_data(filters):
     			(sales_invoice_item.amount - sales_invoice_item.net_amount) as special_discount,
     			 sales_invoice_item.net_amount, sales_invoice_item.amount as total_amount, sales_invoice.customer_name, 
     			 sales_invoice.total, sales_invoice.grand_total, sales_invoice.total_taxes_and_charges, sales_invoice.net_total
-    		from `tabSales Invoice` sales_invoice, `tabSales Invoice Item` sales_invoice_item, `tabItem` item
+    		from `tab%s` sales_invoice, `tab%s Item` sales_invoice_item, `tabItem` item
     		where sales_invoice.name = sales_invoice_item.parent and item.item_code = sales_invoice_item.item_code
     			and sales_invoice.docstatus = 1 and %s
     		order by sales_invoice.name
-    		""" % (conditions), as_dict=1)
+    		""" % (invoice_type, invoice_type, conditions), as_dict=1)
 
     data = {}
     for result in query_result:

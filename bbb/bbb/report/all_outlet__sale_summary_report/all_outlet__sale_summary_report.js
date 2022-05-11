@@ -20,5 +20,14 @@ frappe.query_reports["ALL Outlet  Sale Summary Report"] = {
 			"reqd": 1,
 			"width": "60px"
 		},
+		{
+			"fieldname":"switch_invoice",
+			"label": __("Switch Invoice"),
+			"fieldtype": "Select",
+			"options": ["Sales Invoice", "POS Invoice"],
+			"default": "Sales Invoice",
+			"reqd": 1,
+			"width": "60px"
+		},
 	]
 };

@@ -19,6 +19,15 @@ frappe.query_reports["Served By Summary Report"] = {
 			"default": frappe.datetime.get_today(),
 			"reqd": 1,
 			"width": "60px"
-		}
+		},
+		{
+			"fieldname":"switch_invoice",
+			"label": __("Switch Invoice"),
+			"fieldtype": "Select",
+			"options": ["Sales Invoice", "POS Invoice"],
+			"default": "Sales Invoice",
+			"reqd": 1,
+			"width": "60px"
+		},
 	]
 };

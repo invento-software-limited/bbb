@@ -47,6 +47,7 @@ def get_conditions(filters):
 
 def get_invoice_data(filters):
     conditions = get_conditions(filters)
+    invoice_type = filters.get('switch_invoice', "Sales Invoice")
     query_result = frappe.db.sql("""
     		select
     			sales_invoice.grand_total, sales_invoice.served_by, served_by.served_by_id, sales_invoice.total_taxes_and_charges as vat, sales_invoice.name, 
@@ -57,11 +58,11 @@ def get_invoice_data(filters):
     			sales_invoice.discount_amount as special_discount,
     			 sales_invoice_item.net_amount, sales_invoice_item.amount as total_amount, sales_invoice.customer_name, 
     			 sales_invoice.total, sales_invoice.grand_total, sales_invoice.total_taxes_and_charges, sales_invoice.net_total
-    		from `tabSales Invoice` sales_invoice, `tabSales Invoice Item` sales_invoice_item, `tabItem` item, `tabServed By` served_by
+    		from `tab%s` sales_invoice, `tab%s Item` sales_invoice_item, `tabItem` item, `tabServed By` served_by
     		where sales_invoice.name = sales_invoice_item.parent and item.item_code = sales_invoice_item.item_code and sales_invoice.served_by = served_by.name
     			and sales_invoice.docstatus = 1 and %s 
     		order by sales_invoice.name 
-    		""" % (conditions), as_dict=1)
+    		""" % (invoice_type, invoice_type, conditions), as_dict=1)
 
     data = {}
     for result in query_result:
@@ -87,7 +88,6 @@ def get_invoice_data(filters):
             result['served_by_id'] = str(result['served_by_id'])
             data[result.get('served_by')] = result
 
-    print(data)
     pos_wise_list_data = []
 
     for key, invoice_data in data.items():
