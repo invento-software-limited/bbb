@@ -35,9 +35,9 @@ def get_columns():
         {"label": _("Discount %"), "fieldname": "discount_percentage", "fieldtype": "Text", "width": 120},
         {"label": _("Cash"), "fieldname": "Cash", "fieldtype": "Currency", "width": 120,
          "convertible": "rate", "options": "currency"},
-        {"label": _("Card"), "fieldname": "card_amount", "fieldtype": "Currency", "width": 120,
+        {"label": _("Card"), "fieldname": "Card", "fieldtype": "Currency", "width": 120,
          "convertible": "rate", "options": "currency"},
-        {"label": _("Mobile Banking"), "fieldname": "Bkash", "fieldtype": "Currency", "width": 120,
+        {"label": _("Mobile Banking"), "fieldname": "bKash", "fieldtype": "Currency", "width": 120,
          "convertible": "rate", "options": "currency"},
         {"label": _("Rounding"), "fieldname": "cash_amount", "fieldtype": "Currency", "width": 120,
          "convertible": "rate", "options": "currency"},
@@ -89,6 +89,11 @@ def get_invoice_data(filters):
     		""" % (conditions), as_dict=1)
 
     payments = {}
+    payment_types = (frappe.get_meta("Mode of Payment").get_field("type").options).split('\n')
+    payment_type_dict = {}
+    for type in payment_types:
+        payment_type_dict[type] = 0
+
     for payment in payment_result:
         if payment.get('pos_profile') in payments:
             pos_payment = payments.get(payment.get('pos_profile'))
@@ -99,7 +104,8 @@ def get_invoice_data(filters):
             else:
                 pos_payment[payment.get('payment_type')] = payment.get('payment_amount')
         else:
-            payments[payment.get('pos_profile')] = {payment.get('payment_type'): payment.get('payment_amount')}
+            payments[payment.get('pos_profile')] = payment_type_dict
+            payments[payment.get('pos_profile')][payment.get('payment_type')] = payment.get('payment_amount')
 
     data = {}
     for result in query_result:
@@ -129,11 +135,11 @@ def get_invoice_data(filters):
         invoice_data.update(payment_data)
         total_discount = float(invoice_data['discount']) + float(invoice_data['special_discount'])
         invoice_data['basket_value'] = (
-                float(invoice_data['grand_total']) / float(invoice_data['number_of_invoice']))
+                float(invoice_data['net_total']) / float(invoice_data['number_of_invoice']))
         invoice_data['total_discount'] = total_discount
         invoice_data['sell_include_vat'] = invoice_data['grand_total']
         invoice_data['sell_exclude_vat'] = invoice_data['net_total']
         invoice_data['discount_percentage'] = str(
-            float("{:.2f}".format((total_discount / invoice_data['total']) * 100)))
+            float("{:.2f}".format((total_discount / invoice_data['mrp_total']) * 100)))
         pos_wise_list_data.append(invoice_data)
     return pos_wise_list_data
