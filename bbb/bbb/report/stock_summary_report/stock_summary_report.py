@@ -44,6 +44,11 @@ def get_total_stock(filters):
     #
     #     conditions += " GROUP BY ledger.warehouse, item.item_code"
     #     columns += "'' as company, ledger.warehouse"
+    if filters.get('item_group'):
+        conditions += " and item.item_group = '%s'" % filters.get('item_group')
+
+    if filters.get('brand'):
+        conditions += " and item.brand = '%s'" % filters.get('brand')
 
     if filters.get("group_by") == "All":
         conditions += " GROUP BY item.item_code"
