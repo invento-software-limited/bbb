@@ -69,7 +69,7 @@ def get_invoice_data(filters):
     			sales_invoice_item.price_list_rate as unit_price, sales_invoice_item.rate as selling_rate,
     			sales_invoice_item.qty as quantity,
     			(sales_invoice_item.qty * item.standard_rate) as mrp_total,
-    			((sales_invoice_item.qty * item.standard_rate) - (sales_invoice_item.rate * sales_invoice_item.qty)) as discount,
+    			((sales_invoice_item.qty * item.standard_rate) - (sales_invoice_item.net_rate * sales_invoice_item.qty)) as discount,
     			(sales_invoice_item.amount - sales_invoice_item.net_amount) as special_discount,
     			 sales_invoice_item.net_amount, sales_invoice_item.amount as total_amount, sales_invoice.customer_name, 
     			 sales_invoice.total, sales_invoice.grand_total, sales_invoice.total_taxes_and_charges, sales_invoice.net_total

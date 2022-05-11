@@ -16,18 +16,17 @@ def get_columns():
         # {"label": _("No"), "fieldname": "serial_no", "fieldtype": "Text", "width": 100},
         {"label": _("Served By Name"), "fieldname": "served_by", "fieldtype": "Link", "options": "Served By",
          "width": 180},
-        {"label": _("ID"), "fieldname": "id", "fieldtype": "Text", "width": 100},
-        {"label": _("Number Of Invoice"), "fieldname": "number_of_invoice", "fieldtype": "Int", "width": 100},
+        {"label": _("ID"), "fieldname": "served_by_id", "fieldtype": "Text", "width": 100},
+        {"label": _("Number Of Invoice"), "fieldname": "number_of_invoice", "fieldtype": "Int", "width": 150},
         {"label": _("Basket Value"), "fieldname": "basket_value", "fieldtype": "Float", "width": 120},
         {"label": _("Total MRP Price"), "fieldname": "mrp_total", "fieldtype": "Currency", "width": 180,
          "convertible": "rate", "options": "currency"},
         {"label": _("Total Sell Final"), "fieldname": "total_sell_final", "fieldtype": "Currency", "width": 180,
          "convertible": "rate", "options": "currency"},
-        {"label": _("Total Sell Disc"), "fieldname": "total_discount", "fieldtype": "Currency", "width": 180,
+        {"label": _("Total Sell Discount"), "fieldname": "total_discount", "fieldtype": "Currency", "width": 180,
          "convertible": "rate", "options": "currency"},
-        {"label": _("Total Disc %"), "fieldname": "discount_percentage", "fieldtype": "Text", "width": 150, },
-        {"label": _("Ranking"), "fieldname": "ranking", "fieldtype": "Currency", "width": 120,
-         "convertible": "rate", "options": "currency"},
+        {"label": _("Total Discount %"), "fieldname": "discount_percentage", "fieldtype": "Text", "width": 150, },
+        {"label": _("Ranking"), "fieldname": "ranking", "fieldtype": "Text", "width": 90},
     ]
     return columns
 
@@ -50,18 +49,18 @@ def get_invoice_data(filters):
     conditions = get_conditions(filters)
     query_result = frappe.db.sql("""
     		select
-    			sales_invoice.grand_total, sales_invoice.served_by, sales_invoice.total_taxes_and_charges as vat, sales_invoice.name, 
+    			sales_invoice.grand_total, sales_invoice.served_by, served_by.served_by_id, sales_invoice.total_taxes_and_charges as vat, sales_invoice.name, 
     			sales_invoice_item.price_list_rate as unit_price, sales_invoice_item.rate as selling_rate,
     			sales_invoice_item.qty as quantity,
     			(sales_invoice_item.qty * item.standard_rate) as mrp_total,
-    			((sales_invoice_item.qty * item.standard_rate) - (sales_invoice_item.rate * sales_invoice_item.qty)) as discount,
+    			((sales_invoice_item.qty * item.standard_rate) - (sales_invoice_item.net_rate * sales_invoice_item.qty)) as discount,
     			sales_invoice.discount_amount as special_discount,
     			 sales_invoice_item.net_amount, sales_invoice_item.amount as total_amount, sales_invoice.customer_name, 
     			 sales_invoice.total, sales_invoice.grand_total, sales_invoice.total_taxes_and_charges, sales_invoice.net_total
-    		from `tabSales Invoice` sales_invoice, `tabSales Invoice Item` sales_invoice_item, `tabItem` item
-    		where sales_invoice.name = sales_invoice_item.parent and item.item_code = sales_invoice_item.item_code
-    			and sales_invoice.docstatus = 1 and %s
-    		order by sales_invoice.name
+    		from `tabSales Invoice` sales_invoice, `tabSales Invoice Item` sales_invoice_item, `tabItem` item, `tabServed By` served_by
+    		where sales_invoice.name = sales_invoice_item.parent and item.item_code = sales_invoice_item.item_code and sales_invoice.served_by = served_by.name
+    			and sales_invoice.docstatus = 1 and %s 
+    		order by sales_invoice.name 
     		""" % (conditions), as_dict=1)
 
     data = {}
@@ -85,16 +84,25 @@ def get_invoice_data(filters):
         else:
             result['number_of_invoice'] = 1
             result['total_item_qty'] = result['quantity']
+            result['served_by_id'] = str(result['served_by_id'])
             data[result.get('served_by')] = result
 
+    print(data)
     pos_wise_list_data = []
+
     for key, invoice_data in data.items():
         total_discount = float(invoice_data['discount']) + float(invoice_data['special_discount'])
+        print(invoice_data)
         invoice_data['basket_value'] = (
-                float(invoice_data['grand_total']) / float(invoice_data['number_of_invoice']))
+                float(invoice_data['net_total']) / float(invoice_data['number_of_invoice']))
         invoice_data['total_discount'] = total_discount
         invoice_data['total_sell_final'] = invoice_data['net_total']
         invoice_data['discount_percentage'] = str(
-            float("{:.2f}".format((total_discount / invoice_data['total']) * 100)))
+            float("{:.2f}".format((total_discount / invoice_data['mrp_total']) * 100)))
         pos_wise_list_data.append(invoice_data)
-    return pos_wise_list_data
+
+    sorted_list_of_dict = sorted(pos_wise_list_data, key=lambda d: d['total_item_qty'])
+
+    for index in range(len(sorted_list_of_dict)):
+        sorted_list_of_dict[index]['ranking'] = str(index + 1)
+    return sorted_list_of_dict
