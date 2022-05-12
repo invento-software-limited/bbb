@@ -3,6 +3,9 @@ erpnext.PointOfSale.ItemCart = class {
         this.wrapper = wrapper;
         this.events = events;
         this.customer_info = undefined;
+        this.served_by_info = undefined;
+        this.ignore_discount = undefined;
+        this.ignore_pricing_rule = "Yes";
         this.hide_images = settings.hide_images;
         this.allowed_customer_groups = settings.customer_groups;
         this.allow_rate_change = settings.allow_rate_change;
@@ -69,12 +72,17 @@ erpnext.PointOfSale.ItemCart = class {
         this.customer_field.set_focus();
     }
 
-    reset_served_by_and_discount_selector() {
+    reset_served_by_selector() {
         const frm = this.events.get_frm();
         frm.set_value('served_by', '');
-        frm.set_value('ignore_pricing_rule', 0);
         this.make_served_by_selector();
+        this.served_by_field.set_focus();
+    }
+    reset_ignore_discount_selector() {
+        const frm = this.events.get_frm();
+        frm.set_value('ignore_pricing_rule', 0);
         this.make_discount_price_selector();
+        this.ignore_discount_field.set_focus();
     }
 
     init_cart_components() {
@@ -188,15 +196,26 @@ erpnext.PointOfSale.ItemCart = class {
 
     bind_events() {
         const me = this;
+        this.$customer_section.on('click', '.reset-customer-btn', function () {
+            me.reset_customer_selector();
+        });
+
+        this.$served_by_section.on('click', '.reset-served-by-btn', function () {
+            me.reset_served_by_selector();
+        });
+        this.$pricing_discount_section.on('click', '.reset-ignore_pricing-rule-btn', function () {
+            me.reset_ignore_discount_selector();
+        });
+
         this.$customer_section.on('click', '.close-details-btn', function () {
-            me.toggle_customer_info(false);
+            // me.toggle_customer_info(false);
         });
 
         this.$customer_section.on('click', '.customer-display', function (e) {
-            if ($(e.target).closest('.reset-customer-btn').length) return;
-
-            const show = me.$cart_container.is(':visible');
-            me.toggle_customer_info(show);
+            // if ($(e.target).closest('.reset-customer-btn').length) return;
+            //
+            // const show = me.$cart_container.is(':visible');
+            // me.toggle_customer_info(show);
         });
         /*
                 this.$cart_items_wrapper.on('click', '.cart-item-wrapper', function () {
@@ -350,9 +369,8 @@ erpnext.PointOfSale.ItemCart = class {
                             frappe.run_serially([
                                 () => me.fetch_customer_details(this.value),
                                 () => me.events.customer_details_updated(me.customer_info),
-                                // () => me.update_customer_section(),
+                                () => me.update_customer_section(),
                                 () => me.update_totals_section(),
-                                () => me.reset_served_by_and_discount_selector(),
                                 // () => me.check_out_validation(true),
                                 () => frappe.dom.unfreeze()
                             ]);
@@ -383,12 +401,13 @@ erpnext.PointOfSale.ItemCart = class {
                 onchange: function () {
                     if (this.value) {
                         const frm = me.events.get_frm();
-                        frappe.dom.freeze();
                         frappe.model.set_value(frm.doc.doctype, frm.doc.name, 'served_by', this.value);
                         frm.script_manager.trigger('served_by', frm.doc.doctype, frm.doc.name);
                         frappe.run_serially([
                             // () => me.check_out_validation(true),
-                            () => frappe.dom.unfreeze()
+                            () => me.served_by_info = {'served_by': this.value},
+                            () => me.update_served_by_section()
+                            // () => frappe.dom.unfreeze()
                         ]);
                     }
                 },
@@ -397,7 +416,6 @@ erpnext.PointOfSale.ItemCart = class {
             render_input: true,
         });
         this.served_by_field.toggle_label(false);
-        this.served_by_field.set_focus();
     }
 
     make_discount_price_selector() {
@@ -416,10 +434,10 @@ erpnext.PointOfSale.ItemCart = class {
                 onchange: function () {
                     if (this.value) {
                         const frm = me.events.get_frm();
-                        frappe.dom.freeze();
                         frappe.run_serially([
+                            () => me.ignore_pricing_rule = this.value,
+                            () => me.update_pricing_discount_section(),
                             () => me.ignore_pricing_discount(me, this.value),
-                            () => frappe.dom.unfreeze()
                         ]);
                     }
                 },
@@ -428,7 +446,6 @@ erpnext.PointOfSale.ItemCart = class {
             render_input: true,
         });
         this.ignore_discount_field.toggle_label(false);
-        this.ignore_discount_field.set_focus();
     }
 
 
@@ -479,6 +496,34 @@ erpnext.PointOfSale.ItemCart = class {
         // this.page.add_menu_item(__("Save as Draft"), this.save_draft_invoice.bind(this), false, 'Ctrl+S');
         //
         // this.page.add_menu_item(__('Close the POS'), this.close_pos.bind(this), false, 'Shift+Ctrl+C');
+    }
+
+    fetch_discount_details(ignore_pricing_rule) {
+        return new Promise((resolve) => {
+            if(ignore_pricing_rule === 0){
+                this.ignore_pricing_rule = "Yes"
+            }else{
+                this.ignore_pricing_rule = "No"
+            }
+            console.log(this.ignore_pricing_rule);
+            resolve();
+        });
+    }
+
+    fetch_served_by_details(served_by) {
+        if (served_by) {
+            return new Promise((resolve) => {
+                frappe.db.get_value('Served By', served_by, ["served_by_name"]).then(({message}) => {
+                    this.served_by_info = {...message, served_by};
+                    resolve();
+                });
+            });
+        } else {
+            return new Promise((resolve) => {
+                this.served_by_info = {}
+                resolve();
+            });
+        }
     }
 
     fetch_customer_details(customer) {
@@ -570,6 +615,50 @@ erpnext.PointOfSale.ItemCart = class {
         }
     }
 
+    update_pricing_discount_section() {
+        const me = this;
+        const ignore_pricing_rule = this.ignore_pricing_rule;
+        this.$pricing_discount_section.html(
+            `<div class="pricing-discount-details">
+                <div class="pricing-discount-display">
+                    <div class="pricing-discount-desc">
+                        <div class="pricing-discount-name">${ignore_pricing_rule}</div>
+                    </div>
+                    <div class="reset-ignore_pricing-rule-btn" data-pricing-discount="${escape(ignore_pricing_rule)}">
+                        <svg width="32" height="32" viewBox="0 0 14 14" fill="none">
+                            <path d="M4.93764 4.93759L7.00003 6.99998M9.06243 9.06238L7.00003 6.99998M7.00003 6.99998L4.93764 9.06238L9.06243 4.93759" stroke="#8D99A6"/>
+                        </svg>
+                    </div>
+                </div>
+            </div>`
+        );
+    }
+
+    update_served_by_section() {
+        const me = this;
+        const {served_by} = this.served_by_info || {};
+        if (served_by) {
+            let served_by_name = served_by.split('-')[0]
+            this.$served_by_section.html(
+                `<div class="served-by-details">
+					<div class="served-by-display">
+						<div class="served-by-name-desc">
+							<div class="served-by-name">${served_by_name}</div>
+						</div>
+						<div class="reset-served-by-btn" data-served-by="${escape(served_by)}">
+							<svg width="32" height="32" viewBox="0 0 14 14" fill="none">
+								<path d="M4.93764 4.93759L7.00003 6.99998M9.06243 9.06238L7.00003 6.99998M7.00003 6.99998L4.93764 9.06238L9.06243 4.93759" stroke="#8D99A6"/>
+							</svg>
+						</div>
+					</div>
+				</div>`
+            );
+        } else {
+            this.reset_served_by_selector();
+        }
+
+    }
+
     update_customer_section() {
         const me = this;
         const {customer, email_id = '', mobile_no = '', image} = this.customer_info || {};
@@ -578,10 +667,8 @@ erpnext.PointOfSale.ItemCart = class {
             this.$customer_section.html(
                 `<div class="customer-details">
 					<div class="customer-display">
-						${this.get_customer_image()}
 						<div class="customer-name-desc">
 							<div class="customer-name">${customer}</div>
-							${get_customer_description()}
 						</div>
 						<div class="reset-customer-btn" data-customer="${escape(customer)}">
 							<svg width="32" height="32" viewBox="0 0 14 14" fill="none">
@@ -594,7 +681,6 @@ erpnext.PointOfSale.ItemCart = class {
         } else {
             // reset customer selector
             this.reset_customer_selector();
-            this.reset_served_by_and_discount_selector();
         }
 
         function get_customer_description() {
@@ -708,7 +794,7 @@ erpnext.PointOfSale.ItemCart = class {
         }
 
         $item_to_update.html(
-			`<div class="item-name-desc">
+            `<div class="item-name-desc">
                 <div class="item-image-name-dec">
 			        ${get_item_image_html()}
 			        <div class="item-name">
@@ -756,7 +842,7 @@ erpnext.PointOfSale.ItemCart = class {
             // 		// item_mrp = r.message.standard_rate;
             // 	})
             return `
-					<div class="item-row-mrp"><span>${item_data.mrp || 0}</span></div>
+					<div class="item-row-mrp"><span>${item_data.price_list_rate || 0}</span></div>
 					<div class="item-row-rate"><span>${item_data.rate || 0}</span></div>
 					<div class="item-row-qty"><span>${item_data.qty || 0}</span></div>
 					<div class="item-row-amount">
@@ -1139,8 +1225,14 @@ erpnext.PointOfSale.ItemCart = class {
     load_invoice() {
         const frm = this.events.get_frm();
         frm.events.item_list = [];
-
         this.attach_refresh_field_event(frm);
+
+        this.fetch_served_by_details(frm.doc.served_by).then(() => {
+            this.update_served_by_section();
+        });
+        this.fetch_discount_details(frm.doc.ignore_pricing_rule).then(() => {
+            this.update_pricing_discount_section();
+        });
         this.fetch_customer_details(frm.doc.customer).then(() => {
             this.events.customer_details_updated(this.customer_info);
             this.update_customer_section();
@@ -1167,6 +1259,7 @@ erpnext.PointOfSale.ItemCart = class {
         }
 
         this.toggle_component(true);
+        console.log(this)
     }
 
     toggle_component(show) {
@@ -1177,18 +1270,23 @@ erpnext.PointOfSale.ItemCart = class {
         me.$cart_items_wrapper.empty();
         var frm = me.events.get_frm();
         var item_list = me.events.get_cart_items();
-        if (value === 'No') {
-            frm.doc.ignore_pricing_rule = 0;
-        } else if (value === 'Yes') {
-            frm.doc.ignore_pricing_rule = 1;
+        if (value === 'Yes') {
+            // frm.doc.ignore_pricing_rule = 0;
+            frappe.model.set_value(frm.doc.doctype, frm.doc.name, 'ignore_pricing_rule', 0);
+        } else if (value === 'No') {
+            // frm.doc.ignore_pricing_rule = 1
+            frappe.model.set_value(frm.doc.doctype, frm.doc.name, 'ignore_pricing_rule', 1);
         }
 
         frm.doc.items = [];
-        frm.refresh_fields();
+        frm.refresh_field('ignore_pricing_rule');
         frm.reload_doc();
         item_list.forEach(args => {
             me.events.on_cart_update(args);
         });
+        var rr = me.events.get_frm();
+        console.log(rr);
+        console.log(rr.doc.ignore_pricing_rule);
     }
 
     check_out_validation(show) {

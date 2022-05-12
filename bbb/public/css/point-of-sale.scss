@@ -332,29 +332,246 @@
 				}
 			}
 		}
-		> .customer-header-section{
+		> .customer-header-section {
 			display: flex;
 
 			> .served-by-section {
 				@extend .pos-card;
 				width: 30%;
 				display: flex;
-				margin-right:2%;
+				margin-right: 2%;
 				flex-direction: column;
 				padding: var(--padding-md) var(--padding-lg);
 				overflow: visible;
 
+				> .served-by-field {
+					display: flex;
+					align-items: center;
+					padding-top: var(--padding-xs);
+				}
+
+				> .served-by-details {
+					display: flex;
+					flex-direction: column;
+					background-color: var(--fg-color);
+
+					> .header {
+						display: flex;
+						margin-bottom: var(--margin-md);
+						justify-content: space-between;
+						padding-top: var(--padding-md);
+
+						> .label {
+							@extend .label;
+						}
+
+						> .close-details-btn {
+							display: flex;
+							align-items: center;
+							cursor: pointer;
+						}
+					}
+
+					> .served-by-display {
+						display: flex;
+						align-items: center;
+						cursor: pointer;
+
+						> .served-by-image {
+							display: flex;
+							align-items: center;
+							justify-content: center;
+							width: 3rem;
+							height: 3rem;
+							border-radius: 50%;
+							color: var(--gray-500);
+							margin-right: var(--margin-md);
+
+							> img {
+								@extend .image;
+								border-radius: 50%;
+							}
+						}
+
+						> .served-by-abbr {
+							@extend .abbr;
+							font-size: var(--text-2xl);
+						}
+
+						> .served-by-name-desc {
+							@extend .nowrap;
+							display: flex;
+							flex-direction: column;
+							margin-right: auto;
+
+							> .served-by-name {
+								font-weight: 700;
+								font-size: var(--text-lg);
+							}
+
+							> .served-by-desc {
+								color: var(--gray-600);
+								font-weight: 500;
+								font-size: var(--text-sm);
+							}
+						}
+
+						> .reset-served-by-btn {
+							display: flex;
+							align-items: center;
+							cursor: pointer;
+						}
+
+					}
+
+					> .served-by-fields-container {
+						display: grid;
+						grid-template-columns: repeat(2, minmax(0, 1fr));
+						margin-top: var(--margin-md);
+						column-gap: var(--padding-sm);
+						row-gap: var(--padding-xs);
+					}
+
+					> .transactions-label {
+						@extend .label;
+						margin-top: var(--margin-md);
+						margin-bottom: var(--margin-sm);
+					}
+				}
+
+				> .served-by-transactions {
+					height: 100%;
+					overflow-x: hidden;
+					overflow-y: scroll;
+					margin-right: -12px;
+					padding-right: 12px;
+					margin-left: -10px;
+
+					> .no-transactions-placeholder {
+						height: 100%;
+						display: flex;
+						align-items: center;
+						justify-content: center;
+						background-color: var(--gray-50);
+						border-radius: var(--border-radius-md);
+					}
+				}
 			}
+		}
+		> .customer-header-section {
+			display: flex;
+
 			> .pricing-discount-section {
 				@extend .pos-card;
 				width: 20%;
 				display: flex;
 				flex-direction: column;
-				margin-right:2%;
+				margin-right: 2%;
 				padding: var(--padding-md) var(--padding-lg);
 				overflow: visible;
 
+				> .pricing-discount-field {
+					display: flex;
+					align-items: center;
+					padding-top: var(--padding-xs);
+				}
+
+				> .pricing-discount-details {
+					display: flex;
+					flex-direction: column;
+					background-color: var(--fg-color);
+
+					> .header {
+						display: flex;
+						margin-bottom: var(--margin-md);
+						justify-content: space-between;
+						padding-top: var(--padding-md);
+
+						> .label {
+							@extend .label;
+						}
+
+						> .close-details-btn {
+							display: flex;
+							align-items: center;
+							cursor: pointer;
+						}
+					}
+
+					> .pricing-discount-display {
+						display: flex;
+						align-items: center;
+						cursor: pointer;
+
+
+						> .pricing-discount-abbr {
+							@extend .abbr;
+							font-size: var(--text-2xl);
+						}
+
+						> .pricing-discount-desc {
+							@extend .nowrap;
+							display: flex;
+							flex-direction: column;
+							margin-right: auto;
+
+							> .pricing-discount-name {
+								font-weight: 700;
+								font-size: var(--text-lg);
+							}
+
+							> .pricing-discount-desc {
+								color: var(--gray-600);
+								font-weight: 500;
+								font-size: var(--text-sm);
+							}
+						}
+
+						> .reset-pricing-discount-btn {
+							display: flex;
+							align-items: center;
+							cursor: pointer;
+						}
+
+					}
+
+					> .pricing-discount-fields-container {
+						display: grid;
+						grid-template-columns: repeat(2, minmax(0, 1fr));
+						margin-top: var(--margin-md);
+						column-gap: var(--padding-sm);
+						row-gap: var(--padding-xs);
+					}
+
+					> .transactions-label {
+						@extend .label;
+						margin-top: var(--margin-md);
+						margin-bottom: var(--margin-sm);
+					}
+				}
+
+				> .pricing-discount-transactions {
+					height: 100%;
+					overflow-x: hidden;
+					overflow-y: scroll;
+					margin-right: -12px;
+					padding-right: 12px;
+					margin-left: -10px;
+
+					> .no-transactions-placeholder {
+						height: 100%;
+						display: flex;
+						align-items: center;
+						justify-content: center;
+						background-color: var(--gray-50);
+						border-radius: var(--border-radius-md);
+					}
+				}
 			}
+
+		}
+		> .customer-header-section{
+			display: flex;
 			> .menu-section {
 				@extend .pos-card;
 				width: 10%;
