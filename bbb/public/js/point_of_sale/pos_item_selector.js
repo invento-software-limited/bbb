@@ -49,7 +49,6 @@ erpnext.PointOfSale.ItemSelector = class {
 		}
 
 		this.get_items({}).then(({message}) => {
-			// console.log(message.items);
 			this.render_item_list(message.items);
 		});
 	}
@@ -245,13 +244,12 @@ erpnext.PointOfSale.ItemSelector = class {
 
 			// escape(undefined) returns "undefined" then unescape returns "undefined"
 			batch_no = batch_no === "undefined" ? undefined : batch_no;
-			batch_no = batch_no === "undefined" ? undefined : batch_no;
 			serial_no = serial_no === "undefined" ? undefined : serial_no;
 			uom = uom === "undefined" ? undefined : uom;
 			rate = rate === "undefined" ? undefined : rate;
 			mrp = mrp === "undefined" ? undefined : mrp;
 			title = title === "undefined" ? undefined : title;
-			console.log(serial_no, uom, rate, mrp, title);
+			// console.log(serial_no, uom, rate, mrp, title);
 
 			me.events.item_selected({
 				field: 'qty',
@@ -337,7 +335,6 @@ erpnext.PointOfSale.ItemSelector = class {
 					this.search_index[search_term] = items;
 				}
 				this.items = items;
-				// console.log(items);
 				this.render_item_list(items);
 				this.auto_add_item && this.items.length == 1 && this.add_filtered_item_to_cart();
 			});
