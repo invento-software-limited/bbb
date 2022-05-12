@@ -407,7 +407,7 @@ erpnext.PointOfSale.PastOrderSummary = class {
 	}
 
 	insert_invoice_print_log(){
-		console.log("==========>>>",this.doc);
+		// console.log("==========>>>",this.doc);
 		// inserting invoice printing log
 		frappe.db.insert({
 			"doctype": "Printing Log",

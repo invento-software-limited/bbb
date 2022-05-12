@@ -878,7 +878,8 @@ erpnext.PointOfSale.Controller = class {
             "location": this.frm.doc.pos_profile,
             "mobile_number": this.frm.doc.contact_mobile,
             "invoice_number": this.frm.doc.name,
-
+            "served_by": this.frm.doc.served_by,
+            "company": this.frm.doc.company
         }).then(function (doc) {
             // console.log(doc);
         });

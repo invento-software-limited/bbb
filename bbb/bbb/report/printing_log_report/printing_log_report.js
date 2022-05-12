@@ -25,7 +25,21 @@ frappe.query_reports["Printing Log Report"] = {
 			"label": __("Invoice Number"),
 			"fieldtype": "Link",
 			"width": "200",
-			"options": "Served By",
+			"options": "POS Invoice",
+		},
+		{
+			"fieldname": "served_by",
+			"label": __("Served By"),
+			"fieldtype": "Link",
+			"width": "80",
+			"options": "Served By"
+		},
+		{
+			"fieldname": "location",
+			"label": __("Location"),
+			"fieldtype": "Link",
+			"width": "80",
+			"options": "POS Profile"
 		},
 		{
 			"fieldname": "customer",
@@ -34,14 +48,13 @@ frappe.query_reports["Printing Log Report"] = {
 			"width": "80",
 			"options": "Customer"
 		},
-
-		// {
-		// 	"fieldname": "company",
-		// 	"label": __("Company"),
-		// 	"fieldtype": "Link",
-		// 	"width": "80",
-		// 	"options": "Company",
-		// 	"default": frappe.defaults.get_default("company")
-		// },
+		{
+			"fieldname": "company",
+			"label": __("Company"),
+			"fieldtype": "Link",
+			"width": "80",
+			"options": "Company",
+			"default": frappe.defaults.get_default("company")
+		},
 	]
 };
