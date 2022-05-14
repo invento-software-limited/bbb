@@ -4,5 +4,5 @@
 # import frappe
 import unittest
 
-class TestProductSearchlog(unittest.TestCase):
+class TestProductSearchLog(unittest.TestCase):
 	pass

@@ -690,16 +690,18 @@ erpnext.PointOfSale.Controller = class {
 
     insert_search_product_log(item_code, item_name) {
         // console.log(this.frm.doc);
-        // console.log(item_name);
+        // console.log(item_code, item_name);
 
         frappe.db.insert({
-            "doctype": "Product Search log",
+            "doctype": "Product Search Log",
             "date": frappe.datetime.get_today(),
             "customer_name": this.frm.doc.customer_name,
             "customer": this.frm.doc.customer,
             "email": this.frm.doc.contact_email,
             "location": this.frm.doc.pos_profile,
-            "product_code": item_code,
+			"served_by": this.frm.doc.served_by,
+			"company": this.frm.doc.company,
+            "product": item_code,
             "product_name": item_name.replace('%20', ' ')
 
         }).then(function (doc) {
