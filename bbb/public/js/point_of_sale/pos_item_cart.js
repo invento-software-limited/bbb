@@ -5,7 +5,7 @@ erpnext.PointOfSale.ItemCart = class {
         this.customer_info = undefined;
         this.served_by_info = undefined;
         this.ignore_discount = undefined;
-        this.ignore_pricing_rule = "Yes";
+        this.ignore_pricing_rule = "No";
         this.hide_images = settings.hide_images;
         this.allowed_customer_groups = settings.customer_groups;
         this.allow_rate_change = settings.allow_rate_change;
@@ -371,6 +371,7 @@ erpnext.PointOfSale.ItemCart = class {
                                 () => me.events.customer_details_updated(me.customer_info),
                                 () => me.update_customer_section(),
                                 () => me.update_totals_section(),
+                                () => me.events.set_cache_data({'pos_customer': this.value}),
                                 // () => me.check_out_validation(true),
                                 () => frappe.dom.unfreeze()
                             ]);
@@ -406,6 +407,7 @@ erpnext.PointOfSale.ItemCart = class {
                         frappe.run_serially([
                             // () => me.check_out_validation(true),
                             () => me.served_by_info = {'served_by': this.value},
+                            () => me.events.set_cache_data({'pos_served_by': this.value}),
                             () => me.update_served_by_section()
                             // () => frappe.dom.unfreeze()
                         ]);
@@ -437,6 +439,7 @@ erpnext.PointOfSale.ItemCart = class {
                         frappe.run_serially([
                             () => me.ignore_pricing_rule = this.value,
                             () => me.update_pricing_discount_section(),
+                            () => me.events.set_cache_data({'pos_ignore_pricing_rule': this.value}),
                             () => me.ignore_pricing_discount(me, this.value),
                         ]);
                     }
@@ -500,7 +503,7 @@ erpnext.PointOfSale.ItemCart = class {
 
     fetch_discount_details(ignore_pricing_rule) {
         return new Promise((resolve) => {
-            if(ignore_pricing_rule === 0){
+            if(ignore_pricing_rule === 1){
                 this.ignore_pricing_rule = "Yes"
             }else{
                 this.ignore_pricing_rule = "No"
@@ -1221,12 +1224,51 @@ erpnext.PointOfSale.ItemCart = class {
             this.update_totals_section(frm);
         });
     }
-
+    update_cached_data(cached_data){
+        const frm = this.events.get_frm();
+        const pos_ignore_pricing_rule = cached_data['pos_ignore_pricing_rule'] ? cached_data['pos_ignore_pricing_rule'] : "No"
+        frappe.model.set_value(frm.doc.doctype, frm.doc.name, 'customer', cached_data['pos_customer']);
+        frm.script_manager.trigger('customer', frm.doc.doctype, frm.doc.name).then(() => {
+                frappe.run_serially([
+                () => this.fetch_customer_details(cached_data['pos_customer']),
+                () => this.events.customer_details_updated(this.customer_info),
+                () => this.update_customer_section(),
+                () => this.update_totals_section(),
+            ]);
+        })
+        frappe.model.set_value(frm.doc.doctype, frm.doc.name, 'served_by', cached_data['pos_served_by']);
+        frm.script_manager.trigger('served_by', frm.doc.doctype, frm.doc.name).then(() => {
+            frappe.run_serially([
+                () => this.served_by_info = {'served_by': cached_data['pos_served_by']},
+                () => this.update_served_by_section(),
+            ]);
+        });
+        frappe.run_serially([
+            () => this.ignore_pricing_rule = pos_ignore_pricing_rule,
+            () => this.update_pricing_discount_section(),
+            // () => this.ignore_pricing_discount(this, pos_ignore_pricing_rule),
+        ]);
+    }
+    get_cache_data(){
+		frappe.call({
+			method: 'bbb.bbb.pos_invoice.get_pos_cached_data',
+			callback: function(r) {
+				if (!r.exc) {
+					console.log(r.message);
+					return r.message;
+				}
+			}
+		});
+	}
     load_invoice() {
         const frm = this.events.get_frm();
         frm.events.item_list = [];
         this.attach_refresh_field_event(frm);
-
+        // const cached_data = this.events.get_cache_data();
+        // if(cached_data){
+        //     this.update_cached_data(cached_data)
+        // }
+        // else {
         this.fetch_served_by_details(frm.doc.served_by).then(() => {
             this.update_served_by_section();
         });
@@ -1237,7 +1279,7 @@ erpnext.PointOfSale.ItemCart = class {
             this.events.customer_details_updated(this.customer_info);
             this.update_customer_section();
         });
-
+        // }
         this.$cart_items_wrapper.html('');
         if (frm.doc.items.length) {
             frm.doc.items.forEach(item => {
@@ -1259,7 +1301,22 @@ erpnext.PointOfSale.ItemCart = class {
         }
 
         this.toggle_component(true);
-        console.log(this)
+        // if(cached_data){
+        //     const items = cached_data.pos_items ? cached_data.pos_items : {}
+        //     frm.doc.items = [];
+        //     frm.refresh_field('items');
+        //     frm.reload_doc();
+        //     items.forEach(item_dict => {
+        //         const values = Object.values(item_dict)[0];
+        //         var qty = values.qty;
+        //         var args = {
+        //         'field': "qty",
+        //         'item': values,
+        //         'value': "+" + qty
+        //         }
+        //         this.events.update_cached_item_data(args);
+        //     });
+        // }
     }
 
     toggle_component(show) {
@@ -1267,6 +1324,8 @@ erpnext.PointOfSale.ItemCart = class {
     }
 
     ignore_pricing_discount(me, value) {
+        const cached_data = me.events.get_cache_data();
+        const items = cached_data['pos_items']
         me.$cart_items_wrapper.empty();
         var frm = me.events.get_frm();
         var item_list = me.events.get_cart_items();
@@ -1284,9 +1343,17 @@ erpnext.PointOfSale.ItemCart = class {
         item_list.forEach(args => {
             me.events.on_cart_update(args);
         });
-        var rr = me.events.get_frm();
-        console.log(rr);
-        console.log(rr.doc.ignore_pricing_rule);
+        // items.forEach(item_dict => {
+        //     const values = Object.values(item_dict)[0];
+        //     console.log(values);
+        //     var qty = values.qty;
+        //     var args = {
+        //     'field': "qty",
+        //     'item': values,
+        //     'value': "+" + qty
+        //     }
+        //     this.events.on_cart_update(args);
+        // });
     }
 
     check_out_validation(show) {

@@ -7,8 +7,8 @@ erpnext.PointOfSale.Controller = class {
         this.item_list = [];
         $(".page-head").css("display", "none");
         $(".page-body").css("margin-top", "20px");
-
-
+		this.cached_data = undefined;
+		this.get_cache_data(this);
     }
 
 	fetch_opening_entry() {
@@ -256,7 +256,7 @@ erpnext.PointOfSale.Controller = class {
 			events: {
 				item_selected: args => this.on_cart_update(args),
 				set_cart_item: args => this.item_list.push(args),
-				get_frm: () => this.frm || {}
+				get_frm: () => this.frm || {},
 			}
 		})
 	}
@@ -288,10 +288,13 @@ erpnext.PointOfSale.Controller = class {
                 set_cart_item: args => this.item_list.push(args),
                 on_cart_update: args => this.on_cart_update(args),
                 item_selected: args => this.on_cart_update(args),
+                set_cache_data: args => this.set_cache_data(args),
+                get_cache_data: () => this.cached_data,
                 open_form_view: () => this.open_form_view(),
                 toggle_recent_order: () => this.toggle_recent_order(),
                 save_draft_invoice: () => this.save_draft_invoice(),
                 close_pos: () => this.close_pos(),
+                update_cached_item_data: (args) => this.update_cached_item_data(args),
 
             }
         })
@@ -510,21 +513,51 @@ erpnext.PointOfSale.Controller = class {
 
 	make_sales_invoice_frm() {
 		const doctype = 'POS Invoice';
+
 		return new Promise(resolve => {
 			if (this.frm) {
 				this.frm = this.get_new_frm(this.frm);
 				this.frm.doc.items = [];
 				this.frm.doc.is_pos = 1
+				// this.get_cached_data_if_exist(this, this.frm)
 				resolve();
 			} else {
 				frappe.model.with_doctype(doctype, () => {
 					this.frm = this.get_new_frm();
 					this.frm.doc.items = [];
 					this.frm.doc.is_pos = 1
+					// this.get_cached_data_if_exist(this, this.frm)
 					resolve();
 				});
 			}
 		});
+	}
+
+	get_cached_data_if_exist(me, frm){
+		const cached_data = me.get_cache_data(me);
+		console.log(cached_data)
+
+		if(cached_data){
+        	const items = cached_data.pos_items
+			frappe.model.set_value(frm.doc.doctype, frm.doc.name, 'customer', cached_data.pos_customer);
+			frappe.model.set_value(frm.doc.doctype, frm.doc.name, 'served_by', cached_data.served_by);
+			if (cached_data.pos_ignore_pricing_rule === 'Yes') {
+				frappe.model.set_value(frm.doc.doctype, frm.doc.name, 'ignore_pricing_rule', 1);
+			} else if (cached_data.pos_ignore_pricing_rule === 'No') {
+				frappe.model.set_value(frm.doc.doctype, frm.doc.name, 'ignore_pricing_rule', 0);
+			}
+			// frm.refresh_fields(['customer', 'served_by', 'ignore_pricing_rule']);
+			if(items){
+				items.forEach(item_dict => {
+					const values = Object.values(item_dict)[0];
+					var qty = values.qty;
+					const new_item = { 'item_code' : values.item_code, 'batch_no': values.batch_no, 'rate': values.rate, 'qty': values.qty, 'serial_no': values.serial_no};
+					frm.add_child('items', new_item);
+				});
+			}
+			frm.reload_doc();
+		}
+		console.log(this);
 	}
 
 	get_new_frm(_frm) {
@@ -565,13 +598,164 @@ erpnext.PointOfSale.Controller = class {
 		this.page.set_indicator(this.pos_profile, "blue");
 	}
 
+	async update_cached_item_data(args) {
+		console.log('args ', args)
+		frappe.dom.freeze();
+		let item_row = undefined;
+		try {
+			let { field, value, item } = args;
+			item_row = this.get_item_from_frm(item);
+			const item_row_exists = !$.isEmptyObject(item_row);
+			const {item_code, batch_no, serial_no, uom, rate, mrp, title, update_rules} = item;
+			// if (this.frm.doc.customer) {
+			// 	this.set_cache_data({"pos_items": [item_code, batch_no, serial_no, uom, rate, mrp, title]})
+			// }
+			// if (this.frm.doc.customer) {
+			// 	this.set_cache_data({"pos_items": {'item_code':item_code, 'batch_no': batch_no, 'serial_no': serial_no, 'rate': rate, 'qty':1, 'uom': uom, 'mrp':mrp, 'title':title, 'name': title }})
+			// }
+			const from_selector = field === 'qty' && value === "+1";
+			if (from_selector)
+				value = flt(item_row.qty) + flt(value);
+
+			if (item_row_exists) {
+				if (field === 'qty')
+					value = flt(value);
+
+				if (['qty', 'conversion_factor'].includes(field) && value > 0 && !this.allow_negative_stock) {
+					const qty_needed = field === 'qty' ? value * item_row.conversion_factor : item_row.qty * value;
+					await this.check_stock_availability(item_row, qty_needed, this.frm.doc.set_warehouse);
+				}
+
+				if (this.is_current_item_being_edited(item_row) || from_selector) {
+					await frappe.model.set_value(item_row.doctype, item_row.name, field, value);
+					this.update_cart_html(item_row);
+				}
+
+			} else {
+				if (!this.frm.doc.customer)
+					return this.raise_customer_selection_alert();
+				const { item_code, batch_no, serial_no, rate } = item;
+
+				if (!item_code)
+					return;
+
+				const new_item = { item_code, batch_no, rate, [field]: value };
+				if (serial_no) {
+					await this.check_serial_no_availablilty(item_code, this.frm.doc.set_warehouse, serial_no);
+					new_item['serial_no'] = serial_no;
+				}
+
+				if (field === 'serial_no')
+					new_item['qty'] = value.split(`\n`).length || 0;
+
+				item_row = this.frm.add_child('items', new_item);
+
+				if (field === 'qty' && value !== 0 && !this.allow_negative_stock)
+					await this.check_stock_availability(item_row, value, this.frm.doc.set_warehouse);
+
+				await this.trigger_new_item_events(item_row);
+
+				this.update_cart_html(item_row);
+
+				if (this.item_details.$component.is(':visible'))
+					this.edit_item_details_of(item_row);
+
+				if (this.check_serial_batch_selection_needed(item_row))
+					this.edit_item_details_of(item_row);
+			}
+
+		} catch (error) {
+			console.log(error);
+		} finally {
+			frappe.dom.unfreeze();
+			return item_row;
+		}
+	}
+	// async on_cart_update(args) {
+	// 	console.log('args ', args)
+	// 	frappe.dom.freeze();
+	// 	let item_row = undefined;
+	// 	try {
+	// 		let { field, value, item } = args;
+	// 		item_row = this.get_item_from_frm(item);
+	// 		const item_row_exists = !$.isEmptyObject(item_row);
+	// 		// if (this.frm.doc.customer) {
+	// 		// 	this.set_cache_data({"pos_items": {'item_code':item_code, 'batch_no': batch_no, 'serial_no': serial_no, 'rate': rate, 'qty':1, 'uom': uom, 'mrp':mrp, 'title':title, 'name': title }})
+	// 		// }
+	// 		const from_selector = field === 'qty' && value === "+1";
+	// 		if (from_selector)
+	// 			value = flt(item_row.qty) + flt(value);
+	//
+	// 		if (item_row_exists) {
+	// 			if (field === 'qty')
+	// 				value = flt(value);
+	//
+	// 			if (['qty', 'conversion_factor'].includes(field) && value > 0 && !this.allow_negative_stock) {
+	// 				const qty_needed = field === 'qty' ? value * item_row.conversion_factor : item_row.qty * value;
+	// 				await this.check_stock_availability(item_row, qty_needed, this.frm.doc.set_warehouse);
+	// 			}
+	//
+	// 			if (this.is_current_item_being_edited(item_row) || from_selector) {
+	// 				await frappe.model.set_value(item_row.doctype, item_row.name, field, value);
+	// 				this.update_cart_html(item_row);
+	// 			}
+	//
+	// 			this.insert_search_product_log(item_code, item_row.title)
+	//
+	// 		} else {
+	// 			if (!this.frm.doc.customer)
+	// 				return this.raise_customer_selection_alert();
+	// 			const { item_code, batch_no, serial_no, rate } = item;
+	//
+	// 			if (!item_code)
+	// 				return;
+	//
+	// 			const new_item = { item_code, batch_no, rate, [field]: value };
+	// 			if (serial_no) {
+	// 				await this.check_serial_no_availablilty(item_code, this.frm.doc.set_warehouse, serial_no);
+	// 				new_item['serial_no'] = serial_no;
+	// 			}
+	//
+	// 			if (field === 'serial_no')
+	// 				new_item['qty'] = value.split(`\n`).length || 0;
+	//
+	// 			item_row = this.frm.add_child('items', new_item);
+	//
+	// 			if (field === 'qty' && value !== 0 && !this.allow_negative_stock)
+	// 				await this.check_stock_availability(item_row, value, this.frm.doc.set_warehouse);
+	//
+	// 			await this.trigger_new_item_events(item_row);
+	//
+	// 			this.update_cart_html(item_row);
+	//
+	// 			if (this.item_details.$component.is(':visible'))
+	// 				this.edit_item_details_of(item_row);
+	//
+	// 			if (this.check_serial_batch_selection_needed(item_row))
+	// 				this.edit_item_details_of(item_row);
+	//
+	// 			this.insert_search_product_log(item_code, item_row.title)
+	// 		}
+	//
+	// 	} catch (error) {
+	// 		console.log(error);
+	// 	} finally {
+	// 		frappe.dom.unfreeze();
+	// 		return item_row;
+	// 	}
+	// }
+
 	async on_cart_update(args) {
 		frappe.dom.freeze();
 		let me = this;
 		let item_row = undefined;
 		try {
-			let { field, value, item, item_quantity } = args;
+			let {field, value, item, item_quantity} = args;
 			const {item_code, batch_no, serial_no, uom, rate, mrp, title, update_rules} = item;
+
+			// if (this.frm.doc.customer) {
+			// 	this.set_cache_data({"pos_items": [item_code, batch_no, serial_no, uom, rate, mrp, title]})
+			// }
 			item_row = this.get_item_from_frm(item);
 			const item_row_exists = !$.isEmptyObject(item_row);
 
@@ -581,9 +765,9 @@ erpnext.PointOfSale.Controller = class {
 
 			if (item_row_exists) {
 				if (update_rules === false) {
-                    let objIndex = this.item_list.findIndex((obj => obj.item_code === item_code));
-                    this.item_list[objIndex].item_quantity = this.item_list[objIndex].item_quantity + 1;
-                }
+					let objIndex = this.item_list.findIndex((obj => obj.item_code === item_code));
+					this.item_list[objIndex].item_quantity = this.item_list[objIndex].item_quantity + 1;
+				}
 				if (field === 'qty')
 					value = flt(value);
 
@@ -607,7 +791,7 @@ erpnext.PointOfSale.Controller = class {
 				if (!item_code)
 					return;
 
-				const new_item = { item_code, batch_no, rate, [field]: value };
+				const new_item = {item_code, batch_no, rate, [field]: value};
 
 				if (serial_no) {
 					await this.check_serial_no_availablilty(item_code, this.frm.doc.set_warehouse, serial_no);
@@ -617,10 +801,10 @@ erpnext.PointOfSale.Controller = class {
 				if (field === 'serial_no')
 					new_item['qty'] = value.split(`\n`).length || 0;
 
-                if(parseInt(item_quantity) > 1){
-                    new_item['qty'] = parseInt(item_quantity)
-                }
-                item_row = this.frm.add_child('items', new_item);
+				if (parseInt(item_quantity) > 1) {
+					new_item['qty'] = parseInt(item_quantity)
+				}
+				item_row = this.frm.add_child('items', new_item);
 
 				if (field === 'qty' && value !== 0 && !this.allow_negative_stock)
 					await this.check_stock_availability(item_row, value, this.frm.doc.set_warehouse);
@@ -632,20 +816,20 @@ erpnext.PointOfSale.Controller = class {
 				if (this.item_details.$component.is(':visible'))
 					this.edit_item_details_of(item_row);
 
-                if (this.check_serial_batch_selection_needed(item_row))
-                    this.edit_item_details_of(item_row);
+				if (this.check_serial_batch_selection_needed(item_row))
+					this.edit_item_details_of(item_row);
 
-                if (update_rules === false) {
-                    this.item_list.push({
-                        field: 'qty',
-                        value: "+1",
-                        item: {item_code, batch_no, serial_no, uom, rate, mrp, title, update_rules: true},
-                        item_quantity: item_quantity,
-                        item_code: item_code
-                    })
-                }
-                this.insert_search_product_log(item_code, title);
-            }
+				if (update_rules === false) {
+					this.item_list.push({
+						field: 'qty',
+						value: "+1",
+						item: {item_code, batch_no, serial_no, uom, rate, mrp, title, update_rules: true},
+						item_quantity: item_quantity,
+						item_code: item_code
+					})
+				}
+				this.insert_search_product_log(item_code, item_row.title);
+			}
 
 		} catch (error) {
 			console.log(error);
@@ -893,4 +1077,28 @@ erpnext.PointOfSale.Controller = class {
             this.frm.doc.language || frappe.boot.lang
         );
     }
+    set_cache_data(data){
+		frappe.call({
+			method: 'bbb.bbb.pos_invoice.set_pos_cached_data',
+			args: {
+				"invoice_data" : data,
+			},
+			callback: function(r) {
+				if (!r.exc) {
+					console.log(r);
+				}
+			}
+		});
+	}
+    get_cache_data(me){
+		frappe.call({
+			method: 'bbb.bbb.pos_invoice.get_pos_cached_data',
+			callback: function(r) {
+				if (!r.exc) {
+					me.cached_data = r.message;
+					console.log(me.cached_data)
+				}
+			}
+		});
+	}
 };
