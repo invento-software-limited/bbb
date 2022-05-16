@@ -308,7 +308,7 @@ erpnext.PointOfSale.Controller = class {
 				get_frm: () => this.frm,
 
 				toggle_item_selector: (minimize) => {
-					this.item_selector.resize_selector(minimize);
+					// this.item_selector.resize_selector(minimize); // hide for item detail
 					this.cart.toggle_numpad(minimize);
 				},
 
@@ -914,7 +914,7 @@ erpnext.PointOfSale.Controller = class {
     get_item_from_frm({name, item_code, batch_no, uom, rate, mrp, title, update_rules}) {
 
         let item_row = null;
-        if (!name === undefined) {
+        if (name) {
             item_row = this.frm.doc.items.find(i => i.name == name);
         } else {
             // if item is clicked twice from item selector

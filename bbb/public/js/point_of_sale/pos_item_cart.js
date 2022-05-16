@@ -217,31 +217,30 @@ erpnext.PointOfSale.ItemCart = class {
             // const show = me.$cart_container.is(':visible');
             // me.toggle_customer_info(show);
         });
-        /*
-                this.$cart_items_wrapper.on('click', '.cart-item-wrapper', function () {
-                    const $cart_item = $(this);
 
-                    me.toggle_item_highlight(this);
+        this.$cart_items_wrapper.on('click', '.cart-item-wrapper', function () {
+            const $cart_item = $(this);
 
-                    const payment_section_hidden = !me.$totals_section.find('.edit-cart-btn').is(':visible');
-                    if (!payment_section_hidden) {
-                        // payment section is visible
-                        // edit cart first and then open item details section
-                        me.$totals_section.find(".edit-cart-btn").click();
-                    }
+            me.toggle_item_highlight(this);
 
-                    const item_row_name = unescape($cart_item.attr('data-row-name'));
-                    me.events.cart_item_clicked({name: item_row_name});
-                    this.numpad_value = '';
-                });
-        */
+            const payment_section_hidden = !me.$totals_section.find('.edit-cart-btn').is(':visible');
+            if (!payment_section_hidden) {
+                // payment section is visible
+                // edit cart first and then open item details section
+                me.$totals_section.find(".edit-cart-btn").click();
+            }
+
+            const item_row_name = unescape($cart_item.attr('data-row-name'));
+            me.events.cart_item_clicked({name: item_row_name});
+            this.numpad_value = '';
+        });
+
         this.$component.on('click', '.checkout-btn', function () {
             if ($(this).attr('style').indexOf('--blue-500') == -1) return;
 
             me.wrapper.find('.customer-cart-container').css('grid-column', 'span 5 / span 5');
             me.events.checkout();
             me.toggle_checkout_btn(false);
-            me.toggle_selector(false);
 
             me.allow_discount_change && me.$add_discount_elem.removeClass("d-none");
         });
