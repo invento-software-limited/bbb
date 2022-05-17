@@ -328,13 +328,12 @@ erpnext.PointOfSale.ItemCart = class {
 
     toggle_item_highlight(item) {
         const $cart_item = $(item);
-        const item_is_highlighted = $cart_item.attr("style") == "background-color:var(--gray-50);";
-
+        const item_is_highlighted = $cart_item.attr("style") == 'background-color: var(--blue-100);';
         if (!item || item_is_highlighted) {
             this.item_is_selected = false;
             this.$cart_container.find('.cart-item-wrapper').css("background-color", "");
         } else {
-            $cart_item.css("background-color", "var(--gray-50)");
+            $cart_item.css("background-color", "var(--blue-100)");
             this.item_is_selected = true;
             this.$cart_container.find('.cart-item-wrapper').not(item).css("background-color", "");
         }
