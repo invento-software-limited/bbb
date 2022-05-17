@@ -115,8 +115,8 @@ erpnext.PointOfSale.ItemSelector = class {
 									<span class="indicator-pill whitespace-nowrap ${indicator_color}">${qty_to_display}</span>
 								</div>
 					<div class="item-display">
-								<div class="item-name">
-									${frappe.ellipsis(item.item_name, 18)}
+								<div class="item-name" style="margin-top: 29px">
+									${frappe.ellipsis(item.item_name, 40)}
 								</div>
 							</div>`;
 			
