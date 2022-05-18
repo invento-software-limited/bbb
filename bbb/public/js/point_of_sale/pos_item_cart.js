@@ -467,6 +467,12 @@ erpnext.PointOfSale.ItemCart = class {
                                 </a>
                             </li>
                             <li>
+                                <a class="grey-link dropdown-item" href="#" id="reset_cart">
+                    
+                                    <span class="menu-item-label" data-label="Reset Cart"><span class="alt-underline">R</span>eset Cart</span>
+                                </a>
+                            </li>
+                            <li>
                                 <a class="grey-link dropdown-item toggle_recent_order-1" href="#" id="toggle_recent_order">
                     
                                     <span class="menu-item-label" data-label="Toggle Sidebar"><span class="alt-underline">T</span>oggle Recent Orders</span>

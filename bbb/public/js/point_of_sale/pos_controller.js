@@ -171,6 +171,9 @@ erpnext.PointOfSale.Controller = class {
             e.preventDefault();
             me.open_form_view();
         });
+		$('#reset_cart').bind('click', function (e) {
+			location.reload();
+        });
         $('#toggle_recent_order').bind('click', function (e) {
             e.preventDefault();
             me.toggle_recent_order();
@@ -778,7 +781,8 @@ erpnext.PointOfSale.Controller = class {
 
 				if (this.is_current_item_being_edited(item_row) || from_selector) {
 					await frappe.model.set_value(item_row.doctype, item_row.name, field, value);
-					this.update_cart_html(item_row);
+					// this.update_cart_html(item_row);
+					this.update_rounded_total(item_row)
 				}
 				this.insert_search_product_log(item_code, item_row.title)
 
@@ -811,7 +815,7 @@ erpnext.PointOfSale.Controller = class {
 
 				await this.trigger_new_item_events(item_row);
 
-				this.update_cart_html(item_row);
+				// this.update_cart_html(item_row);
 
 				if (this.item_details.$component.is(':visible'))
 					this.edit_item_details_of(item_row);
@@ -828,6 +832,7 @@ erpnext.PointOfSale.Controller = class {
 						item_code: item_code
 					})
 				}
+				this.update_rounded_total(item_row)
 				this.insert_search_product_log(item_code, item_row.title);
 			}
 
@@ -840,7 +845,9 @@ erpnext.PointOfSale.Controller = class {
 	}
 
     update_rounded_total(item_row) {
-        let grand_total = this.frm.doc.grand_total
+		let doc = this.frm.doc
+        let grand_total = doc.grand_total
+		let payments = doc.payments
         frappe.call({
             method: 'bbb.bbb.controllers.utils.pos_invoice_rounded_total',
             args: {
@@ -853,12 +860,15 @@ erpnext.PointOfSale.Controller = class {
 
                 // frappe.dom.unfreeze();
                 // let data = r.message
+                frappe.model.set_value(this.frm.doctype, this.frm.docname, 'grand_total', r.message.rounded_total);
                 frappe.model.set_value(this.frm.doctype, this.frm.docname, 'rounded_total', r.message.rounded_total);
                 frappe.model.set_value(this.frm.doctype, this.frm.docname, 'rounding_adjustment', r.message.rounding_adjustment);
                 frappe.model.set_value(this.frm.doctype, this.frm.docname, 'base_rounded_total', r.message.rounded_total);
                 frappe.model.set_value(this.frm.doctype, this.frm.docname, 'base_rounding_adjustment', r.message.rounding_adjustment);
                 frappe.model.set_value(this.frm.doctype, this.frm.docname, 'paid_amount', r.message.rounded_total);
                 frappe.model.set_value(this.frm.doctype, this.frm.docname, 'base_paid_amount', r.message.rounded_total);
+				payments[0].amount = r.message.rounded_total
+				payments[0].base_amount = r.message.rounded_total
 
                 this.update_cart_html(item_row);
                 // console.log(this.wrapper.find('.pay-amount')[0]);
@@ -866,7 +876,7 @@ erpnext.PointOfSale.Controller = class {
                 //     console.log(this);
                 // })
                 this.frm.refresh(this.frm.doc.name);
-                frappe.dom.unfreeze();
+                // frappe.dom.unfreeze();
 
             },
         })

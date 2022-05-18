@@ -110,9 +110,13 @@ doc_events = {
         "after_insert": "bbb.bbb.item_price_list.after_insert_or_on_update",
         "on_update": "bbb.bbb.item_price_list.after_insert_or_on_update",
     },
-    # "POS Invoice": {
-    #     "after_insert": "bbb.bbb.pos_invoice.after_insert",
+    # "Sales Invoice": {
+    #     "before_submit": "bbb.bbb.pos_invoice.before_submit",
     # },
+
+    "POS Invoice": {
+        "after_insert": "bbb.bbb.pos_invoice.after_insert"
+    },
 
 }
 jenv = {
