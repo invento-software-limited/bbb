@@ -57,6 +57,7 @@
    "label": "Email"
   },
   {
+   "fetch_from": "product.item_name",
    "fieldname": "product_name",
    "fieldtype": "Data",
    "in_list_view": 1,
@@ -101,9 +102,9 @@
  ],
  "index_web_pages_for_search": 1,
  "links": [],
- "modified": "2022-05-14 23:15:40.935123",
+ "modified": "2022-05-22 16:36:09.712242",
  "modified_by": "Administrator",
- "module": "BBB",
+ "module": "Bbb",
  "name": "Product Search Log",
  "name_case": "Title Case",
  "owner": "Administrator",

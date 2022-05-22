@@ -754,6 +754,7 @@ erpnext.PointOfSale.Controller = class {
 		let item_row = undefined;
 		try {
 			let {field, value, item, item_quantity} = args;
+			console.log(item)
 			const {item_code, batch_no, serial_no, uom, rate, mrp, title, update_rules} = item;
 
 			// if (this.frm.doc.customer) {
@@ -771,6 +772,7 @@ erpnext.PointOfSale.Controller = class {
 					let objIndex = this.item_list.findIndex((obj => obj.item_code === item_code));
 					this.item_list[objIndex].item_quantity = this.item_list[objIndex].item_quantity + 1;
 				}
+
 				if (field === 'qty')
 					value = flt(value);
 
@@ -784,11 +786,15 @@ erpnext.PointOfSale.Controller = class {
 					// this.update_cart_html(item_row);
 					this.update_rounded_total(item_row)
 				}
-				this.insert_search_product_log(item_code, item_row.title)
+				this.insert_search_product_log(item_code)
 
 			} else {
 				if (!this.frm.doc.customer)
 					return this.raise_customer_selection_alert();
+
+
+				if (!this.frm.doc.served_by)
+					return this.raise_served_by_selection_alert();
 
 				// const { item_code, batch_no, serial_no, rate } = item;
 
@@ -833,7 +839,7 @@ erpnext.PointOfSale.Controller = class {
 					})
 				}
 				this.update_rounded_total(item_row)
-				this.insert_search_product_log(item_code, item_row.title);
+				this.insert_search_product_log(item_code);
 			}
 
 		} catch (error) {
@@ -867,6 +873,7 @@ erpnext.PointOfSale.Controller = class {
                 frappe.model.set_value(this.frm.doctype, this.frm.docname, 'base_rounding_adjustment', r.message.rounding_adjustment);
                 frappe.model.set_value(this.frm.doctype, this.frm.docname, 'paid_amount', r.message.rounded_total);
                 frappe.model.set_value(this.frm.doctype, this.frm.docname, 'base_paid_amount', r.message.rounded_total);
+                frappe.model.set_value(this.frm.doctype, this.frm.docname, 'outstanding_amount', 0);
 				payments[0].amount = r.message.rounded_total
 				payments[0].base_amount = r.message.rounded_total
 
@@ -882,7 +889,7 @@ erpnext.PointOfSale.Controller = class {
         })
     }
 
-    insert_search_product_log(item_code, item_name) {
+    insert_search_product_log(item_code) {
         // console.log(this.frm.doc);
         // console.log(item_code, item_name);
 
@@ -895,8 +902,7 @@ erpnext.PointOfSale.Controller = class {
             "location": this.frm.doc.pos_profile,
 			"served_by": this.frm.doc.served_by,
 			"company": this.frm.doc.company,
-            "product": item_code,
-            "product_name": item_name.replace('%20', ' ')
+            "product": item_code
 
         }).then(function (doc) {
             // console.log(doc);
