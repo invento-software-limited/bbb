@@ -271,7 +271,7 @@ erpnext.PointOfSale.ItemCart = class {
 
                 let shortcut_key = `ctrl+${frappe.scrub(String(btn))[0]}`;
                 if (btn === 'Delete') shortcut_key = 'ctrl+backspace';
-                if (btn === 'Remove') shortcut_key = 'shift+ctrl+backspace'
+                if (btn === 'Remove') shortcut_key = 'shift+ctrl+backspace';
                 if (btn === '.') shortcut_key = 'ctrl+>';
 
                 // to account for fieldname map
@@ -582,19 +582,16 @@ erpnext.PointOfSale.ItemCart = class {
                 placeholder: (discount ? discount + '%' : __('Enter discount percentage.')),
                 input_class: 'input-xs',
                 onchange: function () {
-                    if (flt(this.value) != 0) {
-                        frappe.model.set_value(frm.doc.doctype, frm.doc.name, 'additional_discount_percentage', flt(this.value));
-                        me.hide_discount_control(this.value);
-                    } else {
-                        frappe.model.set_value(frm.doc.doctype, frm.doc.name, 'additional_discount_percentage', 0);
-                        me.$add_discount_elem.css({
-                            'border': '1px dashed var(--gray-500)',
-                            'padding': 'var(--padding-sm) var(--padding-md)'
-                        });
-                        me.$add_discount_elem.html(`${me.get_discount_icon()} Add Discount`);
-                        me.discount_field = undefined;
-                    }
+                frappe.run_serially([
+                        ()=> me.update_additional_discount(me, this, frm),
+                    ])
+
+                    const grand_total = cint(frappe.sys_defaults.disable_rounded_total) ? frm.doc.grand_total : frm.doc.rounded_total;
+                    me.events.set_5_basis_rounded_total(grand_total)
+                    console.log(me.events.base_rounded_total);
+                    console.log($('.payment_amount_value').html(format_currency(me.events.base_rounded_total, frm.doc.currency)));
                 },
+
             },
             parent: this.$add_discount_elem.find('.add-discount-field'),
             render_input: true,
@@ -603,6 +600,21 @@ erpnext.PointOfSale.ItemCart = class {
         this.discount_field.set_focus();
     }
 
+    update_additional_discount(me, discount_section, frm){
+        if (flt(discount_section.value) != 0) {
+            frappe.model.set_value(frm.doc.doctype, frm.doc.name, 'additional_discount_percentage', flt(discount_section.value));
+            me.hide_discount_control(discount_section.value);
+            this.events.set_initial_paid_amount(this.events.base_rounded_total)
+        } else {
+            frappe.model.set_value(frm.doc.doctype, frm.doc.name, 'additional_discount_percentage', 0);
+            me.$add_discount_elem.css({
+                'border': '1px dashed var(--gray-500)',
+                'padding': 'var(--padding-sm) var(--padding-md)'
+            });
+            me.$add_discount_elem.html(`${me.get_discount_icon()} Add Discount`);
+            me.discount_field = undefined;
+        }
+    }
     hide_discount_control(discount) {
         if (!discount) {
             this.$add_discount_elem.css({'padding': '0px', 'border': 'none'});
@@ -718,9 +730,12 @@ erpnext.PointOfSale.ItemCart = class {
 
         this.render_net_total(frm.doc.net_total);
         const grand_total = cint(frappe.sys_defaults.disable_rounded_total) ? frm.doc.grand_total : frm.doc.rounded_total;
-        this.render_grand_total(grand_total);
+        this.events.set_5_basis_rounded_total(grand_total);
+        let base_rounded_total = this.events.get_5_basis_rounded_total();
+        this.events.set_initial_paid_amount(base_rounded_total);
+        this.render_grand_total(base_rounded_total);
+        this.render_taxes(frm.doc.taxes)
 
-        this.render_taxes(frm.doc.taxes);
     }
 
     render_net_total(value) {

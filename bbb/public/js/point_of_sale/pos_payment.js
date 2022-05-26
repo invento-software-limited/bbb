@@ -210,8 +210,11 @@ erpnext.PointOfSale.Payment = class {
 			// for setting correct amount after loyalty points are redeemed
 			const default_mop = locals[cdt][cdn];
 			const mode = default_mop.mode_of_payment.replace(/ +/g, "_").toLowerCase();
+
+			// this[`${mode}_control`].set_value(this.events.get_initial_paid_amount());
 			if (this[`${mode}_control`] && this[`${mode}_control`].get_value() != default_mop.amount) {
-				this[`${mode}_control`].set_value(default_mop.amount);
+				this[`${mode}_control`].set_value(this.events.get_5_basis_rounded_total(default_mop.amount));
+				// this[`${mode}_control`].set_value(this.events.get_5_basis_rounded_total());
 			}
 		});
 	}
@@ -245,7 +248,9 @@ erpnext.PointOfSale.Payment = class {
 
 	auto_set_remaining_amount() {
 		const doc = this.events.get_frm().doc;
+
 		const grand_total = cint(frappe.sys_defaults.disable_rounded_total) ? doc.grand_total : doc.rounded_total;
+		// let rounded_data = this.events.get_5_basis_rounded(grand_total)
 		const remaining_amount = grand_total - doc.paid_amount;
 		const current_value = this.selected_mode ? this.selected_mode.get_value() : undefined;
 		if (!current_value && remaining_amount > 0 && this.selected_mode) {
@@ -334,7 +339,7 @@ erpnext.PointOfSale.Payment = class {
 		const doc = this.events.get_frm().doc;
 		const payments = doc.payments;
 		const currency = doc.currency;
-
+		// console.log(payments);
 		this.$payment_modes.html(`${
 			payments.map((p, i) => {
 				const mode = p.mode_of_payment.replace(/ +/g, "_").toLowerCase();
@@ -357,6 +362,7 @@ erpnext.PointOfSale.Payment = class {
 		payments.forEach(p => {
 			const mode = p.mode_of_payment.replace(/ +/g, "_").toLowerCase();
 			const me = this;
+			// console.log('mode ', mode)
 			this[`${mode}_control`] = frappe.ui.form.make_control({
 				df: {
 					label: p.mode_of_payment,
@@ -364,12 +370,15 @@ erpnext.PointOfSale.Payment = class {
 					placeholder: __('Enter {0} amount.', [p.mode_of_payment]),
 					onchange: function() {
 						const current_value = frappe.model.get_value(p.doctype, p.name, 'amount');
+						console.log("current_value", current_value, this.value)
 						if (current_value != this.value) {
+							let rounded_amount = me.events.get_5_basis_rounded(this.value)
 							frappe.model
-								.set_value(p.doctype, p.name, 'amount', flt(this.value))
+								.set_value(p.doctype, p.name, 'amount', rounded_amount)
 								.then(() => me.update_totals_section())
+							// me.events.set_initial_paid_amount(this.value);
 
-							const formatted_currency = format_currency(this.value, currency);
+							const formatted_currency = format_currency(rounded_amount, currency);
 							me.$payment_modes.find(`.${mode}-amount`).html(formatted_currency);
 						}
 					}
@@ -509,22 +518,29 @@ erpnext.PointOfSale.Payment = class {
 
 	update_totals_section(doc) {
 		if (!doc) doc = this.events.get_frm().doc;
-		const paid_amount = doc.paid_amount;
+		const frm = this.events.get_frm();
+		const paid_amount = doc.paid_amount
 		const grand_total = cint(frappe.sys_defaults.disable_rounded_total) ? doc.grand_total : doc.rounded_total;
-		const remaining = grand_total - doc.paid_amount;
+        let base_rounded_total = this.events.get_5_basis_rounded_total()
+		const remaining = base_rounded_total - paid_amount;
 		const change = doc.change_amount || remaining <= 0 ? -1 * remaining : undefined;
+		// if(remaining > 0){
+		// 	frappe.model.set_value(doc, frm.docname, 'outstanding_total', remaining);
+		// }else if(change > 0){
+		// 	frappe.model.set_value(doc, frm.docname, 'change_amount', change);
+		// 	frappe.model.set_value(doc, frm.docname, 'base_change_amount', change);
+		// }
 		const currency = doc.currency;
 		const label = change ? __('Change') : __('To Be Paid');
-
 		this.$totals.html(
 			`<div class="col">
 				<div class="total-label">${__('Grand Total')}</div>
-				<div class="value">${format_currency(grand_total, currency)}</div>
+				<div class="value">${format_currency(base_rounded_total, currency)}</div>
 			</div>
 			<div class="seperator-y"></div>
 			<div class="col">
 				<div class="total-label">${__('Paid Amount')}</div>
-				<div class="value">${format_currency(paid_amount, currency)}</div>
+				<div class="value payment_amount_value">${format_currency(paid_amount, currency)}</div>
 			</div>
 			<div class="seperator-y"></div>
 			<div class="col">

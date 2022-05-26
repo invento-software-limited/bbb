@@ -12,29 +12,44 @@ def after_insert(doc, method):
         adjustment = float_number - divisible_number
         # print(type(doc.rounded_total), " ",doc.rounded_total, " ",type(divisible_number), " ",divisible_number)
         # print(float(doc.rounded_total) == float(divisible_number), " == ", float(doc.rounded_total) == float(divisible_number + 5))
+        payments = doc.payments
+        paid_amount = 0
+        for payment in payments:
+            paid_amount += payment.amount
+
         if float(doc.rounded_total) == float(divisible_number) or float(doc.rounded_total) == float(
                 divisible_number + 5):
             pass
         elif adjustment < 2.50:
             rounding_adjustment = -(adjustment) if adjustment != 0.0 else adjustment
+            change_amount = (paid_amount - divisible_number) if (paid_amount - divisible_number) > 0 else 0
+            outstanding_amount = (divisible_number - paid_amount) if (divisible_number - paid_amount) > 0 else 0
             in_words = money_in_words(divisible_number)
             frappe.db.set_value("POS Invoice", doc.name, "in_words", in_words)
             frappe.db.set_value("POS Invoice", doc.name, "grand_total", divisible_number)
             frappe.db.set_value("POS Invoice", doc.name, "rounded_total", divisible_number)
-            frappe.db.set_value("POS Invoice", doc.name, "paid_amount", divisible_number)
-            frappe.db.set_value("POS Invoice", doc.name, "base_paid_amount", divisible_number)
+            frappe.db.set_value("POS Invoice", doc.name, "paid_amount", paid_amount)
+            frappe.db.set_value("POS Invoice", doc.name, "base_paid_amount", paid_amount)
+            frappe.db.set_value("POS Invoice", doc.name, "change_amount", change_amount)
+            frappe.db.set_value("POS Invoice", doc.name, "base_change_amount", change_amount)
+            frappe.db.set_value("POS Invoice", doc.name, "outstanding_amount", outstanding_amount)
             frappe.db.set_value("POS Invoice", doc.name, "rounding_adjustment", rounding_adjustment)
             frappe.db.set_value("POS Invoice", doc.name, "base_rounded_total", divisible_number)
             frappe.db.set_value("POS Invoice", doc.name, "base_rounding_adjustment", rounding_adjustment)
 
         elif adjustment > 2.49:
             rounding_adjustment = divisible_number - float_number
+            change_amount = (paid_amount - (divisible_number + 5)) if (paid_amount - (divisible_number + 5)) > 0 else 0
+            outstanding_amount = (divisible_number - paid_amount) if (divisible_number - paid_amount) > 0 else 0
             in_words = money_in_words(divisible_number + 5)
             frappe.db.set_value("POS Invoice", doc.name, "in_words", in_words)
             frappe.db.set_value("POS Invoice", doc.name, "grand_total", divisible_number + 5)
             frappe.db.set_value("POS Invoice", doc.name, "rounded_total", divisible_number + 5)
-            frappe.db.set_value("POS Invoice", doc.name, "paid_amount", divisible_number + 5)
-            frappe.db.set_value("POS Invoice", doc.name, "base_paid_amount", divisible_number + 5)
+            frappe.db.set_value("POS Invoice", doc.name, "paid_amount", paid_amount)
+            frappe.db.set_value("POS Invoice", doc.name, "base_paid_amount", paid_amount)
+            frappe.db.set_value("POS Invoice", doc.name, "change_amount", change_amount)
+            frappe.db.set_value("POS Invoice", doc.name, "base_change_amount", change_amount)
+            frappe.db.set_value("POS Invoice", doc.name, "outstanding_amount", outstanding_amount)
             frappe.db.set_value("POS Invoice", doc.name, "rounding_adjustment", rounding_adjustment)
             frappe.db.set_value("POS Invoice", doc.name, "base_rounded_total", divisible_number + 5)
             frappe.db.set_value("POS Invoice", doc.name, "base_rounding_adjustment", rounding_adjustment)
@@ -119,3 +134,19 @@ def get_pos_cached_data():
         return data
     else:
         return {}
+
+
+@frappe.whitelist()
+def clear_cached_data():
+    frappe.cache().delete_value('pos_items')
+    frappe.cache().delete_value('pos_customer')
+    frappe.cache().delete_value('pos_ignore_pricing_rule')
+    frappe.cache().delete_value('pos_items')
+
+
+@frappe.whitelist()
+def remove_single_item_from_cache():
+    frappe.cache().delete_value('pos_items')
+    frappe.cache().delete_value('pos_customer')
+    frappe.cache().delete_value('pos_ignore_pricing_rule')
+    frappe.cache().delete_value('pos_items')
