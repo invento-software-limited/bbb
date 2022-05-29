@@ -460,12 +460,7 @@ erpnext.PointOfSale.ItemCart = class {
                                 class="icon icon-sm">           <use xlink:href="#icon-dot-horizontal">           </use>          </svg>         </span>        </span>
                         </button>
                         <ul class="dropdown-menu dropdown-menu-right" role="menu">
-                            <li>
-                                <a class="grey-link dropdown-item" href="#" id="open_form_view">
-                    
-                                    <span class="menu-item-label" data-label="Reset Customizations"><span class="alt-underline">O</span>pen Form View</span>
-                                </a>
-                            </li>
+
                             <li>
                                 <a class="grey-link dropdown-item" href="#" id="reset_cart">
                     
