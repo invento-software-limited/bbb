@@ -802,7 +802,7 @@ erpnext.PointOfSale.Controller = class {
                 if (this.is_current_item_being_edited(item_row) || from_selector) {
                     await frappe.model.set_value(item_row.doctype, item_row.name, field, value);
 
-                    // this.update_rounded_total(item_row)
+                    this.update_rounded_total(item_row)
                     this.update_cart_html(item_row);
                     this.update_paid_amount()
                     this.frm.doc.paid_amount = this.base_rounded_total;
@@ -841,9 +841,9 @@ erpnext.PointOfSale.Controller = class {
                     await this.check_stock_availability(item_row, value, this.frm.doc.set_warehouse);
 
                 await this.trigger_new_item_events(item_row);
-                // this.update_rounded_total(item_row)
                 this.update_cart_html(item_row);
                 this.update_paid_amount()
+                this.update_rounded_total(item_row)
                 // this.frm.doc.paid_amount = this.base_rounded_total;
 
                 // if (this.item_details.$component.is(':visible'))
@@ -861,8 +861,7 @@ erpnext.PointOfSale.Controller = class {
                 // 		item_code: item_code
                 // 	})
                 // }
-                // await this.update_rounded_total(item_row)
-                await this.insert_search_product_log(item_code);
+                this.insert_search_product_log(item_code);
             }
 
         } catch (error) {
@@ -893,7 +892,7 @@ erpnext.PointOfSale.Controller = class {
         let doc = this.frm.doc
         let grand_total = doc.grand_total
         let payments = doc.payments
-        let rounded_data = this.get_5_basis_rounded(grand_total)
+        let rounded_data = await this.get_5_basis_rounded(grand_total)
         if (rounded_data) {
             await frappe.model.set_value(this.frm.doctype, this.frm.docname, 'grand_total', rounded_data.rounded_total);
             await frappe.model.set_value(this.frm.doctype, this.frm.docname, 'rounded_total', rounded_data.rounded_total);
@@ -905,8 +904,8 @@ erpnext.PointOfSale.Controller = class {
             await frappe.model.set_value(this.frm.doctype, this.frm.docname, 'outstanding_amount', 0);
             await frappe.model.set_value(this.frm.doctype, this.frm.docname, 'change_amount', 0);
             await frappe.model.set_value(this.frm.doctype, this.frm.docname, 'base_change_amount', 0);
-            payments[0].amount = rounded_data.rounded_total
-            payments[0].base_amount = rounded_data.rounded_total
+            payments[0].amount = rounded_data.rounded_total;
+            payments[0].base_amount = rounded_data.rounded_total;
 
             // await this.frm.script_manager.trigger('grand_total', item_row.doctype, item_row.name);
             // await this.frm.script_manager.trigger('rounded_total', item_row.doctype, item_row.name);
@@ -916,9 +915,8 @@ erpnext.PointOfSale.Controller = class {
             // await this.frm.script_manager.trigger('rounding_adjustment', item_row.doctype, item_row.name);
             // await this.frm.script_manager.trigger('rounding_adjustment', item_row.doctype, item_row.name);
             // await this.frm.script_manager.trigger('qty', item_row.doctype, item_row.name);
-            this.frm.refresh(doc.name);
-            this.update_cart_html(item_row);
-            frappe.dom.unfreeze();
+            await this.frm.refresh(doc.name);
+            // await this.update_cart_html(item_row);
         }
         /*frappe.call({
             method: 'bbb.bbb.controllers.utils.pos_invoice_rounded_total',
