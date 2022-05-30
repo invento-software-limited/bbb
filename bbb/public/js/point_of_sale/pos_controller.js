@@ -1185,7 +1185,19 @@ erpnext.PointOfSale.Controller = class {
         });
     }
 
-    set_5_basis_rounded_total(number) {
+    async remove_single_item_from_cached(me){
+        frappe.call({
+            method: 'bbb.bbb.pos_invoice.get_pos_cached_data',
+            callback: function (r) {
+                if (!r.exc) {
+                    me.cached_data = r.message;
+                    console.log(me.cached_data)
+                }
+            }
+        });
+    }
+
+    async set_5_basis_rounded_total(number) {
         // rounding : M rounds to 5 basis ( 12.49 will be 10 and 12.5 will  be 15)
         let data = undefined
         if (number == undefined || number == null) {
