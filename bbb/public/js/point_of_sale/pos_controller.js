@@ -396,10 +396,21 @@ erpnext.PointOfSale.Controller = class {
                 },
 
                 submit_invoice: () => {
-                    frappe.run_serially([
-                        () => this.get_naming_series(this),
-                        () => this.process_submit()
-                    ]);
+                    let grand_total = this.$components_wrapper.find('.payment_grand_total_value').attr('grand_total_val')
+                    let paid_amount = this.$components_wrapper.find('.payment_amount_value').attr('paid_amount_val')
+                    if((grand_total-paid_amount) > 0){
+                        frappe.dom.unfreeze();
+                        frappe.show_alert({
+                            message: __('Partial paid not allow'),
+                            indicator: 'red'
+                        });
+                        frappe.utils.play_sound("error");
+                    }else {
+                        frappe.run_serially([
+                            () => this.get_naming_series(this),
+                            () => this.process_submit()
+                        ]);
+                    }
                 },
                 set_5_basis_rounded_total: (grand_total) => this.set_5_basis_rounded_total(grand_total),
                 get_5_basis_rounded_total: () => this.base_rounded_total,

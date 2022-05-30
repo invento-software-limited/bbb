@@ -370,7 +370,6 @@ erpnext.PointOfSale.Payment = class {
 					placeholder: __('Enter {0} amount.', [p.mode_of_payment]),
 					onchange: function() {
 						const current_value = frappe.model.get_value(p.doctype, p.name, 'amount');
-						console.log("current_value", current_value, this.value)
 						if (current_value != this.value) {
 							let rounded_amount = me.events.get_5_basis_rounded(this.value)
 							frappe.model
@@ -535,12 +534,12 @@ erpnext.PointOfSale.Payment = class {
 		this.$totals.html(
 			`<div class="col">
 				<div class="total-label">${__('Grand Total')}</div>
-				<div class="value">${format_currency(base_rounded_total, currency)}</div>
+				<div class="value payment_grand_total_value" grand_total_val="${base_rounded_total}">${format_currency(base_rounded_total, currency)}</div>
 			</div>
 			<div class="seperator-y"></div>
 			<div class="col">
 				<div class="total-label">${__('Paid Amount')}</div>
-				<div class="value payment_amount_value">${format_currency(paid_amount, currency)}</div>
+				<div class="value payment_amount_value" paid_amount_val="${paid_amount}">${format_currency(paid_amount, currency)}</div>
 			</div>
 			<div class="seperator-y"></div>
 			<div class="col">
