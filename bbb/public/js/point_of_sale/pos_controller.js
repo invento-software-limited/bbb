@@ -783,7 +783,6 @@ erpnext.PointOfSale.Controller = class {
         let item_row = undefined;
         try {
             let {field, value, item, item_quantity} = args;
-            console.log(item)
             const {item_code, batch_no, serial_no, uom, rate, mrp, title, update_rules} = item;
 
             // if (this.frm.doc.customer) {
@@ -813,10 +812,10 @@ erpnext.PointOfSale.Controller = class {
                 if (this.is_current_item_being_edited(item_row) || from_selector) {
                     await frappe.model.set_value(item_row.doctype, item_row.name, field, value);
 
-                    this.update_rounded_total(item_row)
+
                     this.update_cart_html(item_row);
                     this.update_paid_amount()
-                    this.frm.doc.paid_amount = this.base_rounded_total;
+                    this.update_rounded_total(item_row)
                 }
                 await this.insert_search_product_log(item_code)
 
@@ -892,8 +891,8 @@ erpnext.PointOfSale.Controller = class {
         .set_value(payments[0].doctype, payments[0].name, 'amount', this.base_rounded_total)
         .then(() => this.payment.update_totals_section(this.frm.doc))
 
-        let base_rounded_total = this.events.get_5_basis_rounded_total();
-        this.events.set_initial_paid_amount(base_rounded_total);
+        let base_rounded_total = this.get_5_basis_rounded_total();
+        this.set_initial_paid_amount(base_rounded_total);
     }
 
     async update_rounded_total(item_row = undefined) {
