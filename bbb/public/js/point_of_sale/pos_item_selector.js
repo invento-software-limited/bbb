@@ -112,7 +112,8 @@ erpnext.PointOfSale.ItemSelector = class {
 
 					return `
 						<div class="item-qty-pill">
-									<span class="indicator-pill whitespace-nowrap ${indicator_color}">${qty_to_display}</span>
+<!--									<span class="indicator-pill whitespace-nowrap ${indicator_color}">${qty_to_display}</span>-->
+									<span class="indicator-pill whitespace-nowrap ${indicator_color}"></span>
 								</div>
 					<div class="item-display">
 								<div class="item-name" style="margin-top: 29px">
