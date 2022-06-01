@@ -247,7 +247,7 @@ erpnext.PointOfSale.ItemCart = class {
 
         this.$totals_section.on('click', '.edit-cart-btn', () => {
 
-            me.wrapper.find('.customer-cart-container').css('grid-column', 'span 6 / span 6');
+            me.wrapper.find('.customer-cart-container').css('grid-column', 'span 7 / span 7');
             this.events.edit_cart();
             this.toggle_checkout_btn(true);
         });
@@ -305,7 +305,7 @@ erpnext.PointOfSale.ItemCart = class {
             const item_cart_visible = this.$component.is(":visible");
             const checkout_btn_invisible = !this.$totals_section.find('.checkout-btn').is('visible');
             if (item_cart_visible && checkout_btn_invisible) {
-                this.wrapper.find('.customer-cart-container').css('grid-column', 'span 6 / span 6')
+                this.wrapper.find('.customer-cart-container').css('grid-column', 'span 7 / span 7')
                 this.$component.find(".edit-cart-btn").click();
             }
         });
@@ -437,7 +437,7 @@ erpnext.PointOfSale.ItemCart = class {
                         frappe.run_serially([
                             () => me.ignore_pricing_rule = this.value,
                             () => me.update_pricing_discount_section(),
-                            () => me.events.set_cache_data({'pos_ignore_pricing_rule': this.value}),
+                            // () => me.events.set_cache_data({'pos_ignore_pricing_rule': this.value}),
                             () => me.ignore_pricing_discount(me, this.value),
                         ]);
                     }

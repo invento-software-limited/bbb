@@ -359,7 +359,7 @@ erpnext.PointOfSale.ItemSelector = class {
 			this.$component.css('grid-column', 'span 2 / span 2');
 
 		minimize ?
-			this.$items_container.css('grid-template-columns', 'repeat(3, minmax(0, 1fr))') :
+			this.$items_container.css('grid-template-columns', 'repeat(2, minmax(0, 1fr))') :
 			this.$items_container.css('grid-template-columns', 'repeat(1, minmax(0, 1fr))');
 	}
 

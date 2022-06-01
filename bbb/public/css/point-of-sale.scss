@@ -94,7 +94,7 @@
 
 	> .items-selector {
 		@extend .pos-card;
-		grid-column: span 4 / span 4;
+		grid-column: span 3 / span 3;
 		display: flex;
 		flex-direction: column;
 		overflow: hidden;
@@ -129,7 +129,7 @@
 
 		> .items-container {
 			display: grid;
-			grid-template-columns: repeat(3, minmax(0, 1fr));
+			grid-template-columns: repeat(2, minmax(0, 1fr));
 			gap: var(--margin-lg);
 			padding: var(--padding-lg);
 			padding-top: var(--padding-xs);
@@ -202,7 +202,7 @@
 	}
 
 	> .customer-cart-container {
-		grid-column: span 6 / span 6;
+		grid-column: span 7 / span 7;
 		display: flex;
 		flex-direction: column;
 
