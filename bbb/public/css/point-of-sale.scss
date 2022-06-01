@@ -642,6 +642,22 @@
 						//flex: 1 1 20px;
 						flex: 1 0 0;
 					}
+					> .discount-header {
+						display: flex;
+						margin-right: var(--margin-lg);
+						text-align: center;
+						justify-content: center;
+						//flex: 1 1 20px;
+						flex: 1 0 0;
+					}
+					> .after-discount-header {
+						display: flex;
+						margin-right: var(--margin-lg);
+						text-align: center;
+						justify-content: center;
+						//flex: 1 1 20px;
+						flex: 1 0 0;
+					}
 					> .qty-header {
 						display: flex;
 						margin-right: var(--margin-lg);

@@ -91,11 +91,12 @@ erpnext.PointOfSale.ItemCart = class {
 				<div class="abs-cart-container">
 <!--					<div class="cart-label">Item Cart</div>-->
 					<div class="cart-header">
-						<div class="name-header">Item</div>
+						<div class="name-header">Product</div>
 						<div class="mrp-header">MRP</div>
-						<div class="rate-header">Rate</div>
+						<div class="discount-header">Disc</div>
+						<div class="after-discount-header">After Disc</div>
 						<div class="qty-header">Qty</div>
-						<div class="rate-amount-header">Amount</div>
+						<div class="rate-amount-header">Final Amount</div>
 					</div>
 					<div class="cart-items-section"></div>
 					<div class="cart-totals-section"></div>
@@ -860,6 +861,7 @@ erpnext.PointOfSale.ItemCart = class {
             // 	})
             return `
 					<div class="item-row-mrp"><span>${item_data.price_list_rate || 0}</span></div>
+					<div class="item-row-rate"><span>${(item_data.price_list_rate - item_data.rate) || 0}</span></div>
 					<div class="item-row-rate"><span>${item_data.rate || 0}</span></div>
 					<div class="item-row-qty"><span>${item_data.qty || 0}</span></div>
 					<div class="item-row-amount">
