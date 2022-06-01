@@ -529,13 +529,16 @@ erpnext.PointOfSale.Controller = class {
         return frappe.run_serially([
             () => frappe.dom.freeze(),
             () => this.make_sales_invoice_frm(),
+            () => this.set_pricing_rule(),
             () => this.set_pos_profile_data(),
             () => this.set_pos_profile_status(),
             () => this.cart.load_invoice(),
             () => frappe.dom.unfreeze()
         ]);
     }
-
+    set_pricing_rule(){
+        frappe.model.set_value(this.frm.doc.doctype, this.frm.doc.name, 'ignore_pricing_rule', 1);
+    }
     make_sales_invoice_frm() {
         const doctype = 'POS Invoice';
 
@@ -1177,7 +1180,7 @@ erpnext.PointOfSale.Controller = class {
             },
             callback: function (r) {
                 if (!r.exc) {
-                    console.log(r);
+                    // console.log(r);
                 }
             }
         });

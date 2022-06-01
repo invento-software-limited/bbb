@@ -55,12 +55,12 @@ erpnext.PointOfSale.ItemCart = class {
 
         this.$customer_section = this.$customer_header_section.find('.customer-section');
         this.$served_by_section = this.$customer_header_section.find('.served-by-section');
-        this.$pricing_discount_section = this.$customer_header_section.find('.pricing-discount-section');
+        this.$pricing_rule_discount_section = this.$customer_header_section.find('.pricing-discount-section');
         this.$menu_section = this.$customer_header_section.find('.menu-section');
 
         this.make_customer_selector();
-        this.make_discount_price_selector();
         this.make_served_by_selector();
+        this.make_discount_price_selector();
         this.make_menu_dropdown();
 
     }
@@ -82,7 +82,7 @@ erpnext.PointOfSale.ItemCart = class {
         const frm = this.events.get_frm();
         frm.set_value('ignore_pricing_rule', 0);
         this.make_discount_price_selector();
-        this.ignore_discount_field.set_focus();
+        this.price_rule_ignore_discount_field.set_focus();
     }
 
     init_cart_components() {
@@ -204,7 +204,7 @@ erpnext.PointOfSale.ItemCart = class {
         this.$served_by_section.on('click', '.reset-served-by-btn', function () {
             me.reset_served_by_selector();
         });
-        this.$pricing_discount_section.on('click', '.reset-ignore_pricing-rule-btn', function () {
+        this.$pricing_rule_discount_section.on('click', '.reset-ignore_pricing-rule-btn', function () {
             me.reset_ignore_discount_selector();
         });
 
@@ -400,6 +400,7 @@ erpnext.PointOfSale.ItemCart = class {
                 get_query: () => query,
                 onchange: function () {
                     if (this.value) {
+                        frappe.dom.freeze();
                         const frm = me.events.get_frm();
                         frappe.model.set_value(frm.doc.doctype, frm.doc.name, 'served_by', this.value);
                         frm.script_manager.trigger('served_by', frm.doc.doctype, frm.doc.name);
@@ -407,8 +408,8 @@ erpnext.PointOfSale.ItemCart = class {
                             // () => me.check_out_validation(true),
                             () => me.served_by_info = {'served_by': this.value},
                             () => me.events.set_cache_data({'pos_served_by': this.value}),
-                            () => me.update_served_by_section()
-                            // () => frappe.dom.unfreeze()
+                            () => me.update_served_by_section(),
+                            () => frappe.dom.unfreeze()
                         ]);
                     }
                 },
@@ -420,34 +421,68 @@ erpnext.PointOfSale.ItemCart = class {
     }
 
     make_discount_price_selector() {
-        this.$pricing_discount_section.html(`
-			<div class="ignore-pricing-rule-field"></div>
-		`);
         const me = this;
-
-        this.ignore_discount_field = frappe.ui.form.make_control({
-            df: {
-                label: __('Ignore Discount'),
-                fieldtype: 'Select',
-                options: ["Yes", "No"],
-                placeholder: __('Ignore Discount'),
-                default: 'No',
-                onchange: function () {
-                    if (this.value) {
-                        const frm = me.events.get_frm();
-                        frappe.run_serially([
-                            () => me.ignore_pricing_rule = this.value,
-                            () => me.update_pricing_discount_section(),
-                            // () => me.events.set_cache_data({'pos_ignore_pricing_rule': this.value}),
-                            () => me.ignore_pricing_discount(me, this.value),
-                        ]);
-                    }
-                },
-            },
-            parent: this.$pricing_discount_section.find('.ignore-pricing-rule-field'),
-            render_input: true,
-        });
-        this.ignore_discount_field.toggle_label(false);
+        const html = `
+        <div class="ignore-pricing-rule-field">
+            <div class="frappe-control input-max-width" data-fieldtype="Select">
+                <div class="form-group"><div class="clearfix">
+                    <label class="control-label hide" style="padding-right: 0px;">Ignore Discount</label>
+                </div>
+                <div class="control-input-wrapper">
+                    <div class="control-input flex align-center">
+                        <select type="text" id="ignore_pricing_rule" autocomplete="off" class="input-with-feedback form-control ellipsis" maxlength="140" data-fieldtype="Select" placeholder="Ignore Discount">
+                            <option></option>
+                            <option value="Yes">Yes</option>
+                            <option value="No">No</option>
+                       </select>
+                    <div class="select-icon "><svg class="icon  icon-sm" style=""><use class="" href="#icon-select"></use></svg>
+                </div>
+                <div class="placeholder ellipsis text-extra-muted "><span>Ignore Discount</span></div>
+            </div>
+            <div class="control-value like-disabled-input" style="display: none;"></div>
+            <p class="help-box small text-muted"></p>
+        </div>
+        `
+        this.$pricing_rule_discount_section.html(`
+			<div class="ignore-pricing-rule-field">${html}</div>
+		`);
+        $('#ignore_pricing_rule').on('change', function (){
+            frappe.run_serially([
+                // () => me.ignore_pricing_rule = this.value,
+                () => me.update_pricing_rule_discount_section(this.value),
+                // () => me.events.set_cache_data({'pos_ignore_pricing_rule': this.value}),
+                () => me.ignore_pricing_discount(me, this.value),
+                () => frappe.dom.unfreeze(),
+            ]);
+        })
+        // this.price_rule_ignore_discount_field = frappe.ui.form.make_control({
+        //     df: {
+        //         label: __('Ignore Discount'),
+        //         fieldtype: 'Select',
+        //         options: ["", "Yes", "No"],
+        //         placeholder: __('Ignore Discount'),
+        //         default: 'No',
+        //         onchange: function () {
+        //             console.log(this.value)
+        //             if (this.value) {
+        //                 frappe.dom.freeze();
+        //                 console.log("called ..")
+        //                 const frm = me.events.get_frm();
+        //                 frappe.run_serially([
+        //                     // () => me.ignore_pricing_rule = this.value,
+        //                     () => me.update_pricing_rule_discount_section(this.value),
+        //                     // () => me.events.set_cache_data({'pos_ignore_pricing_rule': this.value}),
+        //                     () => me.ignore_pricing_discount(me, this.value),
+        //                     () => frappe.dom.unfreeze(),
+        //                 ]);
+        //
+        //             }
+        //         },
+        //     },
+        //     parent: this.$pricing_rule_discount_section.find('.ignore-pricing-rule-field'),
+        //     render_input: true,
+        // });
+        // this.price_rule_ignore_discount_field.toggle_label(false);
     }
 
 
@@ -508,7 +543,6 @@ erpnext.PointOfSale.ItemCart = class {
             }else{
                 this.ignore_pricing_rule = "No"
             }
-            console.log(this.ignore_pricing_rule);
             resolve();
         });
     }
@@ -630,10 +664,12 @@ erpnext.PointOfSale.ItemCart = class {
         }
     }
 
-    update_pricing_discount_section() {
+    update_pricing_rule_discount_section(ignore_pricing_rule=undefined) {
         const me = this;
-        const ignore_pricing_rule = this.ignore_pricing_rule;
-        this.$pricing_discount_section.html(
+        if(ignore_pricing_rule == undefined){
+            ignore_pricing_rule = this.ignore_pricing_rule;
+        }
+        this.$pricing_rule_discount_section.html(
             `<div class="pricing-discount-details">
                 <div class="pricing-discount-display">
                     <div class="pricing-discount-desc">
@@ -1261,7 +1297,7 @@ erpnext.PointOfSale.ItemCart = class {
         });
         frappe.run_serially([
             () => this.ignore_pricing_rule = pos_ignore_pricing_rule,
-            () => this.update_pricing_discount_section(),
+            () => this.update_pricing_rule_discount_section(),
             // () => this.ignore_pricing_discount(this, pos_ignore_pricing_rule),
         ]);
     }
@@ -1270,7 +1306,7 @@ erpnext.PointOfSale.ItemCart = class {
 			method: 'bbb.bbb.pos_invoice.get_pos_cached_data',
 			callback: function(r) {
 				if (!r.exc) {
-					console.log(r.message);
+					// console.log(r.message);
 					return r.message;
 				}
 			}
@@ -1289,7 +1325,7 @@ erpnext.PointOfSale.ItemCart = class {
             this.update_served_by_section();
         });
         this.fetch_discount_details(frm.doc.ignore_pricing_rule).then(() => {
-            this.update_pricing_discount_section();
+            this.update_pricing_rule_discount_section();
         });
         this.fetch_customer_details(frm.doc.customer).then(() => {
             this.events.customer_details_updated(this.customer_info);
@@ -1339,37 +1375,34 @@ erpnext.PointOfSale.ItemCart = class {
         show ? this.$component.css('display', 'flex') : this.$component.css('display', 'none');
     }
 
-    ignore_pricing_discount(me, value) {
-        const cached_data = me.events.get_cache_data();
-        const items = cached_data['pos_items']
+    async ignore_pricing_discount(me, value) {
+        // const cached_data = me.events.get_cache_data();
+        // const items = cached_data['pos_items']
         me.$cart_items_wrapper.empty();
         var frm = me.events.get_frm();
         var item_list = me.events.get_cart_items();
         if (value === 'Yes') {
-            // frm.doc.ignore_pricing_rule = 0;
-            frappe.model.set_value(frm.doc.doctype, frm.doc.name, 'ignore_pricing_rule', 0);
+            frm.doc.ignore_pricing_rule = 1;
+            // frappe.model.set_value(frm.doc.doctype, frm.doc.name, 'ignore_pricing_rule', 0);
         } else if (value === 'No') {
-            // frm.doc.ignore_pricing_rule = 1
-            frappe.model.set_value(frm.doc.doctype, frm.doc.name, 'ignore_pricing_rule', 1);
+            frm.doc.ignore_pricing_rule = 0
+            // frappe.model.set_value(frm.doc.doctype, frm.doc.name, 'ignore_pricing_rule', 1);
         }
-
+        const item_data = frm.doc.items;
+        console.log(item_data)
         frm.doc.items = [];
         frm.refresh_field('ignore_pricing_rule');
-        frm.reload_doc();
-        item_list.forEach(args => {
-            me.events.on_cart_update(args);
+        await item_data.forEach(item => {
+            let new_item = {'item_code':item.item_code, 'batch_no': item.batch_no, 'rate':item.item_code, 'qty': item.qty, 'mrp': item.item_price_list, 'title': item.item_name, update_rules: false}
+            var args = {
+            'field': "qty",
+            'item': new_item,
+            'value': "+" + item.qty
+            }
+            this.events.on_cart_update(args);
         });
-        // items.forEach(item_dict => {
-        //     const values = Object.values(item_dict)[0];
-        //     console.log(values);
-        //     var qty = values.qty;
-        //     var args = {
-        //     'field': "qty",
-        //     'item': values,
-        //     'value': "+" + qty
-        //     }
-        //     this.events.on_cart_update(args);
-        // });
+        frm.reload_doc();
+        console.log(frm.doc)
     }
 
     check_out_validation(show) {
