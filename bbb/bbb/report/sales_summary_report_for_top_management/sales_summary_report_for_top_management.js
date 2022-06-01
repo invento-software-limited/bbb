@@ -3,84 +3,31 @@
 /* eslint-disable */
 
 frappe.query_reports["Sales Summary Report For Top Management"] = {
-    "filters": [
-        {
-            "fieldname": "date_range",
-            "label": __("Date Range"),
-            "fieldtype": "DateRange",
-            "default": [frappe.datetime.add_days(frappe.datetime.get_today(), - 1), frappe.datetime.add_days(frappe.datetime.get_today())],
-            "reqd": 1
-        },
-        {
-            "fieldname": "company",
-            "label": __("Company"),
-            "fieldtype": "Link",
-            "options": "Company",
-            "default": frappe.defaults.get_user_default("Company")
-        },
-        {
-            "fieldname": "pos_profile",
-            "label": __("Outlet"),
-            "fieldtype": "Link",
-            "options": "POS Profile",
-            "default": frappe.defaults.get_user_default("pos_profile")
-        },
-        {
-            "fieldname": "customer",
-            "label": __("Customer"),
-            "fieldtype": "Link",
-            "options": "Customer"
-        },
-
-        // {
-        //     "fieldname": "patient_concern",
-        //     "label": __("Patient Concern"),
-        //     "fieldtype": "Select",
-        //     "options": ["", "Regular Skin Care", "Acne Care", "Hair Care", "Pigmentation & Melasma", "Anti-Aging", "Body Shaping and Weight Loss", "Unwanted Hair", "Mole", "Others"]
-        // },
-        // {
-        //     "fieldname": "age",
-        //     "label": __("Age: Example age <= 30 "),
-        //     "fieldtype": "Int"
-        // },
-        {
-            "fieldname": "item_group",
-            "label": __("Item Group"),
-            "fieldtype": "Link",
-            "options": "Item Group"
-        },
-        // {
-        //     "fieldname": "doctors",
-        //     "label": __("Doctor"),
-        //     "fieldtype": "Link",
-        //     "options": "Doctors"
-        // },
-        // {
-        //     "fieldname": "therapist",
-        //     "label": __("Therapist"),
-        //     "fieldtype": "Link",
-        //     "options": "Therapist"
-        // },
-        // {
-        //     "fieldname": "reference",
-        //     "label": __("Reference"),
-        //     "fieldtype": "Link",
-        //     "options": "Reference"
-        // },
-        // {
-        //     "fieldname": "mode_of_payment",
-        //     "label": __("Mode of Payment"),
-        //     "fieldtype": "Link",
-        //     "options": "Mode of Payment",
-        //     "filters": {
-        //         "active": 1,
-        //     }
-        // },
-        // {
-        //     "fieldname": "sale_type",
-        //     "label": __("Sale Type"),
-        //     "fieldtype": "Select",
-        //     "options": ["", "Instant Sale", "Advance Sale", "Online Sale"]
-        // }
-    ]
-}
+	"filters": [
+		{
+			"fieldname":"from_date",
+			"label": __("From Date"),
+			"fieldtype": "Date",
+			"default": frappe.datetime.get_today(),
+			"reqd": 1,
+			"width": "60px"
+		},
+		{
+			"fieldname":"to_date",
+			"label": __("To Date"),
+			"fieldtype": "Date",
+			"default": frappe.datetime.get_today(),
+			"reqd": 1,
+			"width": "60px"
+		},
+		{
+			"fieldname":"switch_invoice",
+			"label": __("Switch Invoice"),
+			"fieldtype": "Select",
+			"options": ["Sales Invoice", "POS Invoice"],
+			"default": "Sales Invoice",
+			"reqd": 1,
+			"width": "60px"
+		},
+	]
+};

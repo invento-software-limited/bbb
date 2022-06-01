@@ -1,149 +1,95 @@
-# Copyright (c) 2013, Invento Bangladesh and contributors
+# Copyright (c) 2022, invento software limited and contributors
 # For license information, please see license.txt
 
-# import frappe
-# Copyright (c) 2013, Invento Software Limited and contributors
-# For license information, please see license.txt
-from __future__ import unicode_literals
-import frappe, erpnext
-import copy
+import frappe
 from frappe import _
 
-def execute(filters=None, additional_table_columns=None, additional_query_columns=None):
-    columns = get_columns()
 
-    if not filters: filters = {}
-
-    filters.update({"from_date": filters.get("date_range") and filters.get("date_range")[0],
-                    "to_date": filters.get("date_range") and filters.get("date_range")[1]})
-
-    item_list = get_items(filters, additional_query_columns)
-    data = get_absolute_data(item_list)
-
+def execute(filters=None):
+    columns, data = get_columns(), get_invoice_data(filters)
     return columns, data
 
-
-def get_absolute_data(invoice_items):
-    invoice_list = get_invoice_list(invoice_items)
-    branch_list = get_branches_list(invoice_list)
-
-    for branch in branch_list:
-        branch['total_discount'] = branch['discount'] + branch['special_discount']
-        discount_rate = "{:.2f} %".format((branch['total_discount'] / branch['mrp_total']) * 100)
-        branch['discount_rate'] = discount_rate
-        print(branch)
-        try:
-            branch['sale_including_vat'] = branch.get('sale_excluding_vat', 0) + branch.get('invoice_tax_amount', 0)
-            branch['basket_value'] = branch.get('sale_excluding_vat', 0) / branch.get('invoice_qty', 0)
-        except:
-            pass
-    return branch_list
-
-countable_values_dict = {
-    'mrp_total': 0, 'discount': 0, 'special_discount': 0
-}
-
-def get_branches_list(invoice_list):
-    branch_list_dict = {}
-    countable_values_dict_ = {
-        'base_net_total': 0,
-        'net_total': 0,
-        'grand_total': 0,
-        'invoice_tax_amount': 0,
-        'sale_excluding_vat': 0
-    }
-    countable_values_dict_.update(countable_values_dict)
-
-    for invoice_item in invoice_list:
-        if invoice_item['pos_profile'] not in branch_list_dict.keys():
-            invoice_item['invoice_qty'] = 1
-            branch_list_dict[invoice_item['pos_profile']] = invoice_item
-        else:
-            branch_invoice = branch_list_dict[invoice_item['pos_profile']]
-
-            for key in countable_values_dict_.keys():
-                if invoice_item.get(key, 0):
-                    branch_invoice[key] += invoice_item.get(key, 0)
-
-            branch_invoice['invoice_qty'] += 1
-
-    return list(branch_list_dict.values())
-
-def get_invoice_list(sales_invoice_items):
-    invoice_list_dict = {}
-
-    for sales_invoice_item in sales_invoice_items:
-        if sales_invoice_item['parent'] not in invoice_list_dict.keys():
-            invoice_list_dict[sales_invoice_item['parent']] = sales_invoice_item
-        else:
-            invoice = invoice_list_dict[sales_invoice_item['parent']]
-
-            for key in countable_values_dict.keys():
-                invoice[key] += sales_invoice_item[key]
-
-    return list(invoice_list_dict.values())
-
-
 def get_columns():
-    """ Columns of Report Table"""
-    return [
-        {"label": _("Branch"), "fieldname": "pos_profile", "fieldtype": "Link", "options": "POS Profile", "width": 150},
-        {"label": _("Number Of Invoice"), "fieldname": "invoice_qty", "fieldtype": "Link", "options": "Sales Invoice",
-         "width": 120},
-        {"label": _("Basket Value"), "fieldname": "basket_value", "fieldtype": "Currency", "width": 120},
-        {"label": _("MRP Total"), "fieldname": "mrp_total", "fieldtype": "Currency", "width": 120},
-        # {"label": _("Selling Rate"), "fieldname": "selling_rate", "width": 125},
-        {"label": _("Discount"), "fieldname": "discount", "fieldtype": "Currency", "width": 100},
-        {"label": _("Special Discount"), "fieldname": "special_discount", "fieldtype": "Currency", "width": 150},
-        {"label": _("Total Discount"), "fieldname": "total_discount", "fieldtype": "Currency", "width": 150},
-        {"label": _("Discount Rate(%)"), "fieldname": "discount_rate", "fieldtype": "", "width": 150},
-
-        {"label": _("Sell Excluding Vat"), "fieldname": "sale_excluding_vat", "fieldtype": "Currency", "width": 150},
-        {"label": _("Vat"), "fieldname": "invoice_tax_amount", "fieldtype": "Currency", "width": 100},
-        {"label": _("Sell Including Vat"), "fieldname": "sale_including_vat", "fieldtype": "Currency", "width": 150},
-
-        {"label": _("Grand Total"), "fieldname": "grand_total", "fieldtype": "Currency", "width": 125},
+    """return columns"""
+    columns = [
+        # {"label": _("No"), "fieldname": "serial_no", "fieldtype": "Text", "width": 100},
+        {"label": _("Branch Name"), "fieldname": "pos_profile", "fieldtype": "Link", "options": "POS Profile",
+         "width": 100},
+        {"label": _("Total Invoice"), "fieldname": "number_of_invoice", "fieldtype": "Int", "width": 110},
+        {"label": _("Sell Include Vat"), "fieldname": "grand_total", "fieldtype": "Currency", "width": 120,
+         "convertible": "rate", "options": "currency"},
+        # {"label": _("Profit/Loss"), "fieldname": "profit_loss", "fieldtype": "Currency", "width": 120,
+        #  "convertible": "rate", "options": "currency"},
+        {"label": _("Sell Exclude Vat"), "fieldname": "net_total", "fieldtype": "Currency", "width": 130,
+         "convertible": "rate", "options": "currency"},
+        {"label": _("Basket Value"), "fieldname": "basket_value", "fieldtype": "Float", "width": 120},
+        {"label": _("Total MRP Price"), "fieldname": "mrp_total", "fieldtype": "Currency", "width": 150,
+         "convertible": "rate", "options": "currency"},
+        {"label": _("Discount"), "fieldname": "discount", "fieldtype": "Currency", "width": 120,
+         "convertible": "rate", "options": "currency"},
+        {"label": _("Special Discount"), "fieldname": "special_discount", "fieldtype": "Currency", "width": 120,
+         "convertible": "rate", "options": "currency"},
+        {"label": _("Total Discount"), "fieldname": "total_discount", "fieldtype": "Currency", "width": 120,
+         "convertible": "rate", "options": "currency"},
+        {"label": _("Discount %"), "fieldname": "discount_percentage", "fieldtype": "Text", "width": 120},
+        {"label": _("Cash"), "fieldname": "Cash", "fieldtype": "Currency", "width": 120,
+         "convertible": "rate", "options": "currency"},
+        {"label": _("Card"), "fieldname": "Card", "fieldtype": "Currency", "width": 120,
+         "convertible": "rate", "options": "currency"},
+        {"label": _("Mobile Banking"), "fieldname": "bKash", "fieldtype": "Currency", "width": 120,
+         "convertible": "rate", "options": "currency"},
+        {"label": _("Rounding"), "fieldname": "cash_amount", "fieldtype": "Currency", "width": 120,
+         "convertible": "rate", "options": "currency"},
+        {"label": _("VAT"), "fieldname": "vat", "fieldtype": "Currency", "width": 120,
+         "convertible": "rate", "options": "currency"},
     ]
-
-
-def get_items(filters, additional_query_columns=None):
-    conditions = get_conditions(filters)
-    match_conditions = frappe.build_match_conditions("Sales Invoice")
-
-    if match_conditions:
-        match_conditions = " and {0} ".format(match_conditions)
-
-    if additional_query_columns:
-        additional_query_columns = ', ' + ', '.join(additional_query_columns)
-
-    return frappe.db.sql("""
-    		select
-    			invoice_item.parent, invoice.grand_total,
-                invoice.territory, invoice.net_total as sale_excluding_vat, invoice.total,
-                
-                invoice_item.base_net_amount, invoice_item.base_net_rate,
-    			invoice.pos_profile, invoice_item.rate as selling_rate,
-    			(invoice_item.qty * invoice_item.price_list_rate) as mrp_total,
-    			((invoice_item.qty * invoice_item.price_list_rate) - (invoice_item.rate * invoice_item.qty)) as discount,
-    			(invoice_item.amount - invoice_item.net_amount) as special_discount,
-    			 invoice_item.net_amount, invoice_item.amount as total_amount,
-    			 
-    			 sales_tax.rate as invoice_tax_rate,
-    			 sales_tax.tax_amount as invoice_tax_amount, sales_tax.total as invoice_tax_total {0}
-    		from `tabSales Invoice` invoice, `tabSales Invoice Item` invoice_item LEFT JOIN `tabSales Taxes and Charges` sales_tax ON sales_tax.parent=invoice_item.parent
-    		where invoice.name = invoice_item.parent 
-    			and invoice.docstatus = 1 %s %s
-    		order by invoice.posting_date desc, invoice_item.parent desc
-    		""".format(additional_query_columns or '') % (conditions, match_conditions), filters, as_dict=1)
+    return columns
 
 
 def get_conditions(filters):
-    conditions = ""
+    conditions = []
 
-    for opts in (("from_date", " and invoice.posting_date>=%(from_date)s"),
-                 ("to_date", " and invoice.posting_date<=%(to_date)s")):
+    if filters.get("from_date"):
+        conditions.append("sales_invoice.posting_date >= '%s'" % filters.get("from_date"))
 
-        if filters.get(opts[0]):
-            conditions += opts[1]
+    if filters.get("to_date"):
+        conditions.append("sales_invoice.posting_date <= '%s'" % filters.get("to_date"))
 
+    if conditions:
+        conditions = " and ".join(conditions)
     return conditions
+
+
+def get_invoice_data(filters):
+    conditions = get_conditions(filters)
+    invoice_type = filters.get('switch_invoice', "Sales Invoice")
+
+    invoice_query = """select sales_invoice.pos_profile, sales_invoice.total_taxes_and_charges as vat, sales_invoice.name,
+    			sum(sales_invoice_item.price_list_rate) as unit_price, sum(sales_invoice_item.rate) as selling_rate,
+    			sum(sales_invoice_item.qty) as quantity,
+    			sum((sales_invoice_item.qty * item.standard_rate)) as mrp_total,
+    			(sales_invoice_item.qty * item.standard_rate) - (sales_invoice_item.net_rate * sales_invoice_item.qty) as discount,
+    			sum((sales_invoice_item.amount - sales_invoice_item.net_amount)) as special_discount,
+    			sum(sales_invoice_item.net_amount)as net_amount, sum(sales_invoice_item.amount) as total_amount, sales_invoice.customer_name,
+    			sales_invoice.total, sales_invoice.grand_total, sales_invoice.net_total
+    		from (`tab%s` sales_invoice, `tab%s Item` sales_invoice_item, `tabItem` item)
+    		where sales_invoice.name = sales_invoice_item.parent and item.item_code = sales_invoice_item.item_code
+    			and sales_invoice.docstatus = 1 and %s group by sales_invoice.name order by sales_invoice.name""" % (invoice_type, invoice_type, conditions)
+
+
+    mode_of_payment_query = """select invoice.pos_profile, invoice.vat, invoice.mrp_total, invoice.discount, invoice.special_discount, invoice.name,
+                invoice.net_amount, invoice.total_amount, invoice.total, invoice.grand_total, invoice.net_total, sum(payment.amount) as payment_amount,
+                payment.type as payment_type
+                from (%s) as invoice left join `tabSales Invoice Payment` payment on invoice.name=payment.parent group by invoice.name""" % invoice_query
+
+
+    pos_profile_query = """select pos_profile, count(name) as number_of_invoice, sum(vat) as vat, sum(mrp_total) as mrp_total,
+    		 sum(discount) as discount, sum(special_discount) as special_discount, (sum(discount) + sum(special_discount)) as total_discount,
+    		  format(((sum(discount) + sum(special_discount)) / sum(mrp_total)) * 100, 1) as discount_percentage, sum(net_amount) as net_amount,
+    		  sum(total_amount) as total_amount, sum(total) as total, sum(grand_total) as grand_total, sum(net_total) as net_total,
+    		  (sum(net_total) / count(name)) as basket_value, sum(if(payment_type='Cash', payment_amount, 0)) as Cash,
+    		  sum(if(payment_type='bKash', payment_amount, 0)) as bKash, sum(if(payment_type='City Card', payment_amount, 0)) as Card
+    		  from (%s) as Tab1 group by pos_profile""" % mode_of_payment_query
+
+    query_result = frappe.db.sql(pos_profile_query, as_dict=1)
+    return query_result
