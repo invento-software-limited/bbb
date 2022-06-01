@@ -40,7 +40,7 @@ def after_insert(doc, method):
         elif adjustment > 2.49:
             rounding_adjustment = (divisible_number + 5) - float_number
             change_amount = (paid_amount - (divisible_number + 5)) if (paid_amount - (divisible_number + 5)) > 0 else 0
-            outstanding_amount = ((divisible_number + 5) - paid_amount) if ((divisible_number + 5)- paid_amount) > 0 else 0
+            outstanding_amount = ((divisible_number + 5) - paid_amount) if ((divisible_number + 5) - paid_amount) > 0 else 0
 
             in_words = money_in_words(divisible_number + 5)
             frappe.db.set_value("POS Invoice", doc.name, "in_words", in_words)
@@ -119,6 +119,30 @@ def set_pos_cached_data(invoice_data=None):
     for key, value in invoice_data.items():
         if key == "pos_items":
             item_code = value.get('item_code')
+            pos_data = frappe.cache().get_value(frappe.session.user)
+            pos_items = pos_data.get('pos_items')
+            if pos_items and item_code in pos_items:
+                pos_items[item_code]['qty'] = pos_items[item_code]['qty'] + 1
+                frappe.cache().set_value(frappe.session.user, pos_data)
+            elif pos_items:
+                pos_items[item_code] = value
+                frappe.cache().set_value(frappe.session.user, pos_data)
+            else:
+                pos_data['pos_items'] = {item_code: value}
+                frappe.cache().set_value(frappe.session.user, pos_data)
+        elif key in key_list:
+            pos_data = frappe.cache().get_value(frappe.session.user)
+            if pos_data:
+                pos_data[key] = value
+                frappe.cache().set_value(frappe.session.user, pos_data)
+            else:
+                pos_data = {key: value}
+                frappe.cache().set_value(frappe.session.user, pos_data)
+
+            """
+    for key, value in invoice_data.items():
+        if key == "pos_items":
+            item_code = value.get('item_code')
             item_list_of_dict = frappe.cache().get_value(key)
             if item_list_of_dict:
                 new_item = True
@@ -132,43 +156,70 @@ def set_pos_cached_data(invoice_data=None):
                     item_dict = {item_code: value}
                     item_list_of_dict.append(item_dict)
                     frappe.cache().set_value(key, item_list_of_dict)
-
             else:
                 frappe.cache().set_value(key, [{item_code: value}])
-
         elif key in key_list:
             frappe.cache().set_value(key, value)
+"""
 
 
 @frappe.whitelist()
 def get_pos_cached_data():
-    # customer = frappe.cache().delete_value('pos_items')
-    # customer = frappe.cache().delete_value('pos_customer')
-    # customer = frappe.cache().delete_value('pos_ignore_pricing_rule')
-    # customer = frappe.cache().delete_value('pos_items')
-    customer = frappe.cache().get_value('pos_customer')
-    if customer:
-        data = {}
-        data['pos_customer'] = customer
-        data['pos_served_by'] = frappe.cache().get_value('pos_served_by')
-        data['pos_ignore_pricing_rule'] = frappe.cache().get_value('pos_ignore_pricing_rule')
-        data['pos_items'] = frappe.cache().get_value('pos_items')
-        return data
+    # frappe.cache().delete_value(frappe.session.user)
+    pos_data = frappe.cache().get_value(frappe.session.user)
+    print('pos_data ', pos_data)
+    if pos_data:
+        if pos_data.get('pos_customer', None) and pos_data.get('pos_served_by', None):
+            data = {}
+            pos_item_list = []
+            data['pos_customer'] = pos_data.get('pos_customer')
+            data['pos_served_by'] = pos_data.get('pos_served_by')
+            data['pos_ignore_pricing_rule'] = pos_data.get('pos_ignore_pricing_rule', 0)
+            pos_items = pos_data.get('pos_items', {})
+            for key, pos_item in pos_items.items():
+                pos_item_list.append(pos_item)
+            data['pos_items'] = pos_item_list
+            return data
+        else:
+            frappe.cache().delete_value(frappe.session.user)
     else:
         return {}
 
 
 @frappe.whitelist()
 def clear_cached_data():
-    frappe.cache().delete_value('pos_items')
-    frappe.cache().delete_value('pos_customer')
-    frappe.cache().delete_value('pos_ignore_pricing_rule')
-    frappe.cache().delete_value('pos_items')
+    frappe.cache().delete_value(frappe.session.user)
 
 
 @frappe.whitelist()
-def remove_single_item_from_cache():
-    frappe.cache().delete_value('pos_items')
-    frappe.cache().delete_value('pos_customer')
-    frappe.cache().delete_value('pos_ignore_pricing_rule')
-    frappe.cache().delete_value('pos_items')
+def remove_single_item_from_cache(item_code=None):
+    if (item_code):
+        pos_data = frappe.cache().get_value(frappe.session.user)
+        pos_items = pos_data.get('pos_items')
+        del pos_items[item_code]
+        frappe.cache().set_value(frappe.session.user, pos_data)
+
+
+@frappe.whitelist()
+def get_past_order_list(search_term, status, limit=3):
+    fields = ["name", "grand_total", "currency", "customer", "posting_time", "posting_date"]
+    invoice_list = []
+
+    if search_term and status:
+        # invoices_by_customer = frappe.db.get_all(
+        #     "POS Invoice",
+        #     filters={"customer": ["like", "%{}%".format(search_term)], "status": status, 'owner': frappe.session.user},
+        #     fields=fields, limit=limit
+        # )
+        invoices_by_name = frappe.db.get_all(
+            "POS Invoice",
+            filters={"name": ["like", "%{}%".format(search_term)], "status": status, 'owner': frappe.session.user},
+            fields=fields, limit=limit
+        )
+
+        invoice_list = invoices_by_name
+        # invoice_list = invoices_by_customer + invoices_by_name
+    elif status:
+        invoice_list = frappe.db.get_all("POS Invoice", filters={"status": status, 'owner': frappe.session.user}, fields=fields, limit=limit)
+
+    return invoice_list
