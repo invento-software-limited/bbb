@@ -140,7 +140,15 @@ erpnext.PointOfSale.ItemCart = class {
         this.$totals_section = this.$component.find('.cart-totals-section');
 
         this.$totals_section.append(
-            `<div class="add-discount-wrapper">
+            `<div class="total-section">
+                <div class="total-label" >Total</div>
+                <div class="mrp-label" >0</div>
+                <div class="disc-label" >0</div>
+                <div class="after-disc-label" >0</div>
+                <div class="qty-label" >0</div>
+                <div class="final-amount-total-label">0</div>
+            </div>
+            <div class="add-discount-wrapper">
 				${this.get_discount_icon()} Add Discount
 			</div>
 			<div class="net-total-container">
@@ -154,8 +162,8 @@ erpnext.PointOfSale.ItemCart = class {
 			</div>
 			<div class="checkout-btn">Checkout</div>
 			<div class="edit-cart-btn">Edit Cart</div>`
-        )
-
+        );
+        $('.total-section').css('visibility', 'hidden');
         this.$add_discount_elem = this.$component.find(".add-discount-wrapper");
     }
 
@@ -767,6 +775,7 @@ erpnext.PointOfSale.ItemCart = class {
         this.events.set_initial_paid_amount(base_rounded_total);
         this.render_grand_total(base_rounded_total);
         this.render_taxes(frm.doc.taxes)
+        this.update_item_cart_total_section(frm)
 
     }
 
@@ -897,7 +906,7 @@ erpnext.PointOfSale.ItemCart = class {
             // 	})
             return `
 					<div class="item-row-mrp"><span>${item_data.price_list_rate || 0}</span></div>
-					<div class="item-row-rate"><span>${(item_data.price_list_rate - item_data.rate) || 0}</span></div>
+					<div class="item-row-disc"><span>${(item_data.price_list_rate - item_data.rate) || 0}</span></div>
 					<div class="item-row-rate"><span>${item_data.rate || 0}</span></div>
 					<div class="item-row-qty"><span>${item_data.qty || 0}</span></div>
 					<div class="item-row-amount">
@@ -1418,4 +1427,37 @@ erpnext.PointOfSale.ItemCart = class {
     // toggle_selector(enabled) {
     //     this.$customer_section.find('.customer-section').setAttribute('disabled');
     // }
+
+    async update_item_cart_total_section(frm){
+        const item_section = $('.cart-item-wrapper').is(':visible');
+        if(item_section == true){
+            const items = frm.doc.items;
+            let total_mrp = 0;
+            let total_disc = 0;
+            let total_after_disc = 0;
+            let total_qty = frm.doc.total_qty;
+            let total_amount = frm.doc.total;
+            items.forEach(item => {
+                total_mrp += parseFloat(item.price_list_rate);
+                total_after_disc += parseFloat(item.rate);
+                total_disc += (parseFloat(item.price_list_rate) - parseFloat(item.rate));
+            });
+            $('.mrp-label').html(total_mrp);
+            $('.disc-label').html(total_disc);
+            $('.after-disc-label').html(total_after_disc.toFixed(0));
+            $('.qty-label').html(total_qty);
+            $('.final-amount-total-label').html(total_amount.toFixed(0));
+
+            $('.total-section').css('visibility', 'visible');
+            //
+            // $('.mrp-label').html(format_currency(total_mrp, frm.doc.currency));
+            // $('.disc-label').html(format_currency(total_disc, frm.doc.currency));
+            // $('.after-disc-label').html(format_currency(total_after_disc.toFixed(0), frm.doc.currency));
+            // $('.qty-label').html(total_qty);
+            // $('.final-amount-total-label').html(format_currency(total_amount.toFixed(0), frm.doc.currency));
+        }else{
+            $('.total-section').css('visibility', 'hidden');
+        }
+
+    }
 }
