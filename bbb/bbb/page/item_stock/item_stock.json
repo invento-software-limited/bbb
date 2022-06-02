@@ -1,0 +1,26 @@
+{
+ "content": null,
+ "creation": "2022-06-02 11:29:56.285728",
+ "docstatus": 0,
+ "doctype": "Page",
+ "idx": 0,
+ "modified": "2022-06-02 11:29:56.285728",
+ "modified_by": "Administrator",
+ "module": "Bbb",
+ "name": "item-stock",
+ "owner": "Administrator",
+ "page_name": "Item Stock",
+ "roles": [
+  {
+   "role": "System Manager"
+  },
+  {
+   "role": "Accounts Manager"
+  }
+ ],
+ "script": null,
+ "standard": "Yes",
+ "style": null,
+ "system_page": 0,
+ "title": "Item Stock"
+}
