@@ -10,7 +10,8 @@ frappe.pages['item-stock'].on_page_load = function(wrapper) {
 	var page = frappe.ui.make_app_page({
 		parent: wrapper,
 		title: 'Item Stock',
-		single_column: true
+		single_column: true,
+		width: 500
 	});
 	page.set_secondary_action('Refresh', () => page.capacity_dashboard.refresh(), 'refresh');
 	page.start = 0;
