@@ -64,8 +64,8 @@ def get_invoice_data(filters):
     conditions = get_conditions(filters)
     invoice_type = filters.get('switch_invoice', "Sales Invoice")
 
-    invoice_query = """select sales_invoice.pos_profile, sales_invoice.total_taxes_and_charges as vat, sales_invoice.name,
-    			sum(sales_invoice_item.price_list_rate) as unit_price, sum(sales_invoice_item.rate) as selling_rate,
+    invoice_query = """select sales_invoice.pos_profile, sales_invoice.total_taxes_and_charges as vat,
+                sales_invoice.name, sum(sales_invoice_item.price_list_rate) as unit_price, sum(sales_invoice_item.rate) as selling_rate,
     			sum(sales_invoice_item.qty) as quantity,
     			sum((sales_invoice_item.qty * item.standard_rate)) as mrp_total,
     			(sales_invoice_item.qty * item.standard_rate) - (sales_invoice_item.net_rate * sales_invoice_item.qty) as discount,
@@ -74,22 +74,23 @@ def get_invoice_data(filters):
     			sales_invoice.total, sales_invoice.grand_total, sales_invoice.net_total
     		from (`tab%s` sales_invoice, `tab%s Item` sales_invoice_item, `tabItem` item)
     		where sales_invoice.name = sales_invoice_item.parent and item.item_code = sales_invoice_item.item_code
-    			and sales_invoice.docstatus = 1 and %s group by sales_invoice.name order by sales_invoice.name""" % (invoice_type, invoice_type, conditions)
+    		and sales_invoice.docstatus = 1 and %s group by sales_invoice.name order by sales_invoice.name""" % (invoice_type, invoice_type, conditions)
 
 
-    mode_of_payment_query = """select invoice.pos_profile, invoice.vat, invoice.mrp_total, invoice.discount, invoice.special_discount, invoice.name,
-                invoice.net_amount, invoice.total_amount, invoice.total, invoice.grand_total, invoice.net_total, sum(payment.amount) as payment_amount,
-                payment.type as payment_type
-                from (%s) as invoice left join `tabSales Invoice Payment` payment on invoice.name=payment.parent group by invoice.name""" % invoice_query
+    mode_of_payment_query = """select invoice.pos_profile, invoice.vat, invoice.mrp_total, invoice.discount,
+            invoice.special_discount, invoice.name, invoice.net_amount, invoice.total_amount, invoice.total,
+            invoice.grand_total, invoice.net_total, sum(payment.amount) as payment_amount, payment.type as payment_type
+        from (%s) as invoice left join `tabSales Invoice Payment` payment on invoice.name=payment.parent
+        group by invoice.name""" % invoice_query
 
 
     pos_profile_query = """select pos_profile, count(name) as number_of_invoice, sum(vat) as vat, sum(mrp_total) as mrp_total,
-    		 sum(discount) as discount, sum(special_discount) as special_discount, (sum(discount) + sum(special_discount)) as total_discount,
-    		  format(((sum(discount) + sum(special_discount)) / sum(mrp_total)) * 100, 1) as discount_percentage, sum(net_amount) as net_amount,
-    		  sum(total_amount) as total_amount, sum(total) as total, sum(grand_total) as grand_total, sum(net_total) as net_total,
-    		  (sum(net_total) / count(name)) as basket_value, sum(if(payment_type='Cash', payment_amount, 0)) as Cash,
-    		  sum(if(payment_type='bKash', payment_amount, 0)) as bKash, sum(if(payment_type='City Card', payment_amount, 0)) as Card
-    		  from (%s) as Tab1 group by pos_profile""" % mode_of_payment_query
+    		sum(discount) as discount, sum(special_discount) as special_discount, (sum(discount) + sum(special_discount)) as total_discount,
+    		format(((sum(discount) + sum(special_discount)) / sum(mrp_total)) * 100, 2) as discount_percentage, sum(net_amount) as net_amount,
+    		sum(total_amount) as total_amount, sum(total) as total, sum(grand_total) as grand_total, sum(net_total) as net_total,
+    		(sum(net_total) / count(name)) as basket_value, sum(if(payment_type='Cash', payment_amount, 0)) as Cash,
+    		sum(if(payment_type='bKash', payment_amount, 0)) as bKash, sum(if(payment_type='City Card', payment_amount, 0)) as Card
+    	from (%s) as Tab1 group by pos_profile""" % mode_of_payment_query
 
     query_result = frappe.db.sql(pos_profile_query, as_dict=1)
     return query_result

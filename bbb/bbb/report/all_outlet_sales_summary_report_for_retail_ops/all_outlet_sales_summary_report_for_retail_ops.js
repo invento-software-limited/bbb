@@ -1,8 +1,8 @@
-// Copyright (c) 2016, Invento Bangladesh and contributors
+// Copyright (c) 2022, invento software limited and contributors
 // For license information, please see license.txt
 /* eslint-disable */
 
-frappe.query_reports["Sales Summary Report For Top Management"] = {
+frappe.query_reports["All Outlet Sales Summary Report For Retail Ops"] = {
 	"filters": [
 		{
 			"fieldname":"from_date",
