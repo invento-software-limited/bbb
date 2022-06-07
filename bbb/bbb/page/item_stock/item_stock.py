@@ -2,6 +2,8 @@ import frappe
 
 @frappe.whitelist()
 def get_item_stock_data(item_code=None, warehouse=None):
+    items = []
+
     items_query = """select bin.warehouse, bin.item_code, item.item_name, bin.actual_qty from `tabBin` bin
             inner join `tabItem` item on item.item_code = bin.item_code"""
 
@@ -12,6 +14,7 @@ def get_item_stock_data(item_code=None, warehouse=None):
     elif warehouse:
         items_query += """ where bin.warehouse = '%s'""" % warehouse
 
-    items = frappe.db.sql(items_query, as_dict=1)
+    if item_code:
+        items = frappe.db.sql(items_query, as_dict=1)
 
     return items

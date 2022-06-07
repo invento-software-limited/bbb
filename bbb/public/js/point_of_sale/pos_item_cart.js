@@ -516,7 +516,11 @@ erpnext.PointOfSale.ItemCart = class {
                                 class="icon icon-sm">           <use xlink:href="#icon-dot-horizontal">           </use>          </svg>         </span>        </span>
                         </button>
                         <ul class="dropdown-menu dropdown-menu-right" role="menu">
-
+                            <li>
+                                <a class="grey-link dropdown-item" href="#" id="check_item_stock">
+                                    <span class="menu-item-label" data-label="Check Item Stock"><span class="alt-underline">C</span>heck Item Stock</span>
+                                </a>
+                            </li>
                             <li>
                                 <a class="grey-link dropdown-item" href="#" id="reset_cart">
                     
@@ -554,6 +558,10 @@ erpnext.PointOfSale.ItemCart = class {
         // this.page.add_menu_item(__("Save as Draft"), this.save_draft_invoice.bind(this), false, 'Ctrl+S');
         //
         // this.page.add_menu_item(__('Close the POS'), this.close_pos.bind(this), false, 'Shift+Ctrl+C');
+
+        // this.page.add_menu_item(__("Stock"), function() {
+        //     console.log("Stock")
+        // })
     }
 
     fetch_discount_details(ignore_pricing_rule) {

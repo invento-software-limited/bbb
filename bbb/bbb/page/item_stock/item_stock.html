@@ -1,54 +1,70 @@
 <div class="card">
-	{% for d in data %}
-		<div class="dashboard-list-item" style="padding: 7px 15px;">
-			<div class="row">
-				<div class="col-sm-2" style="margin-top: 8px;">
-					<a data-type="warehouse" data-name="{{ d.warehouse }}">{{ d.warehouse }}</a>
+	{% if data %}
+		<div class="dashboard-list-item" style="padding: 12px 15px;">
+			<div class="row col-md-12">
+				<div class="col-sm-3 text-muted" style="margin-top: 8px;">
+					Warehouse
 				</div>
-				<div class="col-sm-2" style="margin-top: 8px; ">
-					<a data-type="item" data-name="{{ d.item_code }}">{{ d.item_code }}</a>
+				<div class="col-sm-6 text-muted" style="margin-top: 8px;">
+					Item Name
 				</div>
-				<div class="col-sm-2" style="margin-top: 8px; ">
-					<a data-type="item" data-name="{{ d.item_name }}">{{ d.item_name }}</a>
+				<div class="col-sm-3 text-muted" style="margin-top: 8px;">
+					Stock Status
 				</div>
-				<div class="col-sm-1 text-center" style="margin-top: 8px;">
-					{% if d.actual_qty > 0 %}
-						<span style="height:10px;width: 10px;background-color: green; border-radius: 50%; display: inline-block;"></span>
-					{% else %}
-						<span style="height:10px;width: 10px;background-color: red;border-radius: 50%; display: inline-block;"></span>
-					{% endif %}
-				</div>
-	<!--			<div class="col-sm-2" style="margin-top: 8px; ">-->
-	<!--				{{ d.actual_qty }}-->
-	<!--			</div>-->
-	<!--			<div class="col-sm-2">-->
-	<!--				<div class="progress" title="Occupied Qty: {{ d.actual_qty }}" style="margin-bottom: 4px; height: 7px; margin-top: 14px;">-->
-	<!--					<div class="progress-bar" role="progressbar"-->
-	<!--						aria-valuenow="{{ d.percent_occupied }}"-->
-	<!--						aria-valuemin="0" aria-valuemax="100"-->
-	<!--						style="width:{{ d.percent_occupied }}%;-->
-	<!--						background-color: {{ d.color }}">-->
-	<!--					</div>-->
-	<!--				</div>-->
-	<!--			</div>-->
-	<!--			<div class="col-sm-1" style="margin-top: 8px;">-->
-	<!--				{{ d.percent_occupied }}%-->
-	<!--			</div>-->
-	<!--			{% if can_write %}-->
-	<!--			<div class="col-sm-2 text-right" style="margin-top: 2px;">-->
-	<!--				<button-->
-	<!--					class="btn btn-default btn-xs btn-edit"-->
-	<!--					style="margin: 4px 0; float: left;"-->
-	<!--					data-warehouse="{{ d.warehouse }}"-->
-	<!--					data-item="{{ escape(d.item_code) }}"-->
-	<!--					data-company="{{ escape(d.company) }}">-->
-	<!--					{{ __("Edit Capacity") }}-->
-	<!--				</button>-->
-	<!--			</div>-->
-	<!--			{% endif %}-->
+		<!--		<div class="col-sm-2 text-muted" style="margin-top: 8px;">-->
+		<!--			Balance Stock Qty-->
+		<!--		</div>-->
+		<!--		<div class="col-sm-2 text-muted" style="margin-top: 8px;">-->
+		<!--			% Occupied-->
+		<!--		</div>-->
 			</div>
 		</div>
-	{% endfor %}
+		{% for d in data %}
+			<div class="dashboard-list-item" style="padding: 7px 15px;">
+				<div class="row col-md-12">
+					<div class="col-sm-3" style="margin-top: 8px;">
+						<a data-type="warehouse" data-name="{{ d.warehouse }}">{{ d.warehouse }}</a>
+					</div>
+					<div class="col-sm-6" style="margin-top: 8px; ">
+						<a data-type="item" data-name="{{ d.item_name }}">{{ d.item_name }}</a>
+					</div>
+					<div class="col-sm-3 text-center" style="margin-top: 8px;">
+						{% if d.actual_qty > 0 %}
+							<span style="height:10px;width: 10px;background-color: green; border-radius: 50%; display: inline-block;"></span>
+						{% else %}
+							<span style="height:10px;width: 10px;background-color: red;border-radius: 50%; display: inline-block;"></span>
+						{% endif %}
+					</div>
+		<!--			<div class="col-sm-2" style="margin-top: 8px; ">-->
+		<!--				{{ d.actual_qty }}-->
+		<!--			</div>-->
+		<!--			<div class="col-sm-2">-->
+		<!--				<div class="progress" title="Occupied Qty: {{ d.actual_qty }}" style="margin-bottom: 4px; height: 7px; margin-top: 14px;">-->
+		<!--					<div class="progress-bar" role="progressbar"-->
+		<!--						aria-valuenow="{{ d.percent_occupied }}"-->
+		<!--						aria-valuemin="0" aria-valuemax="100"-->
+		<!--						style="width:{{ d.percent_occupied }}%;-->
+		<!--						background-color: {{ d.color }}">-->
+		<!--					</div>-->
+		<!--				</div>-->
+		<!--			</div>-->
+		<!--			<div class="col-sm-1" style="margin-top: 8px;">-->
+		<!--				{{ d.percent_occupied }}%-->
+		<!--			</div>-->
+		<!--			{% if can_write %}-->
+		<!--			<div class="col-sm-2 text-right" style="margin-top: 2px;">-->
+		<!--				<button-->
+		<!--					class="btn btn-default btn-xs btn-edit"-->
+		<!--					style="margin: 4px 0; float: left;"-->
+		<!--					data-warehouse="{{ d.warehouse }}"-->
+		<!--					data-item="{{ escape(d.item_code) }}"-->
+		<!--					data-company="{{ escape(d.company) }}">-->
+		<!--					{{ __("Edit Capacity") }}-->
+		<!--				</button>-->
+		<!--			</div>-->
+		<!--			{% endif %}-->
+				</div>
+			</div>
+		{% endfor %}
+	{% endif %}
 </div>
-
-
