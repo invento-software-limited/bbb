@@ -25,7 +25,7 @@ erpnext.PointOfSale.ItemSelector = class {
 			`<section class="items-selector">
 				<div class="filter-section">
 <!--					<div class="label">${__(this.pos_profile)}</div>-->
-					<div class="label"><span class="indicator-pill whitespace-nowrap blue"><span>${this.pos_profile}</span></span></div>
+<!--					<div class="label"><span class="indicator-pill whitespace-nowrap blue"><span>${this.pos_profile}</span></span></div>-->
 					
 					<div class="search-field"></div>
 					<div class="item-group-field"></div>
@@ -111,14 +111,14 @@ erpnext.PointOfSale.ItemSelector = class {
 			// }
 
 					return `
-						<div class="item-qty-pill">
+							<div class="item-display">
+								<div class="item-name">
+									${frappe.ellipsis(item.item_name, 50)}
+								</div>
+							</div>
+							<div class="item-qty-pill">
 <!--									<span class="indicator-pill whitespace-nowrap ${indicator_color}">${qty_to_display}</span>-->
-									<span class="indicator-pill whitespace-nowrap ${indicator_color}"></span>
-								</div>
-					<div class="item-display">
-								<div class="item-name" style="margin-top: 29px">
-									${frappe.ellipsis(item.item_name, 40)}
-								</div>
+								<span class="indicator-pill whitespace-nowrap ${indicator_color}" style="height:17px"></span>
 							</div>`;
 			
 		}

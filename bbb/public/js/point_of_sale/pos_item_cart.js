@@ -49,6 +49,9 @@ erpnext.PointOfSale.ItemCart = class {
             `<div class="pricing-discount-section"></div>`
         );
         this.$customer_header_section.append(
+            `<div class="pos-profile-section"></div>`
+        );
+        this.$customer_header_section.append(
             `<div class="menu-section"></div>`
         );
 
@@ -57,12 +60,12 @@ erpnext.PointOfSale.ItemCart = class {
         this.$served_by_section = this.$customer_header_section.find('.served-by-section');
         this.$pricing_rule_discount_section = this.$customer_header_section.find('.pricing-discount-section');
         this.$menu_section = this.$customer_header_section.find('.menu-section');
+        this.$pos_profile_section = this.$customer_header_section.find('.pos-profile-section');
 
         this.make_customer_selector();
         this.make_served_by_selector();
         this.make_discount_price_selector();
         this.make_menu_dropdown();
-
     }
 
     reset_customer_selector() {
@@ -428,6 +431,15 @@ erpnext.PointOfSale.ItemCart = class {
         this.served_by_field.toggle_label(false);
     }
 
+    make_pos_profile() {
+        const frm = this.events.get_frm();
+        const html = `
+        <div class="label"><span class="indicator-pill whitespace-nowrap blue"><span></span id="pos-profile-label">${frm.doc.pos_profile}</span></div>
+    `
+        this.$pos_profile_section.html(`
+            <div class="pos-profile-field">${html}</div>
+        `);
+    }
     make_discount_price_selector() {
         const me = this;
         const html = `
@@ -1360,7 +1372,7 @@ erpnext.PointOfSale.ItemCart = class {
             this.$totals_section.find('.checkout-btn').css('display', 'flex');
             this.$totals_section.find('.edit-cart-btn').css('display', 'none');
         }
-
+        this.make_pos_profile();
         this.toggle_component(true);
         // if(cached_data){
         //     const items = cached_data.pos_items ? cached_data.pos_items : {}
