@@ -211,7 +211,7 @@ erpnext.PointOfSale.Controller = class {
 
     check_item_stock() {
         function get_items_template(dialog, data){
-            var html = `<div class="card">
+            var html = `<div class="card mb-4">
                 {% if data %}
                     <div class="dashboard-list-item" style="padding: 12px 15px;">
                         <div class="row col-md-12">
