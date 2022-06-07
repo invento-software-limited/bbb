@@ -2,7 +2,6 @@ erpnext.PointOfSale.Controller = class {
     constructor(wrapper) {
         this.wrapper = $(wrapper).find('.layout-main-section');
         this.page = wrapper.page;
-
         this.check_opening_entry();
         this.item_list = [];
         $(".page-head").css("display", "none");
@@ -173,6 +172,10 @@ erpnext.PointOfSale.Controller = class {
             e.preventDefault();
             me.open_form_view();
         });
+        $('#check_item_stock').bind('click', function (e) {
+            e.preventDefault();
+            me.check_item_stock();
+        });
         $('#reset_cart').bind('click', function (e) {
             location.reload();
         });
@@ -204,6 +207,119 @@ erpnext.PointOfSale.Controller = class {
     open_form_view() {
         frappe.model.sync(this.frm.doc);
         frappe.set_route("Form", this.frm.doc.doctype, this.frm.doc.name);
+    }
+
+    check_item_stock() {
+        function get_items_template(dialog, data){
+            var html = `<div class="card">
+                {% if data %}
+                    <div class="dashboard-list-item" style="padding: 12px 15px;">
+                        <div class="row col-md-12">
+                            <div class="col-sm-3 text-muted" style="margin-top: 8px;">
+                                Warehouse
+                            </div>
+                            <div class="col-sm-7 text-muted" style="margin-top: 8px;">
+                                Item Name
+                            </div>
+                            <div class="col-sm-2 text-muted" style="margin-top: 8px;">
+                                Stock Status
+                            </div>
+                        </div>
+                    </div>
+                    {% for d in data %}
+                        <div class="dashboard-list-item" style="padding: 7px 15px;">
+                            <div class="row col-md-12">
+                                <div class="col-sm-3" style="margin-top: 8px;">
+                                    <a data-type="warehouse" data-name="{{ d.warehouse }}">
+                                        {{ d.warehouse }}</a>
+                                    </div>
+                                    <div class="col-sm-7" style="margin-top: 8px; ">
+                                        <a data-type="item" data-name="{{ d.item_name }}">
+                                            {{ d.item_name }}</a>
+                                        </div>
+                                    <div class="col-sm-2 text-center" style="margin-top: 8px;">
+                                        {% if d.actual_qty > 0 %}
+                                            <span style="height:10px;width: 10px;background-color: green; border-radius: 50%; display: inline-block;"></span>
+                                        {% else %}
+                                            <span style="height:10px;width: 10px;background-color: red;border-radius: 50%; display: inline-block;"></span>
+                                        {% endif %}
+                                    </div>
+                                </div>
+                            </div>
+                        {% endfor %}
+                    {% else %}
+                        <div class="mt-2 mb-2 text-center">
+                            <span class="text-md-center">Item Not Found!</span>			
+                        </div>
+                    {% endif %}
+                </div>`;
+
+            var table_data = frappe.render_template(html, {data: data});
+            d.fields_dict.items.$wrapper.html(table_data);
+        }
+
+        function get_items(item, warehouse){
+            frappe.call({
+                method: 'bbb.bbb.page.item_stock.item_stock.get_item_stock_data',
+                args: {
+                    item_code: item,
+                    warehouse: warehouse
+                },
+                callback: function(r) {
+                    if (!r.exc) {
+                        // code snippet
+                        // console.log(r);
+                        if(r.message.length !== 0){
+                            console.log("=====>>>", r.message)
+                            get_items_template(d, r.message)
+                        }
+                        else{
+                            get_items_template(d, null)
+                        }
+                    }
+                }
+            });
+        }
+
+        var d = new frappe.ui.Dialog({
+            title: "Item Stock Status",
+            fields: [
+                {
+                    fieldtype: "Data",
+                    fieldname: "item",
+                    label: __("Item"),
+                    // options: "Item",
+                    reqd: 1,
+                    onchange: function (e) {
+                        // cur_dialog.fields_dict.item_code.value
+                        get_items(this.value, cur_dialog.fields_dict.warehouse.value)
+                    }
+                },
+                {
+                    fieldtype: "Column Break"
+                },
+                {
+                    fieldtype: "Link",
+                    fieldname: "warehouse",
+                    label: __("Warehouse"),
+                    options: "Warehouse",
+                    reqd: 1,
+                    onchange: function (e) {
+                        // cur_dialog.fields_dict.item_code.value
+                        get_items(cur_dialog.fields_dict.item.value, this.value)
+                    }
+                },
+                {
+                    fieldtype: "Section Break"
+                },
+                {
+                    'fieldname': 'items',
+                    'fieldtype': 'HTML'
+                },
+            ],
+        });
+        d.show();
+        d.$wrapper.find('.modal-dialog').css("max-width", "800px");
     }
 
     toggle_recent_order() {
