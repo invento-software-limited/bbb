@@ -11,5 +11,8 @@
 		"public/js/point_of_sale/pos_past_order_list.js",
 		"public/js/point_of_sale/pos_past_order_summary.js",
 		"public/js/point_of_sale/pos_controller.js"
+	],
+	"js/customer_quick_entry.js": [
+		"public/js/customer_quick_entry.js"
 	]
 }

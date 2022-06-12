@@ -14,7 +14,7 @@ app_license = "MIT"
 
 # include js, css files in header of desk.html
 app_include_css = "/assets/css/custom-point-of-sale.css"
-# app_include_js = "/assets/js/custom-point-of-sale.min.js"
+app_include_js = "/assets/js/customer_quick_entry.js"
 
 
 # include js, css files in header of web template
@@ -119,6 +119,9 @@ doc_events = {
     "POS Invoice": {
         "after_insert": "bbb.bbb.pos_invoice.after_insert"
     },
+    # "POS Invoice Merge Log": {
+    #     "on_submit": "bbb.bbb.pos_invoice_merge_log.on_submit"
+    # }
 
 }
 jenv = {
