@@ -79,8 +79,9 @@ def get_invoice_data(filters):
 
     mode_of_payment_query = """select invoice.pos_profile, invoice.vat, invoice.mrp_total, invoice.discount,
             invoice.special_discount, invoice.name, invoice.net_amount, invoice.total_amount, invoice.total,
-            invoice.grand_total, invoice.net_total, sum(payment.amount) as payment_amount, payment.type as payment_type
-        from (%s) as invoice left join `tabSales Invoice Payment` payment on invoice.name=payment.parent
+            invoice.grand_total, invoice.net_total, sum(if(payment.type='Cash', payment.amount, 0)) as Cash,
+            sum(if(payment.type='bKash', payment.amount, 0)) as bKash, sum(if(payment.type='City Card', payment.amount, 0)) as Card
+        from (%s) as invoice, `tabSales Invoice Payment` payment where invoice.name=payment.parent
         group by invoice.name""" % invoice_query
 
 
@@ -88,8 +89,7 @@ def get_invoice_data(filters):
     		sum(discount) as discount, sum(special_discount) as special_discount, (sum(discount) + sum(special_discount)) as total_discount,
     		format(((sum(discount) + sum(special_discount)) / sum(mrp_total)) * 100, 2) as discount_percentage, sum(net_amount) as net_amount,
     		sum(total_amount) as total_amount, sum(total) as total, sum(grand_total) as grand_total, sum(net_total) as net_total,
-    		(sum(net_total) / count(name)) as basket_value, sum(if(payment_type='Cash', payment_amount, 0)) as Cash,
-    		sum(if(payment_type='bKash', payment_amount, 0)) as bKash, sum(if(payment_type='City Card', payment_amount, 0)) as Card
+    		(sum(net_total) / count(name)) as basket_value, sum(Cash) as Cash, sum(bKash) as bKash, sum(Card) as Card
     	from (%s) as Tab1 group by pos_profile""" % mode_of_payment_query
 
     query_result = frappe.db.sql(pos_profile_query, as_dict=1)
