@@ -18,15 +18,6 @@ frappe.query_reports["Customer Frequency"] = {
 			"default": frappe.datetime.get_today(),
 		},
 		{
-			"fieldname":"switch_invoice",
-			"label": __("Switch Invoice"),
-			"fieldtype": "Select",
-			"options": ["Sales Invoice", "POS Invoice"],
-			"default": "Sales Invoice",
-			"reqd": 1,
-			"width": "60px"
-		},
-		{
 			"fieldname":"min_basket_value",
 			"label": __("Min. Basket Value"),
 			"fieldtype": "Currency",
