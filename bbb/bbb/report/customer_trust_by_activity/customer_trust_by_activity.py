@@ -13,8 +13,8 @@ def get_columns():
     """return columns"""
     columns = [
         {"label": _("Customer"), "fieldname": "customer", "fieldtype": "Link", "options": "POS Profile","width": 250},
-        {"label": _("Mobile No."), "fieldname": "mobile_number", "fieldtype": "Data", "width": 190},
         {"label": _("Customer Group"), "fieldname": "customer_group", "fieldtype": "Data", "width": 190},
+        {"label": _("Mobile No."), "fieldname": "mobile_number", "fieldtype": "Data", "width": 190},
         {"label": _("Last Invoice Date"), "fieldname": "last_invoice_date", "fieldtype": "Date", "width": 190},
     ]
     return columns
@@ -34,7 +34,7 @@ def get_conditions(filters):
 
 def get_invoice_data(filters):
     conditions = get_conditions(filters)
-    invoice_type = filters.get('switch_invoice', "Sales Invoice")
+    invoice_type = "Sales Invoice"
     has_purchased = False if filters.get("purchase_status") == "No Purchase" else True
     customer_filter = "in" if has_purchased else "not in"
 
@@ -66,18 +66,5 @@ def get_invoice_data(filters):
     # print(customer_info_query)
     return frappe.db.sql(customer_info_query, as_dict=1)
 
-    # #
-    # if has_purchased:
-    #     invoice_query = """select max(invoice.posting_date) as posting_date, invoice.customer from `tab%s` invoice group by invoice.customer""" % invoice_type
-    #
-    #     customer_with_invoice = """select customer.customer, customer.mobile_number, customer.customer_group,
-    #                     invoice.posting_date as last_invoice_date from (%s) as customer join (%s) invoice on
-    #                     customer.customer = invoice.customer order by invoice.posting_date desc""" % (customer_info_query, invoice_query)
-    #
-    #
-    #     query_result = frappe.db.sql(customer_with_invoice, as_dict=1)
-    #     return query_result
-    # else:
-    #     return frappe.db.sql(customer_query, as_dict=1)
 
 
