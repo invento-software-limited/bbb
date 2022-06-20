@@ -151,9 +151,12 @@ erpnext.PointOfSale.ItemCart = class {
                 <div class="qty-label" >0</div>
                 <div class="final-amount-total-label">0</div>
             </div>
-            <div class="add-discount-wrapper">
-				${this.get_discount_icon()} Add Discount
-			</div>
+            <div class="additional-discount-section">
+                 <div class="add-discount-wrapper">
+                    ${this.get_discount_icon()} Add Discount
+                </div>
+                <div class="add-discount-amount-wrapper"></div>
+            </div>
 			<div class="net-total-container">
 				<div class="net-total-label">Net Total</div>
 				<div class="net-total-value">0.00</div>
@@ -168,6 +171,7 @@ erpnext.PointOfSale.ItemCart = class {
         );
         $('.total-section').css('visibility', 'hidden');
         this.$add_discount_elem = this.$component.find(".add-discount-wrapper");
+        this.$add_discount_amount_elem = this.$component.find(".add-discount-amount-wrapper");
     }
 
     make_cart_numpad() {
@@ -255,6 +259,7 @@ erpnext.PointOfSale.ItemCart = class {
             me.toggle_checkout_btn(false);
 
             me.allow_discount_change && me.$add_discount_elem.removeClass("d-none");
+            me.allow_discount_change && me.$add_discount_amount_elem.removeClass("d-none");
         });
 
         this.$totals_section.on('click', '.edit-cart-btn', () => {
@@ -267,7 +272,18 @@ erpnext.PointOfSale.ItemCart = class {
         this.$component.on('click', '.add-discount-wrapper', () => {
             const can_edit_discount = this.$add_discount_elem.find('.edit-discount-btn').length;
 
-            if (!this.discount_field || can_edit_discount) this.show_discount_control();
+            if (!this.discount_field || can_edit_discount){
+                this.show_discount_control();
+                this.show_discount_amount_control();
+            }
+        });
+        this.$component.on('click', '.add-discount-amount-wrapper', () => {
+            const can_edit_discount = this.$add_discount_amount_elem.find('.edit-discount-btn').length;
+
+            if (!this.discount_field || can_edit_discount){
+                this.show_discount_control();
+                this.show_discount_amount_control();
+            }
         });
 
         frappe.ui.form.on("POS Invoice", "paid_amount", frm => {
@@ -325,7 +341,7 @@ erpnext.PointOfSale.ItemCart = class {
         frappe.ui.keys.add_shortcut({
             shortcut: "ctrl+d",
             action: () => this.$component.find(".add-discount-wrapper").click(),
-            condition: () => this.$add_discount_elem.is(":visible"),
+            condition: () => this.$add_discount_elem.is(":visible") && this.$add_discount_amount_elem.is(':visible'),
             description: __("Add Order Discount"),
             ignore_inputs: true,
             page: cur_page.page.page
@@ -641,7 +657,7 @@ erpnext.PointOfSale.ItemCart = class {
                 input_class: 'input-xs',
                 onchange: function () {
                 frappe.run_serially([
-                        ()=> me.update_additional_discount(me, this, frm),
+                        ()=> me.update_additional_discount(me, this, frm, 'additional_discount_percentage'),
                     ])
 
                     const grand_total = cint(frappe.sys_defaults.disable_rounded_total) ? frm.doc.grand_total : frm.doc.rounded_total;
@@ -658,21 +674,81 @@ erpnext.PointOfSale.ItemCart = class {
         this.discount_field.set_focus();
     }
 
-    update_additional_discount(me, discount_section, frm){
-        if (flt(discount_section.value) != 0) {
-            frappe.model.set_value(frm.doc.doctype, frm.doc.name, 'additional_discount_percentage', flt(discount_section.value));
-            me.hide_discount_control(discount_section.value);
-            this.events.set_initial_paid_amount(this.events.base_rounded_total)
-        } else {
-            frappe.model.set_value(frm.doc.doctype, frm.doc.name, 'additional_discount_percentage', 0);
-            me.$add_discount_elem.css({
-                'border': '1px dashed var(--gray-500)',
-                'padding': 'var(--padding-sm) var(--padding-md)'
-            });
-            me.$add_discount_elem.html(`${me.get_discount_icon()} Add Discount`);
-            me.discount_field = undefined;
-        }
+    show_discount_amount_control() {
+        this.$add_discount_amount_elem.css({'padding': '0px', 'border': 'none'});
+        this.$add_discount_amount_elem.html(
+            `<div class="add-discount-amount-field"></div>`
+        );
+        const me = this;
+        const frm = me.events.get_frm();
+        let discount = frm.doc.discount_amount;
+
+        this.discount_amount_field = frappe.ui.form.make_control({
+            df: {
+                label: __('Discount Amount'),
+                fieldtype: 'Data',
+                placeholder: (discount ? discount : __('Enter discount amount.')),
+                input_class: 'input-xs',
+                onchange: function () {
+                frappe.run_serially([
+                        ()=> me.update_additional_discount(me, this, frm, 'discount_amount'),
+                    ])
+                //
+                //     const grand_total = cint(frappe.sys_defaults.disable_rounded_total) ? frm.doc.grand_total : frm.doc.rounded_total;
+                //     me.events.set_5_basis_rounded_total(grand_total)
+                //     console.log(me.events.base_rounded_total);
+                //     console.log($('.payment_amount_value').html(format_currency(me.events.base_rounded_total, frm.doc.currency)));
+                },
+
+            },
+            parent: this.$add_discount_amount_elem.find('.add-discount-amount-field'),
+            render_input: true,
+        });
+        this.discount_amount_field.toggle_label(false);
+        this.discount_amount_field.set_focus();
     }
+
+    update_additional_discount(me, discount_section, frm, field_name){
+        if(field_name == 'additional_discount_percentage'){
+            if (flt(discount_section.value) != 0) {
+                frappe.model.set_value(frm.doc.doctype, frm.doc.name, field_name, flt(discount_section.value));
+                me.hide_discount_control(discount_section.value);
+                (setTimeout(function (){
+                    me.hide_discount_amount_control(frm.doc.discount_amount);
+                }, 500))()
+
+                this.events.set_initial_paid_amount(this.events.base_rounded_total)
+            } else {
+                frappe.model.set_value(frm.doc.doctype, frm.doc.name, field_name, 0);
+                me.$add_discount_elem.css({
+                    'border': '1px dashed var(--gray-500)',
+                    'padding': 'var(--padding-sm) var(--padding-md)'
+                });
+                me.$add_discount_elem.html(`${me.get_discount_icon()} Add Discount`);
+                me.discount_field = undefined;
+            }
+        }else{
+            if (discount_section !=0) {
+                this.$add_discount_elem.css({'padding': '0px', 'border': 'none'});
+                this.$add_discount_elem.html(
+                    `<div class="add-discount-field"></div>`
+                );
+                frappe.model.set_value(frm.doc.doctype, frm.doc.name, field_name, discount_section.value);
+                me.hide_discount_amount_control(discount_section.value);
+                this.events.set_initial_paid_amount(this.events.base_rounded_total)
+            } else {
+                frappe.model.set_value(frm.doc.doctype, frm.doc.name, field_name, 0);
+                me.$add_discount_amount_elem.css({
+                    'border': '1px dashed var(--gray-500)',
+                    'padding': 'var(--padding-sm) var(--padding-md)'
+                });
+                me.$add_discount_amount_elem.html(`${me.get_discount_icon()} Add Discount`);
+                me.discount_amount_field = undefined;
+            }
+        }
+
+    }
+
     hide_discount_control(discount) {
         if (!discount) {
             this.$add_discount_elem.css({'padding': '0px', 'border': 'none'});
@@ -686,7 +762,25 @@ erpnext.PointOfSale.ItemCart = class {
             });
             this.$add_discount_elem.html(
                 `<div class="edit-discount-btn">
-					${this.get_discount_icon()} Additional&nbsp;${String(discount).bold()}% discount applied
+					${this.get_discount_icon()} ${String(discount).bold()}% discount applied
+				</div>`
+            );
+        }
+    }
+    hide_discount_amount_control(discount) {
+        if (!discount) {
+            this.$add_discount_amount_elem.css({'padding': '0px', 'border': 'none'});
+            this.$add_discount_amount_elem.html(
+                `<div class="add-discount-amount-field"></div>`
+            );
+        } else {
+            this.$add_discount_amount_elem.css({
+                'border': '1px dashed var(--dark-green-500)',
+                'padding': 'var(--padding-sm) var(--padding-md)'
+            });
+            this.$add_discount_amount_elem.html(
+                `<div class="edit-discount-btn">
+					${this.get_discount_icon()} ${String(discount).bold()}&nbsp;TK discount applied
 				</div>`
             );
         }
