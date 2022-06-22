@@ -948,6 +948,7 @@ erpnext.PointOfSale.ItemCart = class {
             $item && $item.next().remove() && $item.remove();
         } else {
             const item_row = this.get_item_from_frm(item);
+
             this.render_cart_item(item_row, $item);
         }
 
@@ -1504,25 +1505,29 @@ erpnext.PointOfSale.ItemCart = class {
         me.$cart_items_wrapper.empty();
         var frm = me.events.get_frm();
         var item_list = me.events.get_cart_items();
+        let update_rules = true
         if (value === 'Yes') {
             frm.doc.ignore_pricing_rule = 1;
+            update_rules = true
             // frappe.model.set_value(frm.doc.doctype, frm.doc.name, 'ignore_pricing_rule', 0);
         } else if (value === 'No') {
             frm.doc.ignore_pricing_rule = 0
+            update_rules = false
             // frappe.model.set_value(frm.doc.doctype, frm.doc.name, 'ignore_pricing_rule', 1);
         }
         const item_data = frm.doc.items;
-        console.log(item_data)
         frm.doc.items = [];
         frm.refresh_field('ignore_pricing_rule');
         await item_data.forEach(item => {
-            let new_item = {'item_code':item.item_code, 'batch_no': item.batch_no, 'rate':item.item_code, 'qty': item.qty, 'mrp': item.item_price_list, 'title': item.item_name, update_rules: false}
-            var args = {
-            'field': "qty",
-            'item': new_item,
-            'value': "+" + item.qty
-            }
-            this.events.on_cart_update(args);
+            frappe.db.get_value('Item', {'item_code': item.item_code}, ['start_date', 'end_date', 'discount_amount']).then(res=>{
+                let new_item = {'item_code':item.item_code, 'batch_no': item.batch_no, 'rate':item.item_code, 'qty': item.qty, 'mrp': item.price_list_rate, 'title': item.item_name, 'discount_amount': res.message.discount_amount, 'start_date': new Date(res.message.start_date), 'end_date': new Date(res.message.end_date), update_rules: update_rules}
+                var args = {
+                'field': "qty",
+                'item': new_item,
+                'value': "+" + item.qty
+                }
+                this.events.on_cart_update(args);
+            })
         });
         frm.reload_doc();
         console.log(frm.doc)

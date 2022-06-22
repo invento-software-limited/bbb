@@ -61,7 +61,7 @@ erpnext.PointOfSale.ItemSelector = class {
 		!item_group && (item_group = this.parent_item_group);
 
 		return frappe.call({
-			method: "erpnext.selling.page.point_of_sale.point_of_sale.get_items",
+			method: "bbb.bbb.point_of_sale.get_items",
 			freeze: true,
 			args: { start, page_length, price_list, item_group, search_term, pos_profile },
 		});
@@ -80,7 +80,7 @@ erpnext.PointOfSale.ItemSelector = class {
 	get_item_html(item) {
 		const me = this;
 		// eslint-disable-next-line no-unused-vars
-		const { item_image, serial_no, batch_no, barcode, actual_qty, mrp, stock_uom, price_list_rate } = item;
+		const { item_image, serial_no, batch_no, barcode, actual_qty, mrp, stock_uom, price_list_rate, start_date, end_date, discount_amount } = item;
 		const indicator_color = actual_qty > 10 ? "green" : actual_qty <= 0 ? "red" : "orange";
 		const precision = flt(price_list_rate, 2) % 1 != 0 ? 2 : 0;
 
@@ -122,11 +122,11 @@ erpnext.PointOfSale.ItemSelector = class {
 							</div>`;
 			
 		}
-
 		return (
 			`<div class="item-wrapper"
 				data-item-code="${escape(item.item_code)}" data-serial-no="${escape(serial_no)}"
-				data-batch-no="${escape(batch_no)}" data-uom="${escape(stock_uom)}"
+				data-batch-no="${escape(batch_no)}" data-uom="${escape(stock_uom)}" data-start-date="${escape(item.start_date)}" 
+				data-end-date="${escape(item.end_date)}" data-discount-amount="${escape(item.discount_amount)}"
 				data-rate="${escape(price_list_rate || 0)}" data-mrp="${escape(price_list_rate || 0)}"
 				title="${item.item_name}">
 
@@ -242,7 +242,10 @@ erpnext.PointOfSale.ItemSelector = class {
 			let mrp = unescape($item.attr('data-mrp'));
 			let rate = unescape($item.attr('data-rate'));
 			let title = unescape($item.attr('title'));
-
+			let start_date= unescape($item.attr('data-start-date'));
+			let end_date = unescape($item.attr('data-end-date'));
+			let discount_amount = unescape($item.attr('data-discount-amount'));
+			// console.log(start_date, end_date, item_discount_amount)
 			// escape(undefined) returns "undefined" then unescape returns "undefined"
 			batch_no = batch_no === "undefined" ? undefined : batch_no;
 			serial_no = serial_no === "undefined" ? undefined : serial_no;
@@ -250,12 +253,14 @@ erpnext.PointOfSale.ItemSelector = class {
 			rate = rate === "undefined" ? undefined : rate;
 			mrp = mrp === "undefined" ? undefined : mrp;
 			title = title === "undefined" ? undefined : title;
-			// console.log(serial_no, uom, rate, mrp, title);
+			start_date = start_date === "undefined" ? undefined : new Date(start_date);
+			end_date = end_date === "undefined" ? undefined : new Date(end_date);
+			discount_amount = discount_amount === "undefined" ? undefined : discount_amount;
 
 			me.events.item_selected({
 				field: 'qty',
 				value: "+1",
-				item: { item_code, batch_no, serial_no, uom, rate, mrp, title, update_rules: false},
+				item: { item_code, batch_no, serial_no, uom, rate, mrp, title, start_date, end_date, discount_amount, update_rules: false},
 				item_quantity: 1
 			});
 			me.set_search_value('');
@@ -327,6 +332,7 @@ erpnext.PointOfSale.ItemSelector = class {
 				return;
 			}
 		}
+
 
 		this.get_items({ search_term })
 			.then(({ message }) => {
