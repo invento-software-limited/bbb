@@ -101,9 +101,9 @@ frappe.ui.form.CustomerQuickEntryForm = frappe.ui.form.QuickEntryForm.extend({
 	register_primary_action: function (){
 		const me = this;
 		this.dialog.set_primary_action(__('Save'), function() {
-			let regex = new RegExp('^(?:\\+?88|0088)?01[13-9]\\d{8}$');
+			let regex = new RegExp('^01\\d{9}$');
 			if(regex.test(this.doc.mobile_number) === false){
-				frappe.throw(__('Please enter a valid mobile number'));
+				frappe.throw(__('Please enter 11 digit mobile number. Do not include country code(+88). Ex- 01700000000, 01300000000'));
 				return;
 			}
 			if(me.dialog.working) {
