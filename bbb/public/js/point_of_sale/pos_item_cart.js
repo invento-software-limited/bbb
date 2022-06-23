@@ -155,7 +155,9 @@ erpnext.PointOfSale.ItemCart = class {
                  <div class="add-discount-wrapper">
                     ${this.get_discount_icon()} Add Discount
                 </div>
-                <div class="add-discount-amount-wrapper"></div>
+                <div class="add-discount-amount-wrapper">
+                     Add Discount Amount
+                </div>
             </div>
 			<div class="net-total-container">
 				<div class="net-total-label">Net Total</div>
@@ -273,12 +275,12 @@ erpnext.PointOfSale.ItemCart = class {
             const can_edit_discount = this.$add_discount_elem.find('.edit-discount-btn').length;
 
             if (!this.discount_field || can_edit_discount){
-                this.show_discount_control();
                 this.show_discount_amount_control();
+                this.show_discount_control();
             }
         });
         this.$component.on('click', '.add-discount-amount-wrapper', () => {
-            const can_edit_discount = this.$add_discount_amount_elem.find('.edit-discount-btn').length;
+            const can_edit_discount = this.$add_discount_amount_elem.find('.edit-discount-amount-btn').length;
 
             if (!this.discount_field || can_edit_discount){
                 this.show_discount_control();
@@ -349,6 +351,9 @@ erpnext.PointOfSale.ItemCart = class {
         frappe.ui.keys.on("escape", () => {
             const item_cart_visible = this.$component.is(":visible");
             if (item_cart_visible && this.discount_field && this.discount_field.parent.is(":visible")) {
+                this.discount_field.set_value(0);
+            }
+            if (item_cart_visible && this.discount_amount_field && this.discount_field.parent.is(":visible")) {
                 this.discount_field.set_value(0);
             }
         });
@@ -713,11 +718,9 @@ erpnext.PointOfSale.ItemCart = class {
             if (flt(discount_section.value) != 0) {
                 frappe.model.set_value(frm.doc.doctype, frm.doc.name, field_name, flt(discount_section.value));
                 me.hide_discount_control(discount_section.value);
-                (setTimeout(function (){
+                setTimeout(function (){
                     me.hide_discount_amount_control(frm.doc.discount_amount);
-                }, 500))()
-
-                this.events.set_initial_paid_amount(this.events.base_rounded_total)
+                }, 500)
             } else {
                 frappe.model.set_value(frm.doc.doctype, frm.doc.name, field_name, 0);
                 me.$add_discount_elem.css({
@@ -728,14 +731,13 @@ erpnext.PointOfSale.ItemCart = class {
                 me.discount_field = undefined;
             }
         }else{
-            if (discount_section !=0) {
+            if (discount_section !==0) {
                 this.$add_discount_elem.css({'padding': '0px', 'border': 'none'});
                 this.$add_discount_elem.html(
                     `<div class="add-discount-field"></div>`
                 );
-                frappe.model.set_value(frm.doc.doctype, frm.doc.name, field_name, discount_section.value);
+                frappe.model.set_value(frm.doc.doctype, frm.doc.name, field_name, parseFloat(discount_section.value));
                 me.hide_discount_amount_control(discount_section.value);
-                this.events.set_initial_paid_amount(this.events.base_rounded_total)
             } else {
                 frappe.model.set_value(frm.doc.doctype, frm.doc.name, field_name, 0);
                 me.$add_discount_amount_elem.css({
@@ -779,7 +781,7 @@ erpnext.PointOfSale.ItemCart = class {
                 'padding': 'var(--padding-sm) var(--padding-md)'
             });
             this.$add_discount_amount_elem.html(
-                `<div class="edit-discount-btn">
+                `<div class="edit-discount-amount-btn">
 					${this.get_discount_icon()} ${String(discount).bold()}&nbsp;TK discount applied
 				</div>`
             );
@@ -1084,11 +1086,13 @@ erpnext.PointOfSale.ItemCart = class {
     highlight_checkout_btn(toggle) {
         if (toggle) {
             this.$add_discount_elem.css('display', 'flex');
+            this.$add_discount_amount_elem.css('display', 'flex');
             this.$cart_container.find('.checkout-btn').css({
                 'background-color': 'var(--blue-500)'
             });
         } else {
             this.$add_discount_elem.css('display', 'none');
+            this.$add_discount_amount_elem.css('display', 'none');
             this.$cart_container.find('.checkout-btn').css({
                 'background-color': 'var(--blue-200)'
             });
