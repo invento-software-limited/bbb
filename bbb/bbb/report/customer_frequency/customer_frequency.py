@@ -12,10 +12,10 @@ def execute(filters=None):
 def get_columns():
     """return columns"""
     columns = [
-        {"label": _("Customer"), "fieldname": "customer", "fieldtype": "Link", "options": "POS Profile","width": 250},
+        {"label": _("Customer"), "fieldname": "customer", "fieldtype": "Link", "options": "Customer","width": 250},
         {"label": _("Mobile No."), "fieldname": "mobile_number", "fieldtype": "Data", "width": 190},
-        {"label": _("Customer Group"), "fieldname": "customer_group", "fieldtype": "Data", "width": 190},
-        {"label": _("Customer Visit"), "fieldname": "total_invoice", "fieldtype": "Float", "width": 190},
+        {"label": _("Customer Group"), "fieldname": "customer_group", "fieldtype": "Link", "options": "Customer Group", "width": 190},
+        {"label": _("Customer Visit"), "fieldname": "total_invoice", "fieldtype": "Int", "width": 190},
         {"label": _("Total Amount"), "fieldname": "total_amount", "fieldtype": "Currency", "width": 190,
          "convertible": "rate", "options": "currency"},
         {"label": _("Average Basket Value"), "fieldname": "avg_basket_value", "fieldtype": "Currency", "width": 190,
@@ -50,6 +50,8 @@ def get_basket_value_conditions(filters):
         conditions.append("(total_amount/total_invoice) >= %s" % min_basket_value)
     if filters.get('max_basket_value'):
         conditions.append("(total_amount/total_invoice) <= %s" % max_basket_value)
+    if filters.get("customer_group"):
+        conditions.append("customer.customer_group = '%s'" % filters.get("customer_group"))
 
     if conditions:
         return " where " + " and ".join(conditions)
@@ -64,7 +66,7 @@ def get_invoice_data(filters):
     invoice_query = """select count(invoice.name) as total_invoice, invoice.customer, sum(invoice.grand_total) as total_amount
                     from `tab%s` invoice where invoice.docstatus = 1 %s group by invoice.customer""" % (invoice_type, conditions)
 
-    customer_sales_summary_query = """select total_invoice, total_amount, customer, customer.mobile_number,
+    customer_sales_summary_query = """select total_invoice, total_amount, customer, customer.mobile_no,
                                     (total_amount/total_invoice) as avg_basket_value, customer.customer_group, 
                                     customer.customer_type from (%s) as invoice_group inner join `tabCustomer` customer 
                                     on customer.name = invoice_group.customer %s order by total_amount desc""" % (invoice_query, basket_value_conditions)

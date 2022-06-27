@@ -18,20 +18,17 @@ frappe.query_reports["Customer Trust By Activity"] = {
 			"default": frappe.datetime.get_today(),
 		},
 		{
-			"fieldname":"switch_invoice",
-			"label": __("Switch Invoice"),
-			"fieldtype": "Select",
-			"options": ["Sales Invoice", "POS Invoice"],
-			"default": "Sales Invoice",
-			"reqd": 1,
-			"width": "60px"
-		},
-		{
 			"fieldname":"purchase_status",
 			"label": __("Purchase Status"),
 			"fieldtype": "Select",
 			"options": ["Has Purchased", "No Purchase"],
 			"default": "Has Purchased"
+		},
+		{
+			"fieldname":"customer_group",
+			"label": __("Customer Group"),
+			"fieldtype": "Link",
+			"options": "Customer Group"
 		},
 		{
 			"fieldname":"only_consultancy",

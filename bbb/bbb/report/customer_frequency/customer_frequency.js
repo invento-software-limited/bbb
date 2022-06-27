@@ -18,6 +18,12 @@ frappe.query_reports["Customer Frequency"] = {
 			"default": frappe.datetime.get_today(),
 		},
 		{
+			"fieldname":"customer_group",
+			"label": __("Customer Group"),
+			"fieldtype": "Link",
+			"options": "Customer Group"
+		},
+		{
 			"fieldname":"min_basket_value",
 			"label": __("Min. Basket Value"),
 			"fieldtype": "Currency",

@@ -37,6 +37,8 @@ def get_invoice_data(filters):
     invoice_type = "Sales Invoice"
     has_purchased = False if filters.get("purchase_status") == "No Purchase" else True
     customer_filter = "in" if has_purchased else "not in"
+    customer_group = filters.get("customer_group")
+    customer_group_filter = "and customer.customer_group = '%s'" % customer_group if customer_group else ""
 
     if has_purchased and filters.get('only_consultancy'):
         consultancy_query = """select invoice.customer, invoice.posting_date from `tabSales Invoice Item` item join
@@ -56,12 +58,12 @@ def get_invoice_data(filters):
     if has_purchased:
         customer_info_query = """select max(invoice.posting_date) as last_invoice_date, customer.name as customer, 
                             customer.mobile_number, customer.customer_group, customer.customer_type from (%s) as invoice
-                            join `tabCustomer` customer on invoice.customer = customer.name where %s group by 
-                            invoice.customer order by max(invoice.posting_date) desc """ % (customer_query, conditions)
+                            join `tabCustomer` customer on invoice.customer = customer.name where %s %s group by 
+                            invoice.customer order by max(invoice.posting_date) desc """ % (customer_query, conditions, customer_group_filter)
     else:
         customer_info_query = """select customer.name as customer, customer.mobile_number,
                             customer.customer_group, customer.customer_type from `tabCustomer` customer where customer.name %s
-                            (select invoice.customer from (%s) invoice)""" % (customer_filter, customer_query)
+                            (select invoice.customer from (%s) invoice) %s""" % (customer_filter, customer_query, customer_group_filter)
 
     # print(customer_info_query)
     return frappe.db.sql(customer_info_query, as_dict=1)
