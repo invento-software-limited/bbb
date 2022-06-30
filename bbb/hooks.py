@@ -14,7 +14,7 @@ app_license = "MIT"
 
 # include js, css files in header of desk.html
 app_include_css = "/assets/css/custom-point-of-sale.css"
-app_include_js = "/assets/js/customer_quick_entry.js"
+app_include_js = "/assets/js/custom-app-include-js.js"
 
 
 # include js, css files in header of web template
@@ -124,6 +124,8 @@ doc_events = {
     # }
 
 }
+override_doctype_class = {"POS Invoice": "bbb.bbb.controllers.pos_invoice.CustomPOSInvoice"}
+
 jenv = {
     "methods": [
         "str_to_datetime:bbb.bbb.controllers.utils.str_to_datetime",

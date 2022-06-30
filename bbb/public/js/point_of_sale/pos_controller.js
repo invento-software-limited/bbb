@@ -933,7 +933,7 @@ erpnext.PointOfSale.Controller = class {
 
                     this.update_cart_html(item_row);
                     this.update_paid_amount()
-                    this.update_rounded_total(item_row)
+                    // this.update_rounded_total(item_row)
                 }
                 await this.insert_search_product_log(item_code)
 
@@ -971,34 +971,13 @@ erpnext.PointOfSale.Controller = class {
                 await this.trigger_new_item_events(item_row);
 
                 var today = new Date();
-
                 if(start_date !== undefined && end_date !== undefined && discount_amount !== undefined && today >= start_date && today <= end_date && this.frm.doc.ignore_pricing_rule == 0){
-                    await frappe.model.set_value("POS Invoice Item", item_row.child_docname, 'margin_type', null);
-                    await frappe.model.set_value("POS Invoice Item", item_row.child_docname, 'pricing_rules', null);
-                    await frappe.model.set_value("POS Invoice Item", item_row.child_docname, 'price_or_product_discount', null);
-                    await frappe.model.set_value("POS Invoice Item", item_row.child_docname, 'pricing_rule_for', null);
                     await frappe.model.set_value("POS Invoice Item", item_row.child_docname, 'rate', (mrp-discount_amount));
                 }
                 this.update_cart_html(item_row)
                 this.update_paid_amount()
-                this.update_rounded_total(item_row)
+                // this.update_rounded_total(item_row)
                 // this.frm.doc.paid_amount = this.base_rounded_total;
-
-                // if (this.item_details.$component.is(':visible'))
-                // 	this.edit_item_details_of(item_row);
-
-                // if (this.check_serial_batch_selection_needed(item_row))
-                // 	this.edit_item_details_of(item_row);
-
-                // if (update_rules === false) {
-                // 	this.item_list.push({
-                // 		field: 'qty',
-                // 		value: "+1",
-                // 		item: {item_code, batch_no, serial_no, uom, rate, mrp, title, update_rules: true},
-                // 		item_quantity: item_quantity,
-                // 		item_code: item_code
-                // 	})
-                // }
                 this.insert_search_product_log(item_code);
             }
 
