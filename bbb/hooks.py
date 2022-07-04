@@ -37,7 +37,7 @@ page_js = {
 }
 
 # include js in doctype views
-# doctype_js = {"POS Invoice": 'public/js/point_of_sale.js'}
+# doctype_js = {"*": 'public/js/taxes_and_totals.js'}
 # doctype_list_js = {
 #     "Item": "public/js/items.js"
 # }
@@ -122,9 +122,15 @@ doc_events = {
     # "POS Invoice Merge Log": {
     #     "on_submit": "bbb.bbb.pos_invoice_merge_log.on_submit"
     # }
+    "POS Closing Entry":{
+        "validate": "bbb.bbb.pos_closing_entry.validate"
+    }
 
 }
-override_doctype_class = {"POS Invoice": "bbb.bbb.controllers.pos_invoice.CustomPOSInvoice"}
+override_doctype_class = {
+    "POS Invoice": "bbb.bbb.controllers.pos_invoice.CustomPOSInvoice",
+    # "Sales Invoice": "bbb.bbb.controllers.sales_invoice.SalesInvoice"
+}
 
 jenv = {
     "methods": [
