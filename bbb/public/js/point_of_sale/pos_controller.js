@@ -563,7 +563,8 @@ erpnext.PointOfSale.Controller = class {
                 ]
             },
             callback: function (r) {
-                me.frm.doc.naming_series = r.message._naming_series;
+                let random_number = Math.floor((Math.random() * 10000) + 1);
+                me.frm.doc.naming_series = r.message._naming_series + random_number;
                 me.frm.refresh(me.frm.doc.name);
             }
         });
