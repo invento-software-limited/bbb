@@ -270,7 +270,7 @@ erpnext.PointOfSale.Controller = class {
                         // code snippet
                         // console.log(r);
                         if(r.message.length !== 0){
-                            console.log("=====>>>", r.message)
+                            // console.log("=====>>>", r.message)
                             get_items_template(d, r.message)
                         }
                         else{
@@ -334,7 +334,7 @@ erpnext.PointOfSale.Controller = class {
         this.get_naming_series(this);
         if (this.frm.doc.items.length == 0) {
             frappe.show_alert({
-                message: __("You must add atleast one item	 to save it as draft."),
+                message: __("You must add atleast one item to save it as draft."),
                 indicator: 'red'
             });
             frappe.utils.play_sound("error");
@@ -679,7 +679,7 @@ erpnext.PointOfSale.Controller = class {
 
     get_cached_data_if_exist(me, frm) {
         const cached_data = me.get_cache_data(me);
-        console.log(cached_data)
+        // console.log(cached_data)
 
         if (cached_data) {
             const items = cached_data.pos_items
@@ -749,7 +749,7 @@ erpnext.PointOfSale.Controller = class {
     }
 
     async update_cached_item_data(args) {
-        console.log('args ', args)
+        // console.log('args ', args)
         frappe.dom.freeze();
         let item_row = undefined;
         try {
@@ -902,8 +902,7 @@ erpnext.PointOfSale.Controller = class {
         let item_row = undefined;
         try {
             let {field, value, item, item_quantity} = args;
-            const {item_code, batch_no, serial_no, uom, rate, mrp, title, update_rules} = item;
-
+            const {item_code, batch_no, serial_no, uom, rate, mrp, title, start_date, end_date, discount_amount, update_rules} = item;
             // if (this.frm.doc.customer) {
             // 	this.set_cache_data({"pos_items": [item_code, batch_no, serial_no, uom, rate, mrp, title]})
             // }
@@ -934,7 +933,7 @@ erpnext.PointOfSale.Controller = class {
 
                     this.update_cart_html(item_row);
                     this.update_paid_amount()
-                    this.update_rounded_total(item_row)
+                    // this.update_rounded_total(item_row)
                 }
                 await this.insert_search_product_log(item_code)
 
@@ -951,7 +950,7 @@ erpnext.PointOfSale.Controller = class {
                 if (!item_code)
                     return;
 
-                const new_item = {item_code, batch_no, rate, [field]: value};
+                const new_item = {item_code, batch_no, [field]: value, discount_amount, 'rate': (mrp-discount_amount)};
 
                 if (serial_no) {
                     await this.check_serial_no_availablilty(item_code, this.frm.doc.set_warehouse, serial_no);
@@ -970,26 +969,15 @@ erpnext.PointOfSale.Controller = class {
                     await this.check_stock_availability(item_row, value, this.frm.doc.set_warehouse);
 
                 await this.trigger_new_item_events(item_row);
-                this.update_cart_html(item_row);
+
+                var today = new Date();
+                if(start_date !== undefined && end_date !== undefined && discount_amount !== undefined && today >= start_date && today <= end_date && this.frm.doc.ignore_pricing_rule == 0){
+                    await frappe.model.set_value("POS Invoice Item", item_row.child_docname, 'rate', (mrp-discount_amount));
+                }
+                this.update_cart_html(item_row)
                 this.update_paid_amount()
-                this.update_rounded_total(item_row)
+                // this.update_rounded_total(item_row)
                 // this.frm.doc.paid_amount = this.base_rounded_total;
-
-                // if (this.item_details.$component.is(':visible'))
-                // 	this.edit_item_details_of(item_row);
-
-                // if (this.check_serial_batch_selection_needed(item_row))
-                // 	this.edit_item_details_of(item_row);
-
-                // if (update_rules === false) {
-                // 	this.item_list.push({
-                // 		field: 'qty',
-                // 		value: "+1",
-                // 		item: {item_code, batch_no, serial_no, uom, rate, mrp, title, update_rules: true},
-                // 		item_quantity: item_quantity,
-                // 		item_code: item_code
-                // 	})
-                // }
                 this.insert_search_product_log(item_code);
             }
 
@@ -1308,7 +1296,7 @@ erpnext.PointOfSale.Controller = class {
             callback: function (r) {
                 if (!r.exc) {
                     me.cached_data = r.message;
-                    console.log(me.cached_data)
+                    // console.log(me.cached_data)
                 }
             }
         });
@@ -1320,7 +1308,7 @@ erpnext.PointOfSale.Controller = class {
             callback: function (r) {
                 if (!r.exc) {
                     me.cached_data = r.message;
-                    console.log(me.cached_data)
+                    // console.log(me.cached_data)
                 }
             }
         });
