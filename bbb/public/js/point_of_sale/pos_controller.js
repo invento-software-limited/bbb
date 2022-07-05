@@ -238,10 +238,10 @@ erpnext.PointOfSale.Controller = class {
                                             {{ d.item_name }}</a>
                                         </div>
                                     <div class="col-sm-2 text-center" style="margin-top: 8px;">
-                                        {% if d.actual_qty > 0 %}
-                                            <span style="height:10px;width: 10px;background-color: green; border-radius: 50%; display: inline-block;"></span>
+                                        {% if d.actual_qty > 5 %}
+                                            <span style="color: green">+5</span>
                                         {% else %}
-                                            <span style="height:10px;width: 10px;background-color: red;border-radius: 50%; display: inline-block;"></span>
+                                            <span style="color: red">-5</span>
                                         {% endif %}
                                     </div>
                                 </div>
@@ -258,12 +258,11 @@ erpnext.PointOfSale.Controller = class {
             d.fields_dict.items.$wrapper.html(table_data);
         }
 
-        function get_items(item, warehouse){
+        function get_items(item){
             frappe.call({
                 method: 'bbb.bbb.page.item_stock.item_stock.get_item_stock_data',
                 args: {
-                    item_code: item,
-                    warehouse: warehouse
+                    search_text: item
                 },
                 callback: function(r) {
                     if (!r.exc) {
@@ -288,26 +287,14 @@ erpnext.PointOfSale.Controller = class {
                     fieldtype: "Data",
                     fieldname: "item",
                     label: __("Item"),
-                    // options: "Item",
                     reqd: 1,
                     onchange: function (e) {
                         // cur_dialog.fields_dict.item_code.value
-                        get_items(this.value, cur_dialog.fields_dict.warehouse.value)
+                        get_items(this.value)
                     }
                 },
                 {
-                    fieldtype: "Column Break"
-                },
-                {
-                    fieldtype: "Link",
-                    fieldname: "warehouse",
-                    label: __("Warehouse"),
-                    options: "Warehouse",
-                    reqd: 1,
-                    onchange: function (e) {
-                        // cur_dialog.fields_dict.item_code.value
-                        get_items(cur_dialog.fields_dict.item.value, this.value)
-                    }
+                  fieldtype: "Column Break"
                 },
                 {
                     fieldtype: "Section Break"
