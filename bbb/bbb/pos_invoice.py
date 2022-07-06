@@ -202,24 +202,17 @@ def remove_single_item_from_cache(item_code=None):
 
 @frappe.whitelist()
 def get_past_order_list(search_term, status, limit=3):
-    fields = ["name", "grand_total", "currency", "customer", "posting_time", "posting_date"]
+    # fields = ["name", "grand_total", "currency", "customer", "posting_time", "posting_date"]
     invoice_list = []
 
-    if search_term and status:
-        # invoices_by_customer = frappe.db.get_all(
-        #     "POS Invoice",
-        #     filters={"customer": ["like", "%{}%".format(search_term)], "status": status, 'owner': frappe.session.user},
-        #     fields=fields, limit=limit
-        # )
-        invoices_by_name = frappe.db.get_all(
-            "POS Invoice",
-            filters={"name": ["like", "%{}%".format(search_term)], "status": status, 'owner': frappe.session.user},
-            fields=fields, limit=limit
-        )
+    if status == 'Draft':
+        invoice_list = frappe.db.sql(
+            """SELECT name, grand_total, currency, customer, posting_time, posting_date FROM `tabPOS Invoice` WHERE name LIKE '%{}%' AND docstatus='0' AND  owner='{}' ORDER BY posting_date desc, posting_time desc limit 3""".format(
+                search_term, frappe.session.user), as_dict=True, debug=False)
 
-        invoice_list = invoices_by_name
-        # invoice_list = invoices_by_customer + invoices_by_name
-    elif status:
-        invoice_list = frappe.db.get_all("POS Invoice", filters={"status": status, 'owner': frappe.session.user}, fields=fields, limit=limit)
+    elif status == 'All':
+        invoice_list = frappe.db.sql(
+            """SELECT name, grand_total, currency, customer, posting_time, posting_date FROM `tabPOS Invoice` WHERE name LIKE '%{}%' AND docstatus<>'0' AND owner='{}' ORDER BY posting_date desc, posting_time desc limit 3""".format(
+                search_term, frappe.session.user), as_dict=True, debug=False)
 
     return invoice_list
