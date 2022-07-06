@@ -155,7 +155,7 @@ erpnext.PointOfSale.ItemCart = class {
                  <div class="add-discount-wrapper">
                     ${this.get_discount_icon()} Add Discount
                 </div>
-                <div class="add-discount-amount-wrapper">
+                <div class="add-discount-amount-wrapper" style="display:none">
                      Add Discount Amount
                 </div>
             </div>
