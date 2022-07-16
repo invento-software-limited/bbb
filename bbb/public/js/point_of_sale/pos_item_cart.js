@@ -958,6 +958,20 @@ erpnext.PointOfSale.ItemCart = class {
         this.highlight_checkout_btn(no_of_cart_items > 0);
 
         this.update_empty_cart_section(no_of_cart_items);
+
+        // rounded_total : M rounds to 5 basis ( 12.49 will be 10 and 12.5 will  be 15)
+        const frm = this.events.get_frm()
+        let rounded_total = this.events.get_5_basis_rounded(frm.doc.grand_total)
+        // frappe.model.set_value(frm.doc.doctype, frm.doc.name, 'rounding_adjustment', rounded_total - frm.doc.grand_total)
+        frappe.model.set_value(frm.doc.doctype, frm.doc.name, 'grand_total', rounded_total)
+        frappe.model.set_value(frm.doc.doctype, frm.doc.name, 'base_grand_total', rounded_total)
+        frappe.model.set_value(frm.doc.doctype, frm.doc.name, 'rounded_total', rounded_total)
+        frappe.model.set_value(frm.doc.doctype, frm.doc.name, 'base_rounded_total', null)
+        frappe.model.set_value(frm.doc.doctype, frm.doc.name, 'base_paid_amount', null)
+        frappe.model.set_value(frm.doc.doctype, frm.doc.name, 'base_change_amount', null)
+        frappe.model.set_value(frm.doc.doctype, frm.doc.name, 'base_rounding_adjustment', null)
+        // console.log(frm);
+
     }
 
     render_cart_item(item_data, $item_to_update) {

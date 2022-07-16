@@ -117,7 +117,9 @@ doc_events = {
     # },
 
     "POS Invoice": {
-        "after_insert": "bbb.bbb.pos_invoice.after_insert"
+        "after_insert": "bbb.bbb.pos_invoice.after_insert",
+        "before_submit": "bbb.bbb.pos_invoice.after_insert",
+        "validate": "bbb.bbb.pos_invoice.after_insert"
     },
     # "POS Invoice Merge Log": {
     #     "on_submit": "bbb.bbb.pos_invoice_merge_log.on_submit"
@@ -128,8 +130,8 @@ doc_events = {
 
 }
 override_doctype_class = {
+    # "Sales Invoice": "bbb.bbb.controllers.sales_invoice.CustomSalesInvoice",
     "POS Invoice": "bbb.bbb.controllers.pos_invoice.CustomPOSInvoice",
-    # "Sales Invoice": "bbb.bbb.controllers.sales_invoice.SalesInvoice"
 }
 
 jenv = {
