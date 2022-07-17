@@ -21,6 +21,14 @@ frappe.query_reports["Brand Wise Sell And %"] = {
 			"width": "60px"
 		},
 		{
+			"fieldname":"outlet",
+			"label": __("Outlet"),
+			"fieldtype": "Link",
+			"options": "POS Profile",
+			"reqd": 1,
+			"width": "60px"
+		},
+		{
 			"fieldname":"switch_invoice",
 			"label": __("Switch Invoice"),
 			"fieldtype": "Select",
