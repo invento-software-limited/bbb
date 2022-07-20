@@ -208,12 +208,12 @@ def get_past_order_list(search_term, status, limit=3):
 
     if status == 'Draft':
         invoice_list = frappe.db.sql(
-            """SELECT name, grand_total, currency, customer, posting_time, posting_date FROM `tabPOS Invoice` WHERE name LIKE '%{}%' AND docstatus='0' AND  owner='{}' ORDER BY posting_date desc limit 3""".format(
-                search_term, frappe.session.user), as_dict=True, debug=False)
+            """SELECT name, grand_total, currency, customer, posting_time, posting_date FROM `tabPOS Invoice` WHERE name LIKE '%{}%' OR customer_name LIKE '%{}%' AND docstatus='0' AND  owner='{}' ORDER BY posting_date desc""".format(
+                search_term, search_term,  frappe.session.user), as_dict=True, debug=False)
 
     elif status == 'All':
         invoice_list = frappe.db.sql(
-            """SELECT name, grand_total, currency, customer, posting_time, posting_date FROM `tabPOS Invoice` WHERE name LIKE '%{}%' AND docstatus<>'0' AND owner='{}' ORDER BY posting_date desc limit 3""".format(
-                search_term, frappe.session.user), as_dict=True, debug=False)
+            """SELECT name, grand_total, currency, customer, posting_time, posting_date FROM `tabPOS Invoice` WHERE name LIKE '%{}%' OR customer_name LIKE '%{}%' AND docstatus<>'0' AND owner='{}' ORDER BY posting_date desc limit 3""".format(
+                search_term, search_term, frappe.session.user), as_dict=True, debug=False)
 
     return invoice_list

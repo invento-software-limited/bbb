@@ -162,15 +162,12 @@ class CustomPOSInvoice(POSInvoice):
             # munim fine need to add permission here
         user = frappe.session.user
         user_roles = frappe.get_roles(user)
-        print("ROLE PASS")
         if user == 'Administrator' or 'Can Return' in user_roles:
             pass
         elif self.is_return and entry.amount > 0:
             frappe.throw(_("Row #{0} (Payment Table): Amount must be negative").format(entry.idx))
 
         if self.is_return:
-            print(total_amount_in_payments)
-            print(self.rounded_total or self.grand_total)
             invoice_total = self.rounded()
             if total_amount_in_payments and total_amount_in_payments < invoice_total:
                 frappe.throw(_("Total payments amount can't be greater than {}").format(-invoice_total))

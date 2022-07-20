@@ -167,7 +167,7 @@ erpnext.PointOfSale.Controller = class {
 
     prepare_menu() {
         this.page.clear_menu();
-        let me = this
+        let me = this;
         $('#open_form_view').bind('click', function (e) {
             e.preventDefault();
             me.open_form_view();
@@ -176,8 +176,17 @@ erpnext.PointOfSale.Controller = class {
             e.preventDefault();
             me.check_item_stock();
         });
+        $('#add_damaged_product').bind('click', function (e) {
+            e.preventDefault();
+            me.add_damaged_product();
+        });
         $('#reset_cart').bind('click', function (e) {
             location.reload();
+            // frappe.run_serially([
+            //     () => frappe.dom.freeze(),
+            //     () => me.make_new_invoice(),
+            //     () => frappe.dom.unfreeze(),
+            // ]);
         });
         $('#toggle_recent_order').bind('click', function (e) {
             e.preventDefault();
@@ -307,6 +316,45 @@ erpnext.PointOfSale.Controller = class {
         });
         d.show();
         d.$wrapper.find('.modal-dialog').css("max-width", "800px");
+    }
+
+    add_damaged_product(){
+        const me = this;
+        let d = new frappe.ui.Dialog({
+        title: 'Enter Amount',
+        fields: [
+            // {
+            //     label: 'Item',
+            //     fieldname: 'item_code',
+            //     fieldtype: 'Link',
+            //     options: 'Item'
+            // },
+            // {
+            //     fieldtype: "Column Break"
+            // },
+            {
+                label: 'Amount',
+                fieldname: 'amount',
+                fieldtype: 'Data'
+            },
+        ],
+        primary_action_label: 'Add',
+        primary_action(values) {
+
+            const new_item = {'item_code': 'damaged_product', 'qty': 1};
+            const item_row = me.frm.add_child('items', new_item);
+            me.trigger_new_item_events(item_row);
+            setTimeout(function (){
+                frappe.model.set_value(item_row.doctype, item_row.name, 'rate', values.amount);
+                me.update_cart_html(item_row);
+                me.update_paid_amount();
+                me.insert_search_product_log('damaged_product');
+            }, 2000);
+            d.hide();
+        }
+    });
+
+    d.show();
     }
 
     toggle_recent_order() {
@@ -540,21 +588,25 @@ erpnext.PointOfSale.Controller = class {
     }
 
     get_naming_series(me) {
-        frappe.call({
-            method: 'frappe.client.get_value',
-            args: {
-                'doctype': 'POS Profile',
-                'filters': {'name': this.pos_profile},
-                'fieldname': [
-                    '_naming_series',
-                ]
-            },
-            callback: function (r) {
-                let random_number = Math.floor((Math.random() * 10000) + 1);
-                me.frm.doc.naming_series = r.message._naming_series + random_number;
-                me.frm.refresh(me.frm.doc.name);
-            }
-        });
+
+        if(me.frm.doc.__islocal){
+            frappe.call({
+                method: 'frappe.client.get_value',
+                args: {
+                    'doctype': 'POS Profile',
+                    'filters': {'name': this.pos_profile},
+                    'fieldname': [
+                        '_naming_series',
+                    ]
+                },
+                callback: function (r) {
+                    let random_number = Math.floor((Math.random() * 10000) + 1);
+                    me.frm.doc.naming_series = r.message._naming_series + random_number;
+                    me.frm.refresh(me.frm.doc.name);
+                }
+            });
+        }
+
     }
 
     init_recent_order_list() {
@@ -986,8 +1038,8 @@ erpnext.PointOfSale.Controller = class {
         .set_value(payments[0].doctype, payments[0].name, 'amount', this.base_rounded_total)
         .then(() => this.payment.update_totals_section(this.frm.doc))
 
-        let base_rounded_total = this.get_5_basis_rounded_total();
-        this.set_initial_paid_amount(base_rounded_total);
+        // let base_rounded_total = this.get_5_basis_rounded_total();
+        // this.set_initial_paid_amount(base_rounded_total);
     }
 
     async update_rounded_total(item_row = undefined) {
@@ -1110,7 +1162,7 @@ erpnext.PointOfSale.Controller = class {
                 i => i.item_code === item_code
                     && (!has_batch_no || (has_batch_no && i.batch_no === batch_no))
                     && (i.uom === uom)
-                // && (i.rate == rate)
+                    && (i.qty > 0)
                 // && (i.mrp == mrp)
                 // && (i.title == title)
             );

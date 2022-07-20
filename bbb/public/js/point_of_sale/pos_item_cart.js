@@ -189,7 +189,7 @@ erpnext.PointOfSale.ItemCart = class {
                 [1, 2, 3, 'Quantity'],
                 [4, 5, 6, 'Discount'],
                 [7, 8, 9, 'Rate'],
-                ['.', 0, 'Delete', 'Remove']
+                ['-', 0, 'Delete', 'Remove']
             ],
             css_classes: [
                 ['', '', '', 'col-span-2'],
@@ -540,6 +540,11 @@ erpnext.PointOfSale.ItemCart = class {
                             <li>
                                 <a class="grey-link dropdown-item" href="#" id="check_item_stock">
                                     <span class="menu-item-label" data-label="Check Item Stock"><span class="alt-underline">C</span>heck Item Stock</span>
+                                </a>
+                            </li>
+                            <li>
+                                <a class="grey-link dropdown-item" href="#" id="add_damaged_product">
+                                    <span class="menu-item-label" data-label=""><span class="alt-underline">A</span>dd Damaged Product</span>
                                 </a>
                             </li>
                             <li>
