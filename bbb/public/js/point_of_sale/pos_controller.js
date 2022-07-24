@@ -349,7 +349,7 @@ erpnext.PointOfSale.Controller = class {
                 me.update_cart_html(item_row);
                 me.update_paid_amount();
                 me.insert_search_product_log('damaged_product');
-            }, 2000);
+            }, 1500);
             d.hide();
         }
     });
@@ -1386,25 +1386,43 @@ erpnext.PointOfSale.Controller = class {
                 'rounded_adjustment': 0
             }
             return 0
-        } else {
+        }
+        else if(number % 5 === 0) {
+            return number
+        }
+        else {
             let float_number = parseFloat(number);
             let int_number = parseInt(float_number);
-            let divisible_number = (Math.floor(int_number / 5)) * 5;
-            let adjustment = float_number - divisible_number;
-            let rounding_total = 0;
+            let divisible_number = parseInt(int_number / 5) * 5;
+            let adjustment = Math.abs(float_number - divisible_number);
+            let rounded_total = 0;
             let rounded_adjustment = 0
-            if (adjustment < 2.50) {
-                rounding_total = divisible_number
-                rounded_adjustment = -(adjustment)
-            } else if (adjustment > 2.49) {
-                rounding_total = divisible_number + 5
-                rounded_adjustment = rounding_total - float_number
+            if(number < 0){
+                if (adjustment < 2.50) {
+                    rounded_total = divisible_number
+                    rounded_adjustment = adjustment
+                } else if (adjustment > 2.49) {
+                    rounded_total = divisible_number - 5
+                    rounded_adjustment = -(rounded_total - float_number)
+                }
+            }else{
+                if (adjustment < 2.50) {
+                    rounded_total = divisible_number
+                    rounded_adjustment = -(adjustment)
+                } else if (adjustment > 2.49) {
+                    rounded_total = divisible_number + 5
+                    rounded_adjustment = rounded_total - float_number
+                }
             }
+
             data = {
-                'rounded_total': rounding_total,
+                'rounded_total': rounded_total,
                 'rounding_adjustment': rounded_adjustment.toFixed(2)
             }
-            return rounding_total
+            this.initial_paid_amount = rounded_total
+            this.base_rounded_total = rounded_total;
+            return rounded_total
+
         }
 
     }
