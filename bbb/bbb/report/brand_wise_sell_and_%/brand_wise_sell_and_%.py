@@ -36,6 +36,9 @@ def get_conditions(filters):
     if filters.get("to_date"):
         conditions.append("sales_invoice.posting_date <= '%s'" % filters.get("to_date"))
 
+    if filters.get("outlet"):
+        conditions.append("sales_invoice.pos_profile = '%s'" % filters.get("outlet"))
+
     if conditions:
         conditions = " and ".join(conditions)
     return conditions
@@ -44,26 +47,24 @@ def get_conditions(filters):
 def get_invoice_data(filters):
     conditions = get_conditions(filters)
     invoice_type = filters.get('switch_invoice')
-    outlet = filters.get('outlet')
     query_result = frappe.db.sql("""
     		select
     			sales_invoice.grand_total, sales_invoice.served_by, sales_invoice.total_qty as unit_qty, sales_invoice.name, 
     			item.standard_rate as unit_price, sales_invoice_item.rate as selling_rate,
     			sales_invoice_item.qty as quantity, sales_invoice_item.brand,
     			(sales_invoice_item.qty * item.standard_rate) as mrp_total,
-    			(sales_invoice_item.amount - sales_invoice_item.net_amount) as special_discount,
-    			 sales_invoice_item.net_amount, sales_invoice_item.amount as total_amount, sales_invoice.customer_name, 
-    			 sales_invoice.total, sales_invoice.grand_total, sales_invoice.total_taxes_and_charges, sales_invoice.net_total
+    			 sales_invoice_item.net_amount, sales_invoice_item.amount as total_amount,
+    			 sales_invoice.total, sales_invoice.grand_total, sales_invoice.other_charges_calculation, sales_invoice.net_total
     		from `tab%s` sales_invoice, `tab%s Item` sales_invoice_item, `tabItem` item
     		where sales_invoice.name = sales_invoice_item.parent and item.item_code = sales_invoice_item.item_code
-    			and sales_invoice.docstatus = 1 and sales_invoice.pos_profile='%s' and %s
+    			and sales_invoice.docstatus = 1 and %s
     		order by sales_invoice.name
-    		""" % (invoice_type, invoice_type, outlet, conditions), as_dict=1)
+    		""" % (invoice_type, invoice_type, conditions), as_dict=1)
 
     data = {}
-    total_qty = 0
+    total_amount = 0
     for result in query_result:
-        total_qty += result.get('quantity')
+        total_amount += result.get('total_amount')
         if data.get(result.get('brand')):
             pos_data = data.get(result.get('brand'))
             pos_data['mrp_total'] = pos_data['mrp_total'] + result['mrp_total']
@@ -78,7 +79,7 @@ def get_invoice_data(filters):
     for key, invoice_data in data.items():
         invoice_data['bill_amount'] = invoice_data['total_amount']
         invoice_data['sales_percentage'] = "{:.2f}".format(
-            (invoice_data['total_item_qty'] / total_qty) * 100)
+            (invoice_data['total_amount'] / total_amount) * 100)
         pos_wise_list_data.append(invoice_data)
     return pos_wise_list_data
 
