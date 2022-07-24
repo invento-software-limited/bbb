@@ -255,6 +255,12 @@ erpnext.PointOfSale.ItemCart = class {
 
         this.$component.on('click', '.checkout-btn', function () {
             if ($(this).attr('style').indexOf('--blue-500') == -1) return;
+            const frm = me.events.get_frm();
+            let grand_total = frm.doc.grand_total;
+            let payments = frm.doc.payments;
+            payments[0].amount = grand_total;
+            payments[0].base_amount =grand_total;
+            frappe.model.set_value(frm.doctype, frm.docname, 'paid_amount', grand_total);
 
             me.wrapper.find('.customer-cart-container').css('grid-column', 'span 5 / span 5');
             me.events.checkout();
