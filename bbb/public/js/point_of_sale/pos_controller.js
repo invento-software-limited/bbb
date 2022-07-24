@@ -178,7 +178,13 @@ erpnext.PointOfSale.Controller = class {
         });
         $('#add_damaged_product').bind('click', function (e) {
             e.preventDefault();
-            me.add_damaged_product();
+            if(me.frm.doc.is_return){
+                me.add_damaged_product();
+            }else{
+                const message = __("You can add damaged product in return");
+				frappe.show_alert({ message, indicator: "red" });
+            }
+
         });
         $('#reset_cart').bind('click', function (e) {
             location.reload();
