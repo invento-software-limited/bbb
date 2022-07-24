@@ -32,8 +32,10 @@ def after_insert_or_on_submit(doc, method):
 
             elif adjustment > 2.49:
                 rounding_adjustment = (divisible_number - 5) - grand_total
-                change_amount = (paid_amount - (divisible_number - 5)) if (paid_amount - (divisible_number - 5)) > 0 else 0
-                outstanding_amount = ((divisible_number - 5) - paid_amount) if ((divisible_number - 5) - paid_amount) > 0 else 0
+                change_amount = (paid_amount - (divisible_number - 5)) if (paid_amount - (
+                        divisible_number - 5)) > 0 else 0
+                outstanding_amount = ((divisible_number - 5) - paid_amount) if ((
+                                                                                        divisible_number - 5) - paid_amount) > 0 else 0
 
                 in_words = money_in_words(divisible_number - 5)
                 frappe.db.set_value("POS Invoice", doc.name, "in_words", in_words)
@@ -61,8 +63,10 @@ def after_insert_or_on_submit(doc, method):
 
             elif adjustment > 2.49:
                 rounding_adjustment = (divisible_number + 5) - grand_total
-                change_amount = (paid_amount - (divisible_number + 5)) if (paid_amount - (divisible_number + 5)) > 0 else 0
-                outstanding_amount = ((divisible_number + 5) - paid_amount) if ((divisible_number + 5) - paid_amount) > 0 else 0
+                change_amount = (paid_amount - (divisible_number + 5)) if (paid_amount - (
+                        divisible_number + 5)) > 0 else 0
+                outstanding_amount = ((divisible_number + 5) - paid_amount) if ((
+                                                                                        divisible_number + 5) - paid_amount) > 0 else 0
 
                 in_words = money_in_words(divisible_number + 5)
                 frappe.db.set_value("POS Invoice", doc.name, "in_words", in_words)
@@ -172,11 +176,65 @@ def get_past_order_list(search_term, status, limit=3):
     fields = ["name", "grand_total", "currency", "customer", "posting_time", "posting_date"]
     invoice_list = []
 
+    user = frappe.session.user
+    user_roles = frappe.get_roles(user)
+    if user == 'Administrator' or 'Can Return' in user_roles:
+        if search_term and status:
+            if status == 'Draft':
+                invoices_by_customer = frappe.db.get_all(
+                    "POS Invoice",
+                    filters={"customer": ["like", "%{}%".format(search_term)], "status": status},
+                    fields=fields,
+                )
+                invoices_by_name = frappe.db.get_all(
+                    "POS Invoice",
+                    filters={"name": ["like", "%{}%".format(search_term)], "status": status},
+                    fields=fields,
+                )
+                invoices_by_customer_mobile_number = frappe.db.get_all(
+                    "POS Invoice",
+                    filters={"customer_mobile_number": ["like", "%{}%".format(search_term)], "status": status},
+                    fields=fields,
+                )
+            elif status != 'Draft':
+                invoices_by_customer = frappe.db.get_all(
+                    "POS Invoice",
+                    filters={"customer": ["like", "%{}%".format(search_term)], "status": ["!=", "Draft"]},
+                    fields=fields,
+                    limit=3,
+                )
+                invoices_by_name = frappe.db.get_all(
+                    "POS Invoice",
+                    filters={"name": ["like", "%{}%".format(search_term)], "status": ["!=", "Draft"]},
+                    fields=fields,
+                    limit=3,
+                )
+                invoices_by_customer_mobile_number = frappe.db.get_all(
+                    "POS Invoice",
+                    filters={"customer_mobile_number": ["like", "%{}%".format(search_term)],
+                             "status": ["!=", "Draft"]},
+                    fields=fields,
+                    limit=3,
+                )
+            invoice_list = invoices_by_customer + invoices_by_name + invoices_by_customer_mobile_number
+            if len(invoice_list) > 2:
+                invoice_list = invoice_list[:3]
+        elif status == 'Draft':
+            invoice_list = frappe.db.get_all("POS Invoice",
+                                             filters={"status": status},
+                                             fields=fields)
+        elif status == 'All':
+            invoice_list = frappe.db.get_all("POS Invoice",
+                                             filters={"status": ["!=", "Draft"]},
+                                             fields=fields, limit=3)
+        return invoice_list
+
     if search_term and status:
         if status == 'Draft':
             invoices_by_customer = frappe.db.get_all(
                 "POS Invoice",
-                filters={"customer": ["like", "%{}%".format(search_term)], "status": status, 'owner': frappe.session.user},
+                filters={"customer": ["like", "%{}%".format(search_term)], "status": status,
+                         'owner': frappe.session.user},
                 fields=fields,
             )
             invoices_by_name = frappe.db.get_all(
@@ -186,25 +244,29 @@ def get_past_order_list(search_term, status, limit=3):
             )
             invoices_by_customer_mobile_number = frappe.db.get_all(
                 "POS Invoice",
-                filters={"customer_mobile_number": ["like", "%{}%".format(search_term)], "status": status, 'owner': frappe.session.user},
+                filters={"customer_mobile_number": ["like", "%{}%".format(search_term)], "status": status,
+                         'owner': frappe.session.user},
                 fields=fields,
             )
         elif status != 'Draft':
             invoices_by_customer = frappe.db.get_all(
                 "POS Invoice",
-                filters={"customer": ["like", "%{}%".format(search_term)], "status": ["!=", "Draft"], 'owner': frappe.session.user},
+                filters={"customer": ["like", "%{}%".format(search_term)], "status": ["!=", "Draft"],
+                         'owner': frappe.session.user},
                 fields=fields,
                 limit=3,
             )
             invoices_by_name = frappe.db.get_all(
                 "POS Invoice",
-                filters={"name": ["like", "%{}%".format(search_term)], "status": ["!=", "Draft"], 'owner': frappe.session.user},
+                filters={"name": ["like", "%{}%".format(search_term)], "status": ["!=", "Draft"],
+                         'owner': frappe.session.user},
                 fields=fields,
                 limit=3,
             )
             invoices_by_customer_mobile_number = frappe.db.get_all(
                 "POS Invoice",
-                filters={"customer_mobile_number": ["like", "%{}%".format(search_term)], "status": ["!=", "Draft"], 'owner': frappe.session.user},
+                filters={"customer_mobile_number": ["like", "%{}%".format(search_term)], "status": ["!=", "Draft"],
+                         'owner': frappe.session.user},
                 fields=fields,
                 limit=3,
             )
@@ -212,7 +274,10 @@ def get_past_order_list(search_term, status, limit=3):
         if len(invoice_list) > 2:
             invoice_list = invoice_list[:3]
     elif status == 'Draft':
-        invoice_list = frappe.db.get_all("POS Invoice", filters={"status": status, 'owner': frappe.session.user}, fields=fields)
+        invoice_list = frappe.db.get_all("POS Invoice", filters={"status": status, 'owner': frappe.session.user},
+                                         fields=fields)
     elif status == 'All':
-        invoice_list = frappe.db.get_all("POS Invoice", filters={"status": ["!=", "Draft"], 'owner': frappe.session.user}, fields=fields, limit=3)
+        invoice_list = frappe.db.get_all("POS Invoice",
+                                         filters={"status": ["!=", "Draft"], 'owner': frappe.session.user},
+                                         fields=fields, limit=3)
     return invoice_list
