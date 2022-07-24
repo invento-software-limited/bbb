@@ -24,13 +24,13 @@ class CustomPOSInvoice(POSInvoice):
         super(CustomPOSInvoice, self).__init__(*args, **kwargs)
 
     # def validate(self):
-        # run on validate method of selling controller
-        # super(CustomPOSInvoice, self).validate()
-        # self.validate_pos_return()
-        # munim fine
-        # validate amount in mode of payments for returned invoices for pos must be negative
-        # if self.is_pos and self.is_return:
-        #     self.verify_payment_amount_is_negative()
+    # run on validate method of selling controller
+    # super(CustomPOSInvoice, self).validate()
+    # self.validate_pos_return()
+    # munim fine
+    # validate amount in mode of payments for returned invoices for pos must be negative
+    # if self.is_pos and self.is_return:
+    #     self.verify_payment_amount_is_negative()
 
     def apply_pricing_rule_on_items(self, item, pricing_rule_args):
         if not pricing_rule_args.get("validate_applied_rule", 0):
@@ -123,7 +123,6 @@ class CustomPOSInvoice(POSInvoice):
         if not self.get("is_return"): return
 
         for d in self.get("items"):
-            print("qty error fix")
             # munim fine
             # if d.get("qty") > 0:
             # 	frappe.throw(
@@ -181,7 +180,6 @@ class CustomPOSInvoice(POSInvoice):
                 frappe.throw(_("Paid amount + Write Off Amount can not be greater than Grand Total"))
 
     def verify_payment_amount_is_negative(self):
-        print("Negetive QTY ")
         # for entry in self.payments:
         #     if entry.amount > 0:
         #         frappe.throw(_("Row #{0} (Payment Table): Amount must be negative").format(entry.idx))
@@ -201,11 +199,69 @@ class CustomPOSInvoice(POSInvoice):
                 frappe.throw(_("Total payments amount can't be greater than {}").format(-invoice_total))
 
     def rounded(self):
-        invoice_total = self.rounded_total or self.grand_total
-        five_basis_rounded_total = int(invoice_total / 5) * 5
-        adjustment = abs(invoice_total - five_basis_rounded_total)
-
-        if (adjustment > 2.49):
-            return five_basis_rounded_total + 5
+        invoice_total = self.grand_total
+        five_basis_total = int(invoice_total / 5) * 5
+        adjustment = abs(invoice_total - five_basis_total)
+        if five_basis_total < 0:
+            if (adjustment > 2.49):
+                return five_basis_total - 5
+            else:
+                return five_basis_total
         else:
-            return five_basis_rounded_total
+            if (adjustment > 2.49):
+                return five_basis_total + 5
+            else:
+                return five_basis_total
+
+    def set_status(self, update=False, status=None, update_modified=True):
+        rounded_total = self.rounded()
+        paid_amount = self.paid_amount
+        outstanding_amount = paid_amount - rounded_total
+        if self.is_new():
+            if self.get("amended_from"):
+                self.status = "Draft"
+            return
+
+        if not status:
+            if self.docstatus == 2:
+                status = "Cancelled"
+            elif self.docstatus == 1:
+                if self.consolidated_invoice:
+                    self.status = "Consolidated"
+                elif (
+                        flt(outstanding_amount) > 0
+                        and getdate(self.due_date) < getdate(nowdate())
+                        and self.is_discounted
+                        and self.get_discounting_status() == "Disbursed"
+                ):
+                    self.status = "Overdue and Discounted"
+                elif flt(outstanding_amount) > 0 and getdate(self.due_date) < getdate(nowdate()):
+                    self.status = "Overdue"
+                elif (
+                        flt(outstanding_amount) > 0
+                        and getdate(self.due_date) >= getdate(nowdate())
+                        and self.is_discounted
+                        and self.get_discounting_status() == "Disbursed"
+                ):
+                    self.status = "Unpaid and Discounted"
+                elif flt(outstanding_amount) > 0 and getdate(self.due_date) >= getdate(nowdate()):
+                    self.status = "Unpaid"
+                elif (
+                        flt(outstanding_amount) <= 0
+                        and self.is_return == 0
+                        and frappe.db.get_value(
+                    "POS Invoice", {"is_return": 1, "return_against": self.name, "docstatus": 1}
+                )
+                ):
+                    self.status = "Credit Note Issued"
+                elif self.is_return == 1:
+                    self.status = "Return"
+                elif flt(outstanding_amount) <= 0:
+                    self.status = "Paid"
+                else:
+                    self.status = "Submitted"
+            else:
+                self.status = "Draft"
+
+        if update:
+            self.db_set("status", self.status, update_modified=update_modified)
