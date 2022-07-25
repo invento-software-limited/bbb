@@ -30,6 +30,8 @@ def after_insert_or_on_submit(doc, method):
                 frappe.db.set_value("POS Invoice", doc.name, "in_words", in_words)
                 frappe.db.set_value("POS Invoice", doc.name, "grand_total", divisible_number)
                 frappe.db.set_value("POS Invoice", doc.name, "rounded_total", divisible_number)
+                frappe.db.set_value("POS Invoice", doc.name, "base_rounded_total", divisible_number)
+                frappe.db.set_value("POS Invoice", doc.name, "base_grand_total", divisible_number)
 
             elif adjustment > 2.49:
                 rounding_adjustment = (divisible_number - 5) - grand_total
@@ -42,11 +44,17 @@ def after_insert_or_on_submit(doc, method):
                 frappe.db.set_value("POS Invoice", doc.name, "in_words", in_words)
                 frappe.db.set_value("POS Invoice", doc.name, "grand_total", divisible_number - 5)
                 frappe.db.set_value("POS Invoice", doc.name, "rounded_total", divisible_number - 5)
+                frappe.db.set_value("POS Invoice", doc.name, "base_rounded_total", divisible_number - 5)
+                frappe.db.set_value("POS Invoice", doc.name, "base_grand_total", divisible_number - 5)
 
             frappe.db.set_value("POS Invoice", doc.name, "paid_amount", paid_amount)
+            frappe.db.set_value("POS Invoice", doc.name, "base_paid_amount", paid_amount)
             frappe.db.set_value("POS Invoice", doc.name, "change_amount", change_amount)
+            frappe.db.set_value("POS Invoice", doc.name, "base_change_amount", change_amount)
             frappe.db.set_value("POS Invoice", doc.name, "outstanding_amount", outstanding_amount)
             frappe.db.set_value("POS Invoice", doc.name, "rounding_adjustment", rounding_adjustment)
+            frappe.db.set_value("POS Invoice", doc.name, "base_rounding_adjustment", rounding_adjustment)
+
             # if outstanding_amount == 0 and doc.docstatus != 0:
             #     frappe.db.set_value("POS Invoice", doc.name, "status", "Paid")
 
@@ -61,6 +69,8 @@ def after_insert_or_on_submit(doc, method):
                 frappe.db.set_value("POS Invoice", doc.name, "in_words", in_words)
                 frappe.db.set_value("POS Invoice", doc.name, "grand_total", divisible_number)
                 frappe.db.set_value("POS Invoice", doc.name, "rounded_total", divisible_number)
+                frappe.db.set_value("POS Invoice", doc.name, "base_rounded_total", divisible_number)
+                frappe.db.set_value("POS Invoice", doc.name, "base_grand_total", divisible_number)
 
             elif adjustment > 2.49:
                 rounding_adjustment = (divisible_number + 5) - grand_total
@@ -73,11 +83,16 @@ def after_insert_or_on_submit(doc, method):
                 frappe.db.set_value("POS Invoice", doc.name, "in_words", in_words)
                 frappe.db.set_value("POS Invoice", doc.name, "grand_total", divisible_number + 5)
                 frappe.db.set_value("POS Invoice", doc.name, "rounded_total", divisible_number + 5)
+                frappe.db.set_value("POS Invoice", doc.name, "base_rounded_total", divisible_number + 5)
+                frappe.db.set_value("POS Invoice", doc.name, "base_grand_total", divisible_number + 5)
 
             frappe.db.set_value("POS Invoice", doc.name, "paid_amount", paid_amount)
+            frappe.db.set_value("POS Invoice", doc.name, "base_paid_amount", paid_amount)
             frappe.db.set_value("POS Invoice", doc.name, "change_amount", change_amount)
+            frappe.db.set_value("POS Invoice", doc.name, "base_change_amount", change_amount)
             frappe.db.set_value("POS Invoice", doc.name, "outstanding_amount", outstanding_amount)
             frappe.db.set_value("POS Invoice", doc.name, "rounding_adjustment", rounding_adjustment)
+            frappe.db.set_value("POS Invoice", doc.name, "base_rounding_adjustment", rounding_adjustment)
             # if outstanding_amount == 0 and doc.docstatus !=0:
             #     frappe.db.set_value("POS Invoice", doc.name, "status", "Paid")
 

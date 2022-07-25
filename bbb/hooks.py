@@ -129,7 +129,7 @@ doc_events = {
 
 }
 override_doctype_class = {
-    # "Sales Invoice": "bbb.bbb.controllers.sales_invoice.CustomSalesInvoice",
+    "Sales Invoice": "bbb.bbb.controllers.sales_invoice.CustomSalesInvoice",
     "POS Invoice": "bbb.bbb.controllers.pos_invoice.CustomPOSInvoice",
 }
 
