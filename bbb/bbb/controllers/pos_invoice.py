@@ -174,10 +174,11 @@ class CustomPOSInvoice(POSInvoice):
     def validate_pos(self):
         if self.is_return:
             invoice_total = self.rounded()
-            if flt(self.paid_amount) + flt(self.write_off_amount) - flt(invoice_total) > 1.0 / (
-                    10.0 ** (self.precision("grand_total") + 1.0)
-            ):
-                frappe.throw(_("Paid amount + Write Off Amount can not be greater than Grand Total"))
+
+            # if flt(self.paid_amount) + flt(self.write_off_amount) - flt(invoice_total) > 1.0 / (
+            #         10.0 ** (self.precision("grand_total") + 1.0)
+            # ):
+            #     frappe.throw(_("Paid amount + Write Off Amount can not be greater than Grand Total"))
 
     def verify_payment_amount_is_negative(self):
         # for entry in self.payments:
@@ -201,7 +202,7 @@ class CustomPOSInvoice(POSInvoice):
     def rounded(self):
         invoice_total = self.grand_total
         five_basis_total = int(invoice_total / 5) * 5
-        adjustment = abs(invoice_total - five_basis_total)
+        adjustment = flt(abs(invoice_total - five_basis_total), 2)
         if five_basis_total < 0:
             if (adjustment > 2.49):
                 return five_basis_total - 5
@@ -216,7 +217,8 @@ class CustomPOSInvoice(POSInvoice):
     def set_status(self, update=False, status=None, update_modified=True):
         rounded_total = self.rounded()
         paid_amount = self.paid_amount
-        outstanding_amount = paid_amount - rounded_total
+        outstanding_amount = rounded_total - paid_amount
+
         if self.is_new():
             if self.get("amended_from"):
                 self.status = "Draft"
