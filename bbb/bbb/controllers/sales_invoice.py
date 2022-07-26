@@ -55,6 +55,14 @@ class CustomSalesInvoice(SalesInvoice):
         #     if entry.amount > 0:
         #         frappe.throw(_("Row #{0} (Payment Table): Amount must be negative").format(entry.idx))
 
+    def validate_pos(self):
+        if self.is_return:
+            invoice_total = self.rounded_total or self.grand_total
+            # if flt(self.paid_amount) + flt(self.write_off_amount) - flt(invoice_total) > 1.0 / (
+            #         10.0 ** (self.precision("grand_total") + 1.0)
+            # ):
+            #     frappe.throw(_("Paid amount + Write Off Amount can not be greater than Grand Total"))
+
     def validate_qty(self):
         """Validates qty at row level"""
         self.item_allowance = {}

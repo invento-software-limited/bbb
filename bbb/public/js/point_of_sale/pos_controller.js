@@ -390,9 +390,10 @@ erpnext.PointOfSale.Controller = class {
             frappe.utils.play_sound("error");
         }).then(() => {
             frappe.run_serially([
-                () => frappe.dom.freeze(),
-                () => this.make_new_invoice(),
-                () => frappe.dom.unfreeze(),
+                () => location.reload()
+                // () => frappe.dom.freeze(),
+                // () => this.make_new_invoice(),
+                // () => frappe.dom.unfreeze(),
             ]);
         });
     }

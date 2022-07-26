@@ -213,11 +213,8 @@ erpnext.PointOfSale.Payment = class {
 			// for setting correct amount after loyalty points are redeemed
 			const default_mop = locals[cdt][cdn];
 			const mode = default_mop.mode_of_payment.replace(/ +/g, "_").toLowerCase();
-
-			// this[`${mode}_control`].set_value(this.events.get_initial_paid_amount());
 			if (this[`${mode}_control`] && this[`${mode}_control`].get_value() != default_mop.amount) {
-				this[`${mode}_control`].set_value(this.events.get_5_basis_rounded_total(default_mop.amount));
-				// this[`${mode}_control`].set_value(this.events.get_5_basis_rounded_total());
+				this[`${mode}_control`].set_value(default_mop.amount);
 			}
 		});
 	}
