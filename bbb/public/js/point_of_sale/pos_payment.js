@@ -22,8 +22,18 @@ erpnext.PointOfSale.Payment = class {
 				<div class="payment-modes"></div>
 				<div class="fields-numpad-container">
 					<div class="fields-section">
-						<div class="section-label">${__('Additional Information')}</div>
-						<div class="invoice-fields"></div>
+						<div class="section-label">${__('Special Note')}</div>
+						<div class="invoice-fields">
+						  <div class="form-group">
+							<textarea class="form-control" id="special_note" rows="7"></textarea>
+						  </div>
+						<div class="form-check">
+							<input class="form-check-input" type="checkbox" value="" id="show_on_print">
+							<label class="form-check-label" for="show_on_print">
+								Show On Print
+							</label>
+						</div>
+					</div>
 					</div>
 					<div class="number-pad"></div>
 				</div>

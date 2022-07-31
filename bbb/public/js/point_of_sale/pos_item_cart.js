@@ -1001,9 +1001,9 @@ erpnext.PointOfSale.ItemCart = class {
         $item_to_update.html(
             `<div class="item-name-desc">
                 <div class="item-image-name-dec">
-			        ${get_item_image_html()}
+<!--			        ${get_item_image_html()}-->
 			        <div class="item-name">
-					    ${frappe.ellipsis(item_data.item_name, 20)}
+					    ${frappe.ellipsis(item_data.item_name, 70)}
 				    </div>
                 </div>
                 ${get_rate_discount_html()}
