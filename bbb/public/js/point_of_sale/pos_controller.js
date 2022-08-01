@@ -566,6 +566,7 @@ erpnext.PointOfSale.Controller = class {
                     }else {
                         frappe.run_serially([
                             () => this.get_naming_series(this),
+                            () => this.update_special_note(),
                             () => this.process_submit()
                         ]);
                     }
@@ -577,7 +578,18 @@ erpnext.PointOfSale.Controller = class {
             }
         });
     }
-
+    update_special_note(){
+        const frm = this.frm;
+        let special_note = $('#special_note').val();
+        if($("#show_on_print").is(':checked'))
+            frappe.model.set_value(frm.doctype, frm.docname, 'show_on_print', 1);
+        else{
+            frappe.model.set_value(frm.doctype, frm.docname, 'show_on_print', 0);
+        }
+        if(special_note !== undefined || special_note){
+            frappe.model.set_value(frm.doctype, frm.docname, 'special_note', special_note);
+        }
+    }
     process_submit() {
         this.frm.savesubmit()
             .then((r) => {

@@ -99,7 +99,7 @@ erpnext.PointOfSale.ItemCart = class {
 						<div class="discount-header">Disc</div>
 						<div class="after-discount-header">After Disc</div>
 						<div class="qty-header">Qty</div>
-						<div class="rate-amount-header">Final Amount</div>
+						<div class="rate-amount-header">Amount</div>
 					</div>
 					<div class="cart-items-section"></div>
 					<div class="cart-totals-section"></div>

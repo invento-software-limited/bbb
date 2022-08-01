@@ -784,9 +784,9 @@ def get_fields(doctype, fields=None):
 @frappe.validate_and_sanitize_search_inputs
 def served_by_query(doctype, txt, searchfield, start, page_len, filters):
     conditions = []
-    fields = get_fields("Served By", ["name", "served_by_name", "location"])
+    fields = get_fields("Served By", ["name", "served_by_name", "location", "served_by_id"])
 
-    searchfields = ['served_by_name', 'location']
+    searchfields = ['served_by_name', 'location', 'served_by_id']
     searchfields = " or ".join(field + " like %(txt)s" for field in searchfields)
 
     return frappe.db.sql("""select {fields} from `tabServed By`
