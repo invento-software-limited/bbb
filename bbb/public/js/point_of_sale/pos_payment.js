@@ -541,6 +541,7 @@ erpnext.PointOfSale.Payment = class {
 		// }
 		const currency = doc.currency;
 		const label = change ? __('Change') : __('To Be Paid');
+		const style = change ? 'style="background-color: #0080005c"' : '';
 		this.$totals.html(
 			`<div class="col">
 				<div class="total-label">${__('Grand Total')}</div>
@@ -552,7 +553,7 @@ erpnext.PointOfSale.Payment = class {
 				<div class="value payment_amount_value" paid_amount_val="${paid_amount}">${format_currency(paid_amount, currency)}</div>
 			</div>
 			<div class="seperator-y"></div>
-			<div class="col">
+			<div class="col" ${style}>
 				<div class="total-label">${label}</div>
 				<div class="value">${format_currency(change || remaining, currency)}</div>
 			</div>`
