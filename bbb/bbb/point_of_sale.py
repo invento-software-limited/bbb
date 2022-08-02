@@ -40,19 +40,20 @@ def search_by_term(search_term, warehouse, price_list):
 			{"price_list": price_list, "item_code": item_code},
 			["price_list_rate", "currency"],
 		) or [None, None]
-
-		item_info.update(
-			{
-				"serial_no": serial_no,
-				"batch_no": batch_no,
-				"barcode": barcode,
-				"price_list_rate": price_list_rate,
-				"currency": currency,
-				"actual_qty": item_stock_qty,
-			}
-		)
-
-		return {"items": [item_info]}
+		if item_info:
+			item_info.update(
+				{
+					"serial_no": serial_no,
+					"batch_no": batch_no,
+					"barcode": barcode,
+					"price_list_rate": price_list_rate,
+					"currency": currency,
+					"actual_qty": item_stock_qty,
+				}
+			)
+			return {"items": [item_info]}
+		else:
+			return []
 
 
 @frappe.whitelist()
