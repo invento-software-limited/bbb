@@ -626,7 +626,7 @@ erpnext.PointOfSale.ItemCart = class {
     fetch_customer_details(customer) {
         if (customer) {
             return new Promise((resolve) => {
-                frappe.db.get_value('Customer', customer, ["email_id", "mobile_no", "image", "loyalty_program"]).then(({message}) => {
+                frappe.db.get_value('Customer', customer, ["email_id", "mobile_no", "image", "loyalty_program", "customer_name"]).then(({message}) => {
                     const {loyalty_program} = message;
                     // if loyalty program then fetch loyalty points too
                     if (loyalty_program) {
@@ -847,14 +847,13 @@ erpnext.PointOfSale.ItemCart = class {
 
     update_customer_section() {
         const me = this;
-        const {customer, email_id = '', mobile_no = '', image} = this.customer_info || {};
-
+        const {customer, customer_name, email_id = '', mobile_no = '', image} = this.customer_info || {};
         if (customer) {
             this.$customer_section.html(
                 `<div class="customer-details">
 					<div class="customer-display">
 						<div class="customer-name-desc">
-							<div class="customer-name">${customer}</div>
+							<div class="customer-name">${customer_name}</div>
 						</div>
 						<div class="reset-customer-btn" data-customer="${escape(customer)}">
 							<svg width="32" height="32" viewBox="0 0 14 14" fill="none">
