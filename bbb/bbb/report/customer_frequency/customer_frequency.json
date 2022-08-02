@@ -9,7 +9,7 @@
  "filters": [],
  "idx": 0,
  "is_standard": "Yes",
- "modified": "2022-06-09 17:02:45.208511",
+ "modified": "2022-08-02 17:02:45.208511",
  "modified_by": "Administrator",
  "module": "Bbb",
  "name": "Customer Frequency",
@@ -19,6 +19,9 @@
  "report_name": "Customer Frequency",
  "report_type": "Script Report",
  "roles": [
+  {
+   "role": "System Manager"
+  },
   {
    "role": "Stock Manager"
   },

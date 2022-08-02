@@ -9,7 +9,7 @@
  "filters": [],
  "idx": 0,
  "is_standard": "Yes",
- "modified": "2022-02-19 10:38:54.786671",
+ "modified": "2022-08-02 10:38:54.786671",
  "modified_by": "Administrator",
  "module": "BBB",
  "name": "Purchase Order Summary Report",
@@ -19,6 +19,9 @@
  "report_name": "Purchase Order Summary Report",
  "report_type": "Script Report",
  "roles": [
+  {
+   "role": "System Manager"
+  },
   {
    "role": "Stock User"
   },

@@ -35,9 +35,17 @@ def get_columns():
         {"label": _("Discount %"), "fieldname": "discount_percentage", "fieldtype": "Text", "width": 120},
         {"label": _("Cash"), "fieldname": "Cash", "fieldtype": "Currency", "width": 120,
          "convertible": "rate", "options": "currency"},
-        {"label": _("Card"), "fieldname": "Card", "fieldtype": "Currency", "width": 120,
+        {"label": _("bKash"), "fieldname": "bKash", "fieldtype": "Currency", "width": 120,
          "convertible": "rate", "options": "currency"},
-        {"label": _("Mobile Banking"), "fieldname": "bKash", "fieldtype": "Currency", "width": 120,
+        {"label": _("Nagad"), "fieldname": "Nagad", "fieldtype": "Currency", "width": 120,
+         "convertible": "rate", "options": "currency"},
+        {"label": _("Rocket"), "fieldname": "Rocket", "fieldtype": "Currency", "width": 120,
+         "convertible": "rate", "options": "currency"},
+        {"label": _("City Card"), "fieldname": "City Card", "fieldtype": "Currency", "width": 120,
+         "convertible": "rate", "options": "currency"},
+        {"label": _("DBBL"), "fieldname": "DBBL", "fieldtype": "Currency", "width": 120,
+         "convertible": "rate", "options": "currency"},
+        {"label": _("EBL"), "fieldname": "EBL", "fieldtype": "Currency", "width": 120,
          "convertible": "rate", "options": "currency"},
         {"label": _("Rounding"), "fieldname": "cash_amount", "fieldtype": "Currency", "width": 120,
          "convertible": "rate", "options": "currency"},
@@ -107,7 +115,9 @@ def get_invoice_data(filters):
         else:
             payments[payment.get('pos_profile')] = payment_type_dict
             payments[payment.get('pos_profile')][payment.get('payment_type')] = payment.get('payment_amount')
-
+    print('')
+    print(payments)
+    print('')
     data = {}
     for result in query_result:
         if data.get(result.get('pos_profile')):

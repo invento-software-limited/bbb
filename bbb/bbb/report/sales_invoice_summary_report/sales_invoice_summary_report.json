@@ -9,7 +9,7 @@
  "filters": [],
  "idx": 0,
  "is_standard": "Yes",
- "modified": "2022-02-19 10:37:51.220528",
+ "modified": "2022-08-02 10:37:51.220528",
  "modified_by": "Administrator",
  "module": "BBB",
  "name": "Sales Invoice Summary Report",
@@ -19,6 +19,9 @@
  "report_name": "Sales Invoice Summary Report",
  "report_type": "Script Report",
  "roles": [
+  {
+   "role": "System Manager"
+  },
   {
    "role": "Accounts User"
   },

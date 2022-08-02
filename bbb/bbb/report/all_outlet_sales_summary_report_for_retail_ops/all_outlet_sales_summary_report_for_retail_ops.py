@@ -34,9 +34,17 @@ def get_columns():
         {"label": _("Discount %"), "fieldname": "discount_percentage", "fieldtype": "Text", "width": 120},
         {"label": _("Cash"), "fieldname": "Cash", "fieldtype": "Currency", "width": 120,
          "convertible": "rate", "options": "currency"},
-        {"label": _("Card"), "fieldname": "Card", "fieldtype": "Currency", "width": 120,
+        {"label": _("bKash"), "fieldname": "bKash", "fieldtype": "Currency", "width": 120,
          "convertible": "rate", "options": "currency"},
-        {"label": _("Mobile Banking"), "fieldname": "bKash", "fieldtype": "Currency", "width": 120,
+        {"label": _("Nagad"), "fieldname": "Nagad", "fieldtype": "Currency", "width": 120,
+         "convertible": "rate", "options": "currency"},
+        {"label": _("Rocket"), "fieldname": "Rocket", "fieldtype": "Currency", "width": 120,
+         "convertible": "rate", "options": "currency"},
+        {"label": _("City Card"), "fieldname": "City Card", "fieldtype": "Currency", "width": 120,
+         "convertible": "rate", "options": "currency"},
+        {"label": _("DBBL"), "fieldname": "DBBL", "fieldtype": "Currency", "width": 120,
+         "convertible": "rate", "options": "currency"},
+        {"label": _("EBL"), "fieldname": "EBL", "fieldtype": "Currency", "width": 120,
          "convertible": "rate", "options": "currency"},
         {"label": _("Rounding"), "fieldname": "cash_amount", "fieldtype": "Currency", "width": 120,
          "convertible": "rate", "options": "currency"},
@@ -80,7 +88,9 @@ def get_invoice_data(filters):
     mode_of_payment_query = """select invoice.pos_profile, invoice.vat, invoice.mrp_total, invoice.discount,
             invoice.special_discount, invoice.name, invoice.net_amount, invoice.total_amount, invoice.total,
             invoice.grand_total, invoice.net_total, sum(if(payment.type='Cash', payment.amount, 0)) as Cash,
-            sum(if(payment.type='bKash', payment.amount, 0)) as bKash, sum(if(payment.type='City Card', payment.amount, 0)) as Card
+            sum(if(payment.type='bKash', payment.amount, 0)) as bKash, sum(if(payment.type='City Card', payment.amount, 0)) as city_card,
+            sum(if(payment.type='Nagad', payment.amount, 0)) as Nagad, sum(if(payment.type='Rocket', payment.amount, 0)) as Rocket,
+            sum(if(payment.type='DBBL', payment.amount, 0)) as DBBL, sum(if(payment.type='EBL', payment.amount, 0)) as EBL
         from (%s) as invoice, `tabSales Invoice Payment` payment where invoice.name=payment.parent
         group by invoice.name""" % invoice_query
 
@@ -89,7 +99,8 @@ def get_invoice_data(filters):
     		sum(discount) as discount, sum(special_discount) as special_discount, (sum(discount) + sum(special_discount)) as total_discount,
     		format(((sum(discount) + sum(special_discount)) / sum(mrp_total)) * 100, 2) as discount_percentage, sum(net_amount) as net_amount,
     		sum(total_amount) as total_amount, sum(total) as total, sum(grand_total) as grand_total, sum(net_total) as net_total,
-    		(sum(net_total) / count(name)) as basket_value, sum(Cash) as Cash, sum(bKash) as bKash, sum(Card) as Card
+    		(sum(net_total) / count(name)) as basket_value, sum(Cash) as Cash, sum(Nagad) as Nagad, sum(Rocket) as Rocket, sum(bKash) as bKash,
+    		 sum(city_card) as `City Card`, sum(DBBL) as DBBL, sum(EBL) as EBL
     	from (%s) as Tab1 group by pos_profile""" % mode_of_payment_query
 
     query_result = frappe.db.sql(pos_profile_query, as_dict=1)

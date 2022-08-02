@@ -9,7 +9,7 @@
  "filters": [],
  "idx": 0,
  "is_standard": "Yes",
- "modified": "2022-06-09 09:56:08.879701",
+ "modified": "2022-08-02 09:56:08.879701",
  "modified_by": "Administrator",
  "module": "Bbb",
  "name": "Customer Wise Sales Summary",
@@ -19,6 +19,9 @@
  "report_name": "Customer Wise Sales Summary",
  "report_type": "Script Report",
  "roles": [
+  {
+   "role": "System Manager"
+  },
   {
    "role": "Accounts Manager"
   },
