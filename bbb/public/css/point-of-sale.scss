@@ -864,7 +864,7 @@
 									display: inline-flex;
 									font-weight: 300;
 									font-size: 13px;
-									inline-size: 200px;
+									white-space: pre-line;
 									}
 
 								> .item-desc {
@@ -907,20 +907,24 @@
 							> .item-row-amount {
 								display: flex;
 								font-weight: 400;
-								flex-direction: column;
 								justify-content: right;
 								flex: 1 0 0;
+								align-items: center;
+								font-size: 13px;
+								background-color: white;
 
-								> .item-rate {
-									display: flex;
-									font-weight: 400;
-									justify-content: right;
-								}
-
-								> .item-amount {
-									font-size: var(--text-md);
-									font-weight: 600;
-								}
+								//> .item-rate {
+								//	display: flex;
+								//	flex: 1 0 0;
+								//	flex-direction: column;
+								//	font-weight: 400;
+								//	justify-content: right;
+								//}
+								//
+								//> .item-amount {
+								//	font-size: var(--text-md);
+								//	font-weight: 600;
+								//}
 							}
 
 						}

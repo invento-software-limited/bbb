@@ -1001,8 +1001,8 @@ erpnext.PointOfSale.ItemCart = class {
             `<div class="item-name-desc">
                 <div class="item-image-name-dec">
 <!--			        ${get_item_image_html()}-->
-			        <div class="item-name">
-					    ${frappe.ellipsis(item_data.item_name, 70)}
+			        <div class="item-name" >
+					    <span>${frappe.ellipsis(item_data.item_name, 500)}</span>
 				    </div>
                 </div>
                 ${get_rate_discount_html()}
@@ -1050,10 +1050,7 @@ erpnext.PointOfSale.ItemCart = class {
 					<div class="item-row-disc"><span>${(item_data.price_list_rate - item_data.rate) || 0}</span></div>
 					<div class="item-row-rate"><span>${item_data.rate || 0}</span></div>
 					<div class="item-row-qty"><span>${item_data.qty || 0}</span></div>
-					<div class="item-row-amount">
-<!--						<div class="item-rate">${format_currency(item_data.amount, currency)}</div>-->
-						<div class="item-rate">${item_data.amount}</div>
-					</div>`
+					<div class="item-row-amount"><span>${item_data.amount || 0}</span></div>`
             // }
         }
 
