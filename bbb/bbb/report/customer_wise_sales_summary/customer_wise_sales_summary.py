@@ -53,7 +53,7 @@ def get_invoice_data(filters):
     if conditions:
         invoice_query += """ where %s group by invoice.customer""" % conditions
 
-    customer_sales_summary_query = """select total_invoice, total_amount, customer, customer.mobile_number, pos_profile,
+    customer_sales_summary_query = """select total_invoice, total_amount, customer, customer.mobile_number, invoice_group.pos_profile,
                                     customer.customer_group, customer.customer_type from (%s) as invoice_group inner join `tabCustomer` customer 
                                     on customer.name = invoice_group.customer order by total_amount desc""" % invoice_query
 

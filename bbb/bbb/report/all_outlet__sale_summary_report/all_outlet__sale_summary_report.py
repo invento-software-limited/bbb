@@ -47,7 +47,9 @@ def get_columns():
          "convertible": "rate", "options": "currency"},
         {"label": _("EBL"), "fieldname": "EBL", "fieldtype": "Currency", "width": 120,
          "convertible": "rate", "options": "currency"},
-        {"label": _("Rounding"), "fieldname": "cash_amount", "fieldtype": "Currency", "width": 120,
+        {"label": _("UCB"), "fieldname": "UCB", "fieldtype": "Currency", "width": 120,
+         "convertible": "rate", "options": "currency"},
+        {"label": _("Rounding"), "fieldname": "rounding_adjustment", "fieldtype": "Currency", "width": 120,
          "convertible": "rate", "options": "currency"},
         {"label": _("VAT"), "fieldname": "total_taxes_and_charges", "fieldtype": "Currency", "width": 120,
          "convertible": "rate", "options": "currency"},
@@ -74,14 +76,15 @@ def get_invoice_data(filters):
     invoice_type = filters.get('switch_invoice', "Sales Invoice")
     query_result = frappe.db.sql("""
     		select
-    			sales_invoice.grand_total, sales_invoice.pos_profile, sales_invoice.total_taxes_and_charges as vat, sales_invoice.name, 
+    			sales_invoice.pos_profile, sales_invoice.total_taxes_and_charges as vat, sales_invoice.name, 
     			sales_invoice_item.price_list_rate as unit_price, sales_invoice_item.rate as selling_rate,
     			sales_invoice_item.qty as quantity,
     			(sales_invoice_item.qty * item.standard_rate) as mrp_total,
-    			((sales_invoice_item.qty * item.standard_rate) - (sales_invoice_item.net_rate * sales_invoice_item.qty)) as discount,
-    			(sales_invoice_item.amount - sales_invoice_item.net_amount) as special_discount,
+    			(sales_invoice_item.qty * item.buying_rate) as buying_total,
+    			((sales_invoice_item.qty * sales_invoice_item.discount_amount)) as discount,
+    			(sales_invoice.total - sales_invoice.net_total) as special_discount,
     			 sales_invoice_item.net_amount, sales_invoice_item.amount as total_amount, sales_invoice.customer_name, 
-    			 sales_invoice.total, sales_invoice.grand_total, sales_invoice.total_taxes_and_charges, sales_invoice.net_total
+    			 sales_invoice.total, sales_invoice.rounded_total, sales_invoice.total_taxes_and_charges, sales_invoice.net_total, sales_invoice.rounding_adjustment
     		from `tab%s` sales_invoice, `tab%s Item` sales_invoice_item, `tabItem` item
     		where sales_invoice.name = sales_invoice_item.parent and item.item_code = sales_invoice_item.item_code
     			and sales_invoice.docstatus = 1 and %s
@@ -90,7 +93,7 @@ def get_invoice_data(filters):
 
     payment_result = frappe.db.sql("""
     		select
-    			 sales_invoice.pos_profile, sales_invoice.name, payment.amount as payment_amount, payment.type as payment_type
+    			 sales_invoice.pos_profile, sales_invoice.change_amount, sales_invoice.name, payment.amount as payment_amount, payment.type as payment_type
     		from `tab%s` sales_invoice, `tabSales Invoice Payment` payment
     		where payment.parent = sales_invoice.name
     			and sales_invoice.docstatus = 1 and %s
@@ -108,32 +111,39 @@ def get_invoice_data(filters):
             pos_payment = payments.get(payment.get('pos_profile'))
 
             if pos_payment.get(payment.get('payment_type')):
-                pos_payment[payment.get('payment_type')] = pos_payment[payment.get('payment_type')] + payment.get(
-                    'payment_amount')
+                if payment.get('payment_type') == 'Cash':
+                    pos_payment[payment.get('payment_type')] = (pos_payment[payment.get('payment_type')] + payment.get(
+                        'payment_amount')) - payment.get('change_amount', 0)
+                else:
+                    pos_payment[payment.get('payment_type')] = pos_payment[payment.get('payment_type')] + payment.get(
+                        'payment_amount')
             else:
                 pos_payment[payment.get('payment_type')] = payment.get('payment_amount')
         else:
             payments[payment.get('pos_profile')] = payment_type_dict
-            payments[payment.get('pos_profile')][payment.get('payment_type')] = payment.get('payment_amount')
-    print('')
-    print(payments)
-    print('')
+            if payment.get('payment_type') == 'Cash':
+                payments[payment.get('pos_profile')][payment.get('payment_type')] = payment.get('payment_amount') - payment.get('change_amount')
+            else:
+                payments[payment.get('pos_profile')][payment.get('payment_type')] = payment.get('payment_amount')
+
     data = {}
     for result in query_result:
         if data.get(result.get('pos_profile')):
             pos_data = data.get(result.get('pos_profile'))
             pos_data['mrp_total'] = pos_data['mrp_total'] + result['mrp_total']
-            pos_data['special_discount'] = pos_data['special_discount'] + result['special_discount']
+            pos_data['discount'] = pos_data['discount'] + result['discount']
             pos_data['total_item_qty'] = pos_data['total_item_qty'] + result['quantity']
 
             if result.get('name') != pos_data.get('name'):
                 pos_data['number_of_invoice'] += 1
+                pos_data['rounding_adjustment'] = pos_data['rounding_adjustment'] + result['rounding_adjustment']
                 pos_data['net_total'] = pos_data['net_total'] + result['net_total']
-                pos_data['discount'] = pos_data['discount'] + result['discount']
+                pos_data['buying_total'] = pos_data['buying_total'] + result['buying_total']
+                pos_data['special_discount'] = pos_data['special_discount'] + result['special_discount']
                 pos_data['total'] = pos_data['total'] + result['total']
                 pos_data['total_taxes_and_charges'] = pos_data['total_taxes_and_charges'] + result[
                     'total_taxes_and_charges']
-                pos_data['grand_total'] = pos_data['grand_total'] + result['grand_total']
+                pos_data['rounded_total'] = pos_data['rounded_total'] + result['rounded_total']
                 pos_data['name'] = result.get('name')
         else:
             result['number_of_invoice'] = 1
@@ -146,10 +156,11 @@ def get_invoice_data(filters):
         invoice_data.update(payment_data)
         total_discount = float(invoice_data['discount']) + float(invoice_data['special_discount'])
         invoice_data['basket_value'] = (
-                float(invoice_data['net_total']) / float(invoice_data['number_of_invoice']))
+                float(invoice_data['rounded_total']) / float(invoice_data['number_of_invoice']))
         invoice_data['total_discount'] = total_discount
-        invoice_data['sell_include_vat'] = invoice_data['grand_total']
+        invoice_data['sell_include_vat'] = invoice_data['rounded_total']
         invoice_data['sell_exclude_vat'] = invoice_data['net_total']
+        invoice_data['profit_loss'] = invoice_data['net_total'] - invoice_data['buying_total']
         invoice_data['discount_percentage'] = str(
             float("{:.2f}".format((total_discount / invoice_data['mrp_total']) * 100)))
         pos_wise_list_data.append(invoice_data)

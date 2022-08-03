@@ -29,6 +29,8 @@ def get_columns():
         #  "convertible": "rate", "options": "currency"},
         {"label": _("Grand Total"), "fieldname": "grand_total", "fieldtype": "Currency", "width": 130,
          "convertible": "rate", "options": "currency"},
+        {"label": _("Rounded Total"), "fieldname": "rounded_total", "fieldtype": "Currency", "width": 130,
+         "convertible": "rate", "options": "currency"},
         {"label": _("Paid Amount"), "fieldname": "paid_amount", "fieldtype": "Currency", "width": 130,
          "convertible": "rate", "options": "currency"},
         {"label": _("Due Amount"), "fieldname": "due_amount", "fieldtype": "Currency", "width": 130,
@@ -68,7 +70,7 @@ def get_items(filters):
 
     query_result = frappe.db.sql(
         """select date(sales_invoice.posting_date) as date, sales_invoice.name as voucher, sales_invoice.customer, sales_invoice.total_qty as qty, tax.tax_amount as tax_amount, 
-        tax.total, sales_invoice.company, sales_invoice.grand_total, sales_invoice.net_total as amount, sum(sales_invoice.grand_total - sales_invoice.outstanding_amount) as paid_amount,
+        tax.total, sales_invoice.company, sales_invoice.grand_total, sales_invoice.rounded_total, sales_invoice.net_total as amount, sum(sales_invoice.grand_total - sales_invoice.outstanding_amount) as paid_amount,
          sales_invoice.outstanding_amount as due_amount from `tabSales Invoice` sales_invoice left join `tabPurchase Taxes and Charges` tax 
          on sales_invoice.name=tax.parent where sales_invoice.docstatus = 1 and {} GROUP BY voucher, posting_date ORDER BY sales_invoice.posting_date """.format(
             conditions), as_dict=True)

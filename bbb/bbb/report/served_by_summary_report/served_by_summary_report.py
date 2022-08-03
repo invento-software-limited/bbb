@@ -54,10 +54,10 @@ def get_invoice_data(filters):
     			sales_invoice_item.price_list_rate as unit_price, sales_invoice_item.rate as selling_rate,
     			sales_invoice_item.qty as quantity,
     			(sales_invoice_item.qty * item.standard_rate) as mrp_total,
-    			((sales_invoice_item.qty * item.standard_rate) - (sales_invoice_item.net_rate * sales_invoice_item.qty)) as discount,
-    			sales_invoice.discount_amount as special_discount,
+    			((sales_invoice_item.qty * sales_invoice_item.discount_amount)) as discount,
+    			(sales_invoice.total - sales_invoice.net_total) as special_discount,
     			 sales_invoice_item.net_amount, sales_invoice_item.amount as total_amount, sales_invoice.customer_name, 
-    			 sales_invoice.total, sales_invoice.grand_total, sales_invoice.total_taxes_and_charges, sales_invoice.net_total
+    			 sales_invoice.total, sales_invoice.rounded_total, sales_invoice.total_taxes_and_charges, sales_invoice.net_total
     		from `tab%s` sales_invoice, `tab%s Item` sales_invoice_item, `tabItem` item, `tabServed By` served_by
     		where sales_invoice.name = sales_invoice_item.parent and item.item_code = sales_invoice_item.item_code and sales_invoice.served_by = served_by.name
     			and sales_invoice.docstatus = 1 and %s 
@@ -79,7 +79,7 @@ def get_invoice_data(filters):
                 pos_data['total'] = pos_data['total'] + result['total']
                 pos_data['total_taxes_and_charges'] = pos_data['total_taxes_and_charges'] + result[
                     'total_taxes_and_charges']
-                pos_data['grand_total'] = pos_data['grand_total'] + result['grand_total']
+                pos_data['rounded_total'] = pos_data['rounded_total'] + result['rounded_total']
                 pos_data['name'] = result.get('name')
 
         else:
@@ -89,10 +89,9 @@ def get_invoice_data(filters):
             data[result.get('served_by')] = result
 
     pos_wise_list_data = []
-
+    print(data)
     for key, invoice_data in data.items():
         total_discount = float(invoice_data['discount']) + float(invoice_data['special_discount'])
-        print(invoice_data)
         invoice_data['basket_value'] = (
                 float(invoice_data['net_total']) / float(invoice_data['number_of_invoice']))
         invoice_data['total_discount'] = total_discount
