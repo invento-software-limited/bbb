@@ -9,7 +9,7 @@
  "filters": [],
  "idx": 0,
  "is_standard": "Yes",
- "modified": "2022-08-08 16:14:01.110705",
+ "modified": "2022-08-08 18:20:19.151514",
  "modified_by": "Administrator",
  "module": "Bbb",
  "name": "All Outlet Sales Summary Report For Retail Ops",
@@ -18,5 +18,15 @@
  "ref_doctype": "Sales Invoice",
  "report_name": "All Outlet Sales Summary Report For Retail Ops",
  "report_type": "Script Report",
- "roles": []
+ "roles": [
+  {
+   "role": "System Manager"
+  },
+  {
+   "role": "BBB Admin"
+  },
+  {
+   "role": "Accounts Manager"
+  }
+ ]
 }
