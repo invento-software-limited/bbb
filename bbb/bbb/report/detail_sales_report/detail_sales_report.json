@@ -9,7 +9,7 @@
  "filters": [],
  "idx": 0,
  "is_standard": "Yes",
- "modified": "2022-08-08 13:22:17.246076",
+ "modified": "2022-08-08 15:43:04.563833",
  "modified_by": "Administrator",
  "module": "Bbb",
  "name": "Detail Sales Report",
@@ -23,10 +23,7 @@
    "role": "System Manager"
   },
   {
-   "role": "Accounts Manager"
-  },
-  {
-   "role": "Accounts User"
+   "role": "BBB Admin"
   }
  ]
 }

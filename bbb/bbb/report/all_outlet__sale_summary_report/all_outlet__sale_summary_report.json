@@ -9,7 +9,7 @@
  "filters": [],
  "idx": 0,
  "is_standard": "Yes",
- "modified": "2022-08-02 18:01:55.752093",
+ "modified": "2022-08-08 15:45:50.174420",
  "modified_by": "Administrator",
  "module": "Bbb",
  "name": "ALL Outlet  Sale Summary Report",
@@ -20,13 +20,10 @@
  "report_type": "Script Report",
  "roles": [
   {
-   "role": "Accounts Manager"
-  },
-  {
-   "role": "Accounts User"
-  },
-  {
    "role": "System Manager"
+  },
+  {
+   "role": "BBB Admin"
   }
  ]
 }

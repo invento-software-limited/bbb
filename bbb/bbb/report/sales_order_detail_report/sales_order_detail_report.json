@@ -9,9 +9,9 @@
  "filters": [],
  "idx": 0,
  "is_standard": "Yes",
- "modified": "2022-08-02 10:36:05.946990",
+ "modified": "2022-08-08 15:51:13.178757",
  "modified_by": "Administrator",
- "module": "BBB",
+ "module": "Bbb",
  "name": "Sales Order Detail Report",
  "owner": "Administrator",
  "prepared_report": 0,
@@ -23,19 +23,7 @@
    "role": "System Manager"
   },
   {
-   "role": "Sales User"
-  },
-  {
-   "role": "Sales Manager"
-  },
-  {
-   "role": "Maintenance User"
-  },
-  {
-   "role": "Accounts User"
-  },
-  {
-   "role": "Stock User"
+   "role": "BBB Admin"
   }
  ]
 }

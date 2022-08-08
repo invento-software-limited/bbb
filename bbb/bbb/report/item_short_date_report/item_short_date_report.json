@@ -9,7 +9,7 @@
  "filters": [],
  "idx": 0,
  "is_standard": "Yes",
- "modified": "2022-08-02 16:36:51.913370",
+ "modified": "2022-08-08 15:46:37.207969",
  "modified_by": "Administrator",
  "module": "Bbb",
  "name": "Item Short Date Report",
@@ -23,16 +23,7 @@
    "role": "System Manager"
   },
   {
-   "role": "Item Manager"
-  },
-  {
-   "role": "Stock Manager"
-  },
-  {
-   "role": "Stock User"
-  },
-  {
-   "role": "Sales User"
+   "role": "BBB Admin"
   }
  ]
 }

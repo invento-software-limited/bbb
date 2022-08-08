@@ -9,9 +9,9 @@
  "filters": [],
  "idx": 0,
  "is_standard": "Yes",
- "modified": "2022-08-02 10:51:32.942961",
+ "modified": "2022-08-08 15:48:02.430426",
  "modified_by": "Administrator",
- "module": "BBB",
+ "module": "Bbb",
  "name": "Item-wise Sales Register Report 2",
  "owner": "Administrator",
  "prepared_report": 0,
@@ -23,13 +23,7 @@
    "role": "System Manager"
   },
   {
-   "role": "Accounts User"
-  },
-  {
-   "role": "Accounts Manager"
-  },
-  {
-   "role": "Employee Self Service"
+   "role": "BBB Admin"
   }
  ]
 }

@@ -48,7 +48,7 @@ def get_columns():
          "convertible": "rate", "options": "currency"},
         {"label": _("UCB"), "fieldname": "UCB", "fieldtype": "Currency", "width": 120,
          "convertible": "rate", "options": "currency"},
-        {"label": _("Rounding"), "fieldname": "cash_amount", "fieldtype": "Currency", "width": 120,
+        {"label": _("Rounding"), "fieldname": "rounding_adjustment", "fieldtype": "Currency", "width": 120,
          "convertible": "rate", "options": "currency"},
         {"label": _("VAT"), "fieldname": "vat", "fieldtype": "Currency", "width": 120,
          "convertible": "rate", "options": "currency"},
@@ -116,7 +116,7 @@ def get_invoice_data(filters):
     		select
     			sales_invoice.pos_profile, sales_invoice.total_taxes_and_charges as vat, sales_invoice.name, 
     			sales_invoice_item.price_list_rate as unit_price, sales_invoice_item.rate as selling_rate,
-    			sales_invoice_item.qty as quantity,
+    			sales_invoice_item.qty as quantity, sales_invoice.rounding_adjustment, 
     			(sales_invoice_item.qty * item.standard_rate) as mrp_total,
     			(sales_invoice_item.qty * item.buying_rate) as buying_total,
     			((sales_invoice_item.qty * sales_invoice_item.discount_amount)) as discount,
@@ -183,6 +183,8 @@ def get_invoice_data(filters):
                     'total_taxes_and_charges']
                 pos_data['rounded_total'] = pos_data['rounded_total'] + result['rounded_total']
                 pos_data['name'] = result.get('name')
+                pos_data['vat'] = pos_data['vat'] + result['vat']
+                pos_data['rounding_adjustment'] = pos_data['rounding_adjustment'] + result['rounding_adjustment']
         else:
             result['number_of_invoice'] = 1
             result['total_item_qty'] = result['quantity']
