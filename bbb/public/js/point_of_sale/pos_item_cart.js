@@ -274,6 +274,8 @@ erpnext.PointOfSale.ItemCart = class {
 
             me.wrapper.find('.customer-cart-container').css('grid-column', 'span 7 / span 7');
             this.events.edit_cart();
+            me.$add_discount_elem.find('input').attr('disabled', 'disabled');
+            me.$add_discount_amount_elem.find('input').attr('disabled', 'disabled');
             this.toggle_checkout_btn(true);
         });
 
@@ -968,8 +970,14 @@ erpnext.PointOfSale.ItemCart = class {
         this.highlight_checkout_btn(no_of_cart_items > 0);
 
         this.update_empty_cart_section(no_of_cart_items);
+        this.update_5_basis_rounded()
 
-        // rounded_total : M rounds to 5 basis ( 12.49 will be 10 and 12.5 will  be 15)
+        // console.log(frm);
+
+    }
+
+    update_5_basis_rounded(){
+                // rounded_total : M rounds to 5 basis ( 12.49 will be 10 and 12.5 will  be 15)
         const frm = this.events.get_frm()
         let rounded_total = this.events.get_5_basis_rounded(frm.doc.grand_total)
         // frappe.model.set_value(frm.doc.doctype, frm.doc.name, 'rounding_adjustment', rounded_total - frm.doc.grand_total)
@@ -980,12 +988,11 @@ erpnext.PointOfSale.ItemCart = class {
         frappe.model.set_value(frm.doc.doctype, frm.doc.name, 'base_paid_amount', null)
         frappe.model.set_value(frm.doc.doctype, frm.doc.name, 'base_change_amount', null)
         frappe.model.set_value(frm.doc.doctype, frm.doc.name, 'base_rounding_adjustment', null)
-        // console.log(frm);
-
     }
-
     render_cart_item(item_data, $item_to_update) {
-        const currency = this.events.get_frm().doc.currency;
+        const frm = this.events.get_frm()
+        let items = frm.doc.items
+        const currency = frm.doc.currency;
         const me = this;
 
 
@@ -1000,7 +1007,11 @@ erpnext.PointOfSale.ItemCart = class {
         $item_to_update.html(
             `<div class="item-name-desc">
                 <div class="item-image-name-dec">
-<!--			        ${get_item_image_html()}-->
+			        <div class="item-image" docname="${item_data.name}">
+						<img
+							onerror="cur_pos.cart.handle_broken_image(this)"
+							src="/files/cross-icon.png" alt=""">
+					</div>
 			        <div class="item-name" >
 					    <span>${frappe.ellipsis(item_data.item_name, 500)}</span>
 				    </div>
@@ -1049,7 +1060,9 @@ erpnext.PointOfSale.ItemCart = class {
 					<div class="item-row-mrp"><span>${item_data.price_list_rate || 0}</span></div>
 					<div class="item-row-disc"><span>${(item_data.price_list_rate - item_data.rate) || 0}</span></div>
 					<div class="item-row-rate"><span>${item_data.rate || 0}</span></div>
-					<div class="item-row-qty"><span>${item_data.qty || 0}</span></div>
+					<div class="item-row-qty"><span>${item_data.qty || 0}</span>
+					<!--<input class="form-control item_qty" type="text" value="${item_data.qty || 0}" item_code="${item_data.item_code}" docname="${item_data.name}" style="width: 50px;text-align: center;">
+					--></div> 
 					<div class="item-row-amount"><span>${item_data.amount || 0}</span></div>`
             // }
         }
@@ -1082,6 +1095,44 @@ erpnext.PointOfSale.ItemCart = class {
                 return `<div class="item-image item-abbr">${frappe.get_abbr(item_name)}</div>`;
             }
         }
+
+        $(".item_qty").on('change', function (){
+
+            let item_qty = $(this).val();
+
+            if(item_qty){
+                if(/^-?\d+$/.test(item_qty) === true){
+                    // console.log("item qty: "+ item_qty);
+                    let docname = $(this).attr('docname');
+                    frappe.model.set_value("POS Invoice Item", docname, 'qty', item_qty)
+                }else{
+                    const message = __('Item quantity must be a number');
+                    frappe.show_alert({
+                        indicator: 'red',
+                        message: message
+                    });
+                }
+            }
+        });
+        $(".item-image").on('click', function (){
+            //rabi
+
+            frappe.dom.freeze();
+            let docname = $(this).attr('docname');
+            console.log(docname);
+            let doctype = "POS Invoice Item"
+            let item = frappe.model.get_doc(doctype, docname);
+            const $item = me.get_cart_item(item);
+            // frappe.model.set_value(doctype, docname, 'qty', 0)
+            frappe.run_serially([
+                () => frappe.model.set_value(doctype, docname, 'rate', 0),
+                () => frappe.model.clear_doc(doctype, docname),
+                () => $item && $item.next().remove() && $item.remove(),
+                // () => me.update_item_html(item, true),
+                // () => frappe.model.clear_doc(doctype, docname),
+                () => frappe.dom.unfreeze()
+            ])
+        });
     }
 
     handle_broken_image($img) {
@@ -1098,6 +1149,8 @@ erpnext.PointOfSale.ItemCart = class {
         if (show_checkout) {
             this.$totals_section.find('.checkout-btn').css('display', 'flex');
             this.$totals_section.find('.edit-cart-btn').css('display', 'none');
+            this.$add_discount_elem.find('input').removeAttr('disabled')
+            this.$add_discount_amount_elem.find('input').removeAttr('disabled')
         } else {
             this.$totals_section.find('.checkout-btn').css('display', 'none');
             this.$totals_section.find('.edit-cart-btn').css('display', 'flex');

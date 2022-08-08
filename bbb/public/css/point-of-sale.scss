@@ -855,7 +855,9 @@
 									margin-right: var(--margin-md);
 
 									> img {
-										@extend .image;
+										object-fit: cover;
+										height: 25% !important;
+										max-width: 25% !important;
 									}
 								}
 
