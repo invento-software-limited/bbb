@@ -159,15 +159,33 @@ erpnext.PointOfSale.ItemCart = class {
                      Add Discount Amount
                 </div>
             </div>
-			<div class="net-total-container">
-				<div class="net-total-label">Net Total</div>
-				<div class="net-total-value">0.00</div>
-			</div>
-			<div class="taxes-container"></div>
-			<div class="grand-total-container">
-				<div>Grand Total</div>
-				<div>0.00</div>
-			</div>
+            <div class="row">
+                <div class="col-md-6">
+                	<div class="net-total-container">
+                        <div class="net-total-label">Net Total</div>
+                        <div class="net-total-value">0.00</div>
+                    </div>
+                    <div class="taxes-container"></div>
+                    <div class="special-discount-container">
+                        <div>Special Discount</div>
+                        <div>0.00</div>
+                    </div>
+               </div>
+                <div class="col-md-6">
+                    <div class="grand-total-container">
+                        <div>Grand Total</div>
+                        <div>0.00</div>
+                    </div>
+                    <div class="rounding-adjustment-container">
+                        <div>Grand Total</div>
+                        <div>0.00</div>
+                    </div>
+                     <div class="rounded-total-container">
+                        <div>Rounded Total</div>
+                        <div>0.00</div>
+                    </div>
+                </div>
+            </div>
 			<div class="checkout-btn">Checkout</div>
 			<div class="edit-cart-btn">Edit Cart</div>`
         );
@@ -410,7 +428,7 @@ erpnext.PointOfSale.ItemCart = class {
                                 () => me.events.customer_details_updated(me.customer_info),
                                 () => me.update_customer_section(),
                                 () => me.update_totals_section(),
-                                () => me.events.set_cache_data({'pos_customer': this.value}),
+                                // () => me.events.set_cache_data({'pos_customer': this.value}),
                                 // () => me.check_out_validation(true),
                                 () => frappe.dom.unfreeze()
                             ]);
@@ -447,7 +465,7 @@ erpnext.PointOfSale.ItemCart = class {
                         frappe.run_serially([
                             // () => me.check_out_validation(true),
                             () => me.served_by_info = {'served_by': this.value},
-                            () => me.events.set_cache_data({'pos_served_by': this.value}),
+                            // () => me.events.set_cache_data({'pos_served_by': this.value}),
                             () => me.update_served_by_section(),
                             () => frappe.dom.unfreeze()
                         ]);
@@ -897,13 +915,15 @@ erpnext.PointOfSale.ItemCart = class {
         if (!frm) frm = this.events.get_frm();
 
         this.render_net_total(frm.doc.net_total);
-        const grand_total = cint(frappe.sys_defaults.disable_rounded_total) ? frm.doc.grand_total : frm.doc.rounded_total;
+        const grand_total = frm.doc.grand_total;
         this.events.set_5_basis_rounded_total(frm.doc.grand_total);
         let base_rounded_total = this.events.get_5_basis_rounded_total();
         this.events.set_initial_paid_amount(base_rounded_total);
-        this.render_grand_total(base_rounded_total);
+        this.render_grand_total(grand_total);
+        // this.render_rounded_total(base_rounded_total);
         this.render_taxes(frm.doc.taxes)
         this.update_item_cart_total_section(frm)
+        this.render_rounded_total(frm.doc, grand_total)
 
     }
 
@@ -927,6 +947,20 @@ erpnext.PointOfSale.ItemCart = class {
         this.$numpad_section.find('.numpad-grand-total').html(
             `<div>Grand Total: <span>${format_currency(value, currency)}</span></div>`
         );
+    }
+
+    render_rounded_total(doc, grand_total) {
+        const currency = this.events.get_frm().doc.currency;
+        let adjustment = doc.rounded_total - doc.grand_total;
+        this.$totals_section.find('.rounded-total-container').html(
+            `<div>Rounded Total</div><div>${format_currency(doc.rounded_total, currency)}</div>`
+        )
+        this.$totals_section.find('.rounding-adjustment-container').html(
+            `<div>Rounding Adjustment</div><div>${format_currency(adjustment, currency)}</div>`
+        )
+        this.$totals_section.find('.special-discount-container').html(
+            `<div>Special Discount</div><div>${format_currency(doc.discount_amount, currency)}</div>`
+        )
     }
 
     render_taxes(taxes) {
@@ -980,9 +1014,9 @@ erpnext.PointOfSale.ItemCart = class {
                 // rounded_total : M rounds to 5 basis ( 12.49 will be 10 and 12.5 will  be 15)
         const frm = this.events.get_frm()
         let rounded_total = this.events.get_5_basis_rounded(frm.doc.grand_total)
-        // frappe.model.set_value(frm.doc.doctype, frm.doc.name, 'rounding_adjustment', rounded_total - frm.doc.grand_total)
-        frappe.model.set_value(frm.doc.doctype, frm.doc.name, 'grand_total', rounded_total)
-        frappe.model.set_value(frm.doc.doctype, frm.doc.name, 'base_grand_total', rounded_total)
+        frappe.model.set_value(frm.doc.doctype, frm.doc.name, 'rounding_adjustment', rounded_total - frm.doc.grand_total)
+        // frappe.model.set_value(frm.doc.doctype, frm.doc.name, 'grand_total', rounded_total)
+        // frappe.model.set_value(frm.doc.doctype, frm.doc.name, 'base_grand_total', rounded_total)
         frappe.model.set_value(frm.doc.doctype, frm.doc.name, 'rounded_total', rounded_total)
         frappe.model.set_value(frm.doc.doctype, frm.doc.name, 'base_rounded_total', null)
         frappe.model.set_value(frm.doc.doctype, frm.doc.name, 'base_paid_amount', null)

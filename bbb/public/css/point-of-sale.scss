@@ -1063,42 +1063,78 @@
 						}
 					}
 
-
-					> .net-total-container {
+					> .row {
 						display: flex;
-						align-items: center;
-						justify-content: space-between;
-						padding: var(--padding-sm) 0px;
-						font-weight: 500;
-						font-size: var(--text-md);
-					}
-
-					> .item-qty-total-container {
-						@extend .net-total-container;
-						padding: 5px 0px 0px 0px;
-					}
-
-					> .taxes-container {
-						display: none;
-						flex-direction: column;
-						font-weight: 500;
-						font-size: var(--text-md);
-
-						> .tax-row {
+						> .col-md-6{
 							display: flex;
-							justify-content: space-between;
-							line-height: var(--text-3xl);
+							flex-direction: column;
+
+							> .net-total-container {
+								display: flex;
+								align-items: center;
+								justify-content: space-between;
+								padding: var(--padding-sm) 0px;
+								font-weight: 500;
+								font-size: var(--text-md);
+							}
+							> .taxes-container {
+								display: none;
+								flex-direction: column;
+								font-weight: 500;
+								font-size: var(--text-md);
+
+								> .tax-row {
+									display: flex;
+									justify-content: space-between;
+									line-height: var(--text-3xl);
+								}
+							}
+
+							> .grand-total-container {
+								display: flex;
+								align-items: center;
+								justify-content: space-between;
+								padding: 10px 0;
+								font-weight: 500;
+								font-size: var(--text-md);
+							}
+							> .rounded-total-container {
+								display: flex;
+								align-items: center;
+								justify-content: space-between;
+								padding: 10px 0;
+								font-weight: 500;
+								font-size: var(--text-lg);
+							}
+							> .rounding-adjustment-container {
+								display: flex;
+								align-items: center;
+								justify-content: space-between;
+								font-weight: 500;
+								font-size: var(--text-md);
+							}
+							> .special-discount-container {
+								display: flex;
+								align-items: center;
+								justify-content: space-between;
+								padding: 10px 0px;
+								font-weight: 700;
+								font-size: var(--text-md);
+							}
 						}
 					}
 
-					> .grand-total-container {
+
+					> .item-qty-total-container {
 						display: flex;
 						align-items: center;
 						justify-content: space-between;
-						padding: var(--padding-sm) 0px;
-						font-weight: 700;
-						font-size: var(--text-lg);
+						font-weight: 500;
+						font-size: var(--text-md);
+						padding: 5px 0px 0px 0px;
 					}
+
+
 
 					> .checkout-btn {
 						@extend .primary-action;

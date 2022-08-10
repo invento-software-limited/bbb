@@ -169,15 +169,15 @@ erpnext.PointOfSale.Payment = class {
 			}
 		});
 
-		frappe.ui.form.on('POS Invoice', 'contact_mobile', (frm) => {
-			const contact = frm.doc.contact_mobile;
-			const request_button = $(this.request_for_payment_field.$input[0]);
-			if (contact) {
-				request_button.removeClass('btn-default').addClass('btn-primary');
-			} else {
-				request_button.removeClass('btn-primary').addClass('btn-default');
-      }
-    });
+		// frappe.ui.form.on('POS Invoice', 'contact_mobile', (frm) => {
+		// 	const contact = frm.doc.contact_mobile;
+		// 	const request_button = $(this.request_for_payment_field.$input[0]);
+		// 	if (contact) {
+		// 		request_button.removeClass('btn-default').addClass('btn-primary');
+		// 	} else {
+		// 		request_button.removeClass('btn-primary').addClass('btn-default');
+     	// 	 }
+		// });
 
 		this.setup_listener_for_payments();
 
@@ -529,23 +529,16 @@ erpnext.PointOfSale.Payment = class {
 		if (!doc) doc = this.events.get_frm().doc;
 		const frm = this.events.get_frm();
 		const paid_amount = doc.paid_amount
-		const grand_total = cint(frappe.sys_defaults.disable_rounded_total) ? doc.grand_total : doc.rounded_total;
-        let base_rounded_total = this.events.get_5_basis_rounded_total()
-		const remaining = base_rounded_total - paid_amount;
+		const grand_total = doc.rounded_total;
+		const remaining = grand_total - paid_amount;
 		const change = doc.change_amount || remaining <= 0 ? -1 * remaining : undefined;
-		// if(remaining > 0){
-		// 	frappe.model.set_value(doc, frm.docname, 'outstanding_total', remaining);
-		// }else if(change > 0){
-		// 	frappe.model.set_value(doc, frm.docname, 'change_amount', change);
-		// 	frappe.model.set_value(doc, frm.docname, 'base_change_amount', change);
-		// }
 		const currency = doc.currency;
 		const label = change ? __('Change') : __('To Be Paid');
 		const style = change ? 'style="background-color: #0080005c"' : '';
 		this.$totals.html(
 			`<div class="col">
 				<div class="total-label">${__('Grand Total')}</div>
-				<div class="value payment_grand_total_value" grand_total_val="${base_rounded_total}">${format_currency(base_rounded_total, currency)}</div>
+				<div class="value payment_grand_total_value" grand_total_val="${grand_total}">${format_currency(grand_total, currency)}</div>
 			</div>
 			<div class="seperator-y"></div>
 			<div class="col">
