@@ -21,3 +21,5 @@ def validate(doc, method):
                 5 * five_taka_note + 5 * five_taka_coin + 2 * two_taka_note + 2 * two_taka_coin + one_taka_note + one_taka_coin)
 
         payment.total_amount = total_amount
+
+        payment.withdrawal_amount = total_amount - payment.opening_amount
