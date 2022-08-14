@@ -1571,8 +1571,19 @@ erpnext.PointOfSale.ItemCart = class {
         this.$cart_items_wrapper.html('');
         if (frm.doc.items.length) {
             frm.doc.items.forEach(item => {
-                this.update_item_html(item);
-            });
+                if(item.pricing_rules && item.discount_percentage <= 0){
+                    frappe.call({
+                        method: "bbb.bbb.controllers.utils.get_pricing_rule_discount",
+                        args: {"name": item.pricing_rules},
+                        callback: (r) => {
+                            frappe.model.set_value(item.doctype, item.name, 'discount_percentage', r.message.discount_percentage)
+                            this.update_item_html(item);
+                        }
+                    })
+                }else{
+                    this.update_item_html(item);
+                }
+            })
         } else {
             this.make_no_items_placeholder();
             this.highlight_checkout_btn(false);

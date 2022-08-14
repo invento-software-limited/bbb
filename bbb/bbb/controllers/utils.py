@@ -1,3 +1,5 @@
+import json
+
 import frappe
 import datetime
 from frappe.permissions import get_doctypes_with_read
@@ -202,3 +204,19 @@ def get_invoice_before_discount_amount(doctype, docname):
         mrp_amount = float(item.qty) * float(item.price_list_rate)
         total_mrp_amount += mrp_amount
     return total_mrp_amount
+
+
+@frappe.whitelist()
+def get_pricing_rule_discount(name):
+    docname_list = json.loads(name)
+    try:
+        pricing_rule_doc = frappe.get_doc('Pricing Rule', {'name': docname_list[0], "disable": 0})
+        if pricing_rule_doc:
+            data = {'discount_percentage': pricing_rule_doc.discount_percentage,
+                    'discount_amount': pricing_rule_doc.discount_amount}
+            return data
+        else:
+            data = {'discount_percentage': 0, 'discount_amount': 0}
+            return data
+    except:
+        pass
