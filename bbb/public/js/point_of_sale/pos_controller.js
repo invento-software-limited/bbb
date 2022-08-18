@@ -644,6 +644,7 @@ erpnext.PointOfSale.Controller = class {
     }
 
     init_order_summary() {
+        const me = this;
         this.order_summary = new erpnext.PointOfSale.PastOrderSummary({
             wrapper: this.$components_wrapper,
             events: {
@@ -654,8 +655,8 @@ erpnext.PointOfSale.Controller = class {
                     frappe.db.get_doc('POS Invoice', name).then((doc) => {
                         frappe.run_serially([
                             () => this.make_return_invoice(doc),
-                            () => this.cart.load_invoice(),
-                            () => this.item_selector.toggle_component(true)
+                            () => setTimeout(function(){me.cart.load_invoice()}, 5000),
+                            () => setTimeout(function(){me.item_selector.toggle_component(true)}, 5100),
                         ]);
                     });
                 },
@@ -805,86 +806,6 @@ erpnext.PointOfSale.Controller = class {
     set_pos_profile_status() {
         this.page.set_indicator(this.pos_profile, "blue");
     }
-    //
-    // async on_cart_update(args) {
-    //     // frappe.dom.freeze();
-    //     let me = this;
-    //     let item_row = undefined;
-    //     try {
-    //         let {field, value, item, item_quantity} = args;
-    //         const {item_code, batch_no, serial_no, uom, rate, mrp, title, start_date, end_date, discount_amount, update_rules} = item;
-    //         item_row = this.get_item_from_frm(item);
-    //         const item_row_exists = !$.isEmptyObject(item_row);
-    //
-    //         const from_selector = field === 'qty' && value === "+1";
-    //         if (from_selector)
-    //             value = flt(item_row.qty) + flt(value);
-    //
-    //         if (item_row_exists) {
-    //
-    //             if (field === 'qty')
-    //                 value = flt(value);
-    //
-    //             if (['qty', 'conversion_factor'].includes(field) && value > 0 && !this.allow_negative_stock) {
-    //                 const qty_needed = field === 'qty' ? value * item_row.conversion_factor : item_row.qty * value;
-    //                 await this.check_stock_availability(item_row, qty_needed, this.frm.doc.set_warehouse);
-    //             }
-    //
-    //             if (this.is_current_item_being_edited(item_row) || from_selector) {
-    //                 await frappe.model.set_value(item_row.doctype, item_row.name, field, value);
-    //
-    //
-    //                 this.update_cart_html(item_row);
-    //             }
-    //             this.insert_search_product_log(item_code)
-    //
-    //         } else {
-    //             if (!this.frm.doc.customer)
-    //                 return this.raise_customer_selection_alert();
-    //
-    //
-    //             if (!this.frm.doc.served_by)
-    //                 return this.raise_served_by_selection_alert();
-    //
-    //             if (!item_code)
-    //                 return;
-    //
-    //             const new_item = {item_code, batch_no, [field]: value, discount_amount, 'rate': (mrp-discount_amount)};
-    //
-    //             if (serial_no) {
-    //                 await this.check_serial_no_availablilty(item_code, this.frm.doc.set_warehouse, serial_no);
-    //                 new_item['serial_no'] = serial_no;
-    //             }
-    //
-    //             if (field === 'serial_no')
-    //                 new_item['qty'] = value.split(`\n`).length || 0;
-    //
-    //             if (parseInt(item_quantity) > 1) {
-    //                 new_item['qty'] = parseInt(item_quantity)
-    //             }
-    //             item_row = this.frm.add_child('items', new_item);
-    //
-    //             if (field === 'qty' && value !== 0 && !this.allow_negative_stock)
-    //                 await this.check_stock_availability(item_row, value, this.frm.doc.set_warehouse);
-    //
-    //             await this.trigger_new_item_events(item_row);
-    //
-    //             var today = new Date();
-    //             if(start_date !== undefined && end_date !== undefined && discount_amount !== undefined && today >= start_date && today <= end_date && this.frm.doc.ignore_pricing_rule == 0){
-    //                 await frappe.model.set_value("POS Invoice Item", item_row.child_docname, 'rate', (mrp-discount_amount));
-    //             }
-    //             this.update_cart_html(item_row)
-    //             this.insert_search_product_log(item_code);
-    //         }
-    //
-    //     } catch (error) {
-    //         console.log(error);
-    //     } finally {
-    //         // frappe.dom.unfreeze();
-    //         return item_row;
-    //     }
-    // }
-
 
     async on_cart_update(args) {
 		frappe.dom.freeze();
@@ -968,9 +889,16 @@ erpnext.PointOfSale.Controller = class {
         frappe.model
         .set_value(payments[0].doctype, payments[0].name, 'amount', this.base_rounded_total)
         .then(() => this.payment.update_totals_section(this.frm.doc))
+    }
 
-        // let base_rounded_total = this.get_5_basis_rounded_total();
-        // this.set_initial_paid_amount(base_rounded_total);
+    apply_pricing_rule_in_return(item){
+        frappe.call({
+            method: "bbb.bbb.controllers.utils.get_pricing_rule_discount",
+            args: {"name": item.pricing_rules},
+            callback: (r) => {
+                frappe.model.set_value(item.doctype, item.name, 'discount_percentage', r.message.discount_percentage)
+            }
+        })
     }
 
     async insert_search_product_log(item_code) {
