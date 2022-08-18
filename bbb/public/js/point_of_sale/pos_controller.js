@@ -658,7 +658,9 @@ erpnext.PointOfSale.Controller = class {
                                 frappe.run_serially([
                                     () => me.cart.load_invoice(),
                                     () => me.cart.load_pricing_rules(),
-                                    () => me.item_selector.toggle_component(true)
+                                    () => me.item_selector.toggle_component(true),
+                                    // () => console.log(me.frm.doc.items),
+                                    () => me.cart.update_item_qty()
                                 ])
                             });
                             // () => setTimeout(function(){me.cart.load_invoice()}, 5000),

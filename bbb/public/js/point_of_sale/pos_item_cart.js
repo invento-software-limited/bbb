@@ -1816,4 +1816,36 @@ erpnext.PointOfSale.ItemCart = class {
         }
 
     }
+
+    async update_item_qty(){
+        const me = this;
+        const frm = me.events.get_frm()
+        let items = frm.doc.items;
+        console.log(items);
+        if(items.length){
+            items.forEach(item => {
+                var item_qty = item.qty;
+                frappe.model.set_value("POS Invoice Item", item.name, 'qty', 0)
+                    .then(function (){
+                        console.log(item_qty)
+                        frappe.model.set_value("POS Invoice Item", item.name, 'qty', item_qty)
+                            .then(function (){
+                                if(frm.doc.is_return){
+                                    frappe.call({
+                                        method: "bbb.bbb.controllers.utils.apply_item_pricing_rule",
+                                        args: {"return_against": frm.doc.return_against, 'item_code': item.item_code},
+                                        callback: (r) => {
+                                            frappe.model.set_value("POS Invoice Item", item.name, 'margin_type', r.message.margin_type)
+                                            frappe.model.set_value("POS Invoice Item", item.name, 'discount_percentage', r.message.discount_percentage)
+                                        }
+                                    })
+                                }
+                            })
+                    })
+
+            });
+
+        }
+
+    }
 }
