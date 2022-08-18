@@ -1549,6 +1549,7 @@ erpnext.PointOfSale.ItemCart = class {
 		});
 	}
     load_invoice() {
+        const me = this;
         const frm = this.events.get_frm();
         frm.events.item_list = [];
         this.attach_refresh_field_event(frm);
@@ -1569,27 +1570,64 @@ erpnext.PointOfSale.ItemCart = class {
         });
         // }
         this.$cart_items_wrapper.html('');
-        if (frm.doc.items.length) {
-            frm.doc.items.forEach(item => {
-                if(item.pricing_rules && item.discount_percentage <= 0){
-                    frappe.call({
-                        method: "bbb.bbb.controllers.utils.get_pricing_rule_discount",
-                        args: {"name": item.pricing_rules},
-                        callback: (r) => {
-                            frappe.model.set_value(item.doctype, item.name, 'discount_percentage', r.message.discount_percentage)
-                            this.update_item_html(item);
-                        }
-                    })
-                }else{
-                    this.update_item_html(item);
-                }
-            })
-        } else {
-            this.make_no_items_placeholder();
-            this.highlight_checkout_btn(false);
-        }
+        // if(frm.doc.is_return){
+        //     const item_data = frm.doc.items;
+        //     frm.doc.items = [];
+        //     frm.refresh_field('ignore_pricing_rule');
+        //     item_data.forEach(item => {
+        //         frappe.db.get_value('Item', {'item_code': item.item_code}, ['start_date', 'end_date', 'discount_amount']).then(res=>{
+        //             let new_item = {'item_code':item.item_code, 'batch_no': item.batch_no, 'rate':item.item_code, 'item_actual_qty': item.qty, 'mrp': item.price_list_rate, 'title': item.item_name, 'discount_amount': res.message.discount_amount, 'start_date': new Date(res.message.start_date), 'end_date': new Date(res.message.end_date), update_rules: 0}
+        //             var args = {
+        //             'field': "qty",
+        //             'item': new_item,
+        //             'value': item.qty
+        //             }
+        //             me.events.on_cart_update(args);
+        //         })
+        //     });
+        // }else{
+        //     if (frm.doc.items.length) {
+        //         frm.doc.items.forEach(item => {
+        //             this.update_item_html(item);
+        //         });
+        //     } else {
+        //         this.make_no_items_placeholder();
+        //         this.highlight_checkout_btn(false);
+        //     }
+        // }
+        // frappe.call({
+        //     method: "bbb.bbb.controllers.utils.get_item_pricing_rule",
+        //     args: {"name": frm.doc.},
+        //     callback: (r) => {
+        //         frappe.model.set_value(item.doctype, item.name, 'discount_percentage', 50)
+        //         me.update_item_html(item);
+        //     }
+        // })
+        setTimeout(function (){
+            if (frm.doc.items.length) {
+                frm.doc.items.forEach(item => {
+                    if(item.pricing_rules && item.discount_percentage <= 0){
+                        frappe.call({
+                            method: "bbb.bbb.controllers.utils.get_pricing_rule_discount",
+                            args: {"name": item.pricing_rules},
+                            callback: (r) => {
+                                frappe.model.set_value(item.doctype, item.name, 'discount_percentage', r.message.discount_percentage)
+                                me.update_item_html(item);
+                            }
+                        })
+                    }else{
+                        me.update_item_html(item);
+                    }
+                })
+            } else {
+                me.make_no_items_placeholder();
+                me.highlight_checkout_btn(false);
+            }
 
-        this.update_totals_section(frm);
+            me.update_totals_section(frm);
+        }, 5000);
+
+
 
         if (frm.doc.docstatus === 1) {
             this.$totals_section.find('.checkout-btn').css('display', 'none');
@@ -1621,6 +1659,41 @@ erpnext.PointOfSale.ItemCart = class {
     toggle_component(show) {
         show ? this.$component.css('display', 'flex') : this.$component.css('display', 'none');
     }
+
+
+    // ignore_pricing_discount(me) {
+	// 		// var me = this;
+	// 		var item_list = [];
+    //
+	// 		$.each(me.frm.doc["items"] || [], function(i, d) {
+	// 			if (d.item_code && !d.is_free_item) {
+	// 				item_list.push({
+	// 					"doctype": d.doctype,
+	// 					"name": d.name,
+	// 					"item_code": d.item_code,
+	// 					"pricing_rules": d.pricing_rules,
+	// 					"parenttype": d.parenttype,
+	// 					"parent": d.parent,
+	// 					"price_list_rate": d.price_list_rate
+	// 				})
+	// 			}
+	// 		});
+	// 		return this.frm.call({
+	// 			method: "erpnext.accounts.doctype.pricing_rule.pricing_rule.remove_pricing_rules",
+	// 			args: { item_list: item_list },
+	// 			callback: function(r) {
+	// 				if (!r.exc && r.message) {
+	// 					r.message.forEach(row_item => {
+	// 						me.remove_pricing_rule(row_item);
+	// 					});
+	// 					me._set_values_for_item_list(r.message);
+	// 					me.calculate_taxes_and_totals();
+	// 					if(me.frm.doc.apply_discount_on) me.frm.trigger("apply_discount_on");
+	// 				}
+	// 			}
+	// 		});
+	//
+	// }
 
     async ignore_pricing_discount(me, value) {
         // const cached_data = me.events.get_cache_data();
