@@ -653,11 +653,17 @@ erpnext.PointOfSale.Controller = class {
                 process_return: (name) => {
                     this.recent_order_list.toggle_component(false);
                     frappe.db.get_doc('POS Invoice', name).then((doc) => {
-                        frappe.run_serially([
-                            () => this.make_return_invoice(doc),
-                            () => setTimeout(function(){me.cart.load_invoice()}, 5000),
-                            () => setTimeout(function(){me.item_selector.toggle_component(true)}, 5100),
-                        ]);
+                        this.make_return_invoice(doc)
+                            .then(function (){
+                                frappe.run_serially([
+                                    () => me.cart.load_invoice(),
+                                    () => me.cart.load_pricing_rules(),
+                                    () => me.item_selector.toggle_component(true)
+                                ])
+                            });
+                            // () => setTimeout(function(){me.cart.load_invoice()}, 5000),
+                            // () => setTimeout(function(){me.item_selector.toggle_component(true)}, 5100),
+
                     });
                 },
                 edit_order: (name) => {

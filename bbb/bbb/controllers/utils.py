@@ -220,3 +220,25 @@ def get_pricing_rule_discount(name):
             return data
     except:
         pass
+
+
+@frappe.whitelist()
+def get_and_apply_item_pricing_rules(return_against):
+    return_against_doc = frappe.get_doc('POS Invoice', {'name': return_against})
+    return return_against_doc.pricing_rules
+
+
+@frappe.whitelist()
+def apply_item_pricing_rule(return_against, item_code):
+    return_against_doc = frappe.get_doc('POS Invoice', {'name': return_against})
+    margin_type = ''
+    discount_percentage = 0
+    discount_amount = 0
+    for pricing_rule in return_against_doc.pricing_rules:
+        if pricing_rule.item_code == item_code:
+            pricing_rule_doc = frappe.get_doc('Pricing Rule', {'name': pricing_rule.pricing_rule})
+            # print(pricing_rule_doc.__dict__)
+            margin_type = pricing_rule_doc.margin_type
+            discount_percentage = pricing_rule_doc.discount_percentage
+            discount_amount = pricing_rule_doc.discount_amount
+    return {'margin_type': margin_type, 'discount_amount': discount_amount, 'discount_percentage': discount_percentage}
