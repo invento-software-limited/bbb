@@ -33,7 +33,9 @@ def get_columns(filters):
         {"label": _("Rounding"), "fieldname": "rounding_adjustment", "fieldtype": "Currency", "width": 120,
          "convertible": "rate", "options": "currency"},
         {"label": _("VAT"), "fieldname": "vat", "fieldtype": "Currency", "width": 120,
-         "convertible": "rate", "options": "currency"}]
+         "convertible": "rate", "options": "currency"},
+        {"label": _("Served By"), "fieldname": "served_by", "fieldtype": "Link", "options": "Served By", "width": 150},
+    ]
 
     return new_column
 
@@ -108,7 +110,7 @@ def get_invoice_data(filters):
     			sales_invoice.pos_profile, sales_invoice.total_taxes_and_charges as vat, sales_invoice.name, sales_invoice.posting_date, sales_invoice.posting_time, 
     			sales_invoice_item.price_list_rate as unit_price, sales_invoice_item.rate as selling_rate, item.standard_rate as mrp,
     			sales_invoice_item.qty as quantity, sales_invoice_item.item_name, item.standard_rate as mrp,
-    			(sales_invoice_item.qty * item.standard_rate) as mrp_total,
+    			(sales_invoice_item.qty * item.standard_rate) as mrp_total, sales_invoice.served_by, 
     			(sales_invoice_item.qty * item.buying_rate) as buying_total,
     			((sales_invoice_item.qty * sales_invoice_item.discount_amount)) as discount,
     			(sales_invoice.total - sales_invoice.net_total) as special_discount, sales_invoice.total_qty,
