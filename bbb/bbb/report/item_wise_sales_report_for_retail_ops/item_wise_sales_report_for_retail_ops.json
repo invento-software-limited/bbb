@@ -1,5 +1,5 @@
 {
- "add_total_row": 0,
+ "add_total_row": 1,
  "columns": [],
  "creation": "2022-08-21 16:40:07.045224",
  "disable_prepared_report": 1,
@@ -9,7 +9,7 @@
  "filters": [],
  "idx": 0,
  "is_standard": "Yes",
- "modified": "2022-08-21 16:40:07.045224",
+ "modified": "2022-08-21 18:14:14.779200",
  "modified_by": "Administrator",
  "module": "Bbb",
  "name": "Item Wise Sales Report For Retail Ops",
