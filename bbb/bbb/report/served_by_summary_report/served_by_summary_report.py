@@ -47,7 +47,7 @@ def get_conditions(filters):
 
 def get_invoice_data(filters):
     conditions = get_conditions(filters)
-    invoice_type = filters.get('switch_invoice', "Sales Invoice")
+    invoice_type = filters.get('switch_invoice', "POS Invoice")
     query_result = frappe.db.sql("""
     		select
     			sales_invoice.grand_total, sales_invoice.served_by, served_by.served_by_id, sales_invoice.total_taxes_and_charges as vat, sales_invoice.name, 

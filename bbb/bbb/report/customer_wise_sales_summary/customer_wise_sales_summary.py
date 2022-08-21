@@ -43,7 +43,7 @@ def get_conditions(filters):
 
 def get_invoice_data(filters):
     conditions = get_conditions(filters)
-    invoice_type = filters.get('switch_invoice', "Sales Invoice")
+    invoice_type = filters.get('switch_invoice', "POS Invoice")
     pos_profile = filters.get('pos_profile', '')
 
     invoice_query = """select count(invoice.name) as total_invoice, invoice.customer, sum(invoice.grand_total) as total_amount,

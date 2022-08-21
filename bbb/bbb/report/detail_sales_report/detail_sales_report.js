@@ -31,8 +31,8 @@ frappe.query_reports["Detail Sales Report"] = {
 			"fieldname":"switch_invoice",
 			"label": __("Switch Invoice"),
 			"fieldtype": "Select",
-			"options": ["Sales Invoice", "POS Invoice"],
-			"default": "Sales Invoice",
+			"options": ["POS Invoice"],
+			"default": "POS Invoice",
 			"reqd": 1,
 			"width": "60px"
 		},
