@@ -93,9 +93,9 @@ def get_invoice_data(filters):
     for key, invoice_data in data.items():
         total_discount = float(invoice_data['discount']) + float(invoice_data['special_discount'])
         invoice_data['basket_value'] = (
-                float(invoice_data['net_total']) / float(invoice_data['number_of_invoice']))
+                float(invoice_data['rounded_total']) / float(invoice_data['number_of_invoice']))
         invoice_data['total_discount'] = total_discount
-        invoice_data['total_sell_final'] = invoice_data['net_total']
+        invoice_data['total_sell_final'] = invoice_data['rounded_total']
         invoice_data['discount_percentage'] = str(
             float("{:.2f}".format((total_discount / invoice_data['mrp_total']) * 100)))
         pos_wise_list_data.append(invoice_data)

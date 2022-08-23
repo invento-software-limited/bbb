@@ -2,8 +2,8 @@
 // For license information, please see license.txt
 /* eslint-disable */
 
-frappe.query_reports["Profit-Loss Summary Report"] = {
-"filters": [
+frappe.query_reports["Brand Wise Sell And Percentage"] = {
+	"filters": [
 		{
 			"fieldname":"from_date",
 			"label": __("From Date"),
@@ -18,6 +18,13 @@ frappe.query_reports["Profit-Loss Summary Report"] = {
 			"fieldtype": "Date",
 			"default": frappe.datetime.get_today(),
 			"reqd": 1,
+			"width": "60px"
+		},
+		{
+			"fieldname":"outlet",
+			"label": __("Outlet"),
+			"fieldtype": "Link",
+			"options": "POS Profile",
 			"width": "60px"
 		},
 		{

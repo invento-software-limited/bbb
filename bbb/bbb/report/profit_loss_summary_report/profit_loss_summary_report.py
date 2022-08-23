@@ -30,7 +30,7 @@ def get_columns():
          "convertible": "rate", "options": "currency"},
         {"label": _("Rocket"), "fieldname": "Rocket", "fieldtype": "Currency", "width": 140,
          "convertible": "rate", "options": "currency"},
-        {"label": _("Card"), "fieldname": "Card", "fieldtype": "Currency", "width": 120,
+        {"label": _("City Card"), "fieldname": "City Card", "fieldtype": "Currency", "width": 120,
          "convertible": "rate", "options": "currency"},
         {"label": _("DBBL"), "fieldname": "DBBL", "fieldtype": "Currency", "width": 120,
          "convertible": "rate", "options": "currency"},
@@ -40,10 +40,10 @@ def get_columns():
          "convertible": "rate", "options": "currency"},
         {"label": _("VAT"), "fieldname": "vat", "fieldtype": "Currency", "width": 120,
          "convertible": "rate", "options": "currency"},
-        {"label": _("Cost"), "fieldname": "total_buying_rate", "fieldtype": "Currency", "width": 120,
-         "convertible": "rate", "options": "currency"},
-        {"label": _("Card %"), "fieldname": "card_payment_percentage", "fieldtype": "Currency", "width": 120,
-         "convertible": "rate", "options": "currency"},
+        # {"label": _("Cost"), "fieldname": "total_buying_rate", "fieldtype": "Currency", "width": 120,
+        #  "convertible": "rate", "options": "currency"},
+        # {"label": _("Card %"), "fieldname": "card_payment_percentage", "fieldtype": "Currency", "width": 120,
+        #  "convertible": "rate", "options": "currency"},
         {"label": _("Rounding"), "fieldname": "rounding_adjustment", "fieldtype": "Currency", "width": 120,
          "convertible": "rate", "options": "currency"},
         {"label": _("Profit/Loss"), "fieldname": "profit_loss", "fieldtype": "Currency", "width": 120,
@@ -91,7 +91,7 @@ def get_conditions(filters):
 
 def get_invoice_data(filters):
     conditions = get_conditions(filters)
-    invoice_type = filters.get('switch_invoice', "Sales Invoice")
+    invoice_type = filters.get('switch_invoice', "POS Invoice")
     query_result = frappe.db.sql("""
     		select
     			sales_invoice.pos_profile, sales_invoice.total_taxes_and_charges as vat, sales_invoice.name, 

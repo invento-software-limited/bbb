@@ -12,7 +12,7 @@ def execute(filters=None):
 def get_columns():
 	"""return columns"""
 	columns = [
-		{"label": _("Item Code"), "fieldname": "item_code", "fieldtype": "Link", "options": "POS Profile", "width": 150},
+		{"label": _("Item Code"), "fieldname": "item_code", "fieldtype": "Link", "options": "Item", "width": 150},
 		{"label": _("Item Name"), "fieldname": "item_name", "fieldtype": "Data", "width": 400},
 		# {"label": _("Customer Type"), "fieldname": "customer_type", "fieldtype": "Data", "width": 160},
 		{"label": _("Warehouse"), "fieldname": "warehouse", "fieldtype": "Link", "options": "POS Profile",

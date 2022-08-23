@@ -46,7 +46,7 @@ def get_invoice_data(filters):
     invoice_type = filters.get('switch_invoice', "POS Invoice")
     pos_profile = filters.get('pos_profile', '')
 
-    invoice_query = """select count(invoice.name) as total_invoice, invoice.customer, sum(invoice.grand_total) as total_amount,
+    invoice_query = """select count(invoice.name) as total_invoice, invoice.customer, sum(invoice.rounded_total) as total_amount,
                         (case when '%s' = '' then 'All Outlet' else invoice.pos_profile end) as pos_profile
                         from `tab%s` invoice""" % (pos_profile, invoice_type)
 

@@ -95,7 +95,7 @@ def get_conditions(filters):
         conditions.append("sales_invoice.posting_date <= '%s'" % filters.get("to_date"))
 
     if filters.get("outlet"):
-        conditions.append("sales_invoice.pos_profile = '%s'" % filters.get("pos_profile"))
+        conditions.append("sales_invoice.pos_profile = '%s'" % filters.get("outlet"))
 
     if conditions:
         conditions = " and ".join(conditions)
