@@ -153,10 +153,10 @@ erpnext.PointOfSale.ItemCart = class {
                 <div class="final-amount-total-label">0</div>
             </div>
             <div class="additional-discount-section">
-                 <div class="add-discount-wrapper">
+                 <div class="add-discount-wrapper" can_click="enabled">
                     ${this.get_discount_icon()} Add Discount
                 </div>
-                <div class="add-discount-amount-wrapper" style="display:none">
+                <div class="add-discount-amount-wrapper" style="display:none" can_click="enabled">
                      Add Discount Amount
                 </div>
             </div>
@@ -178,7 +178,7 @@ erpnext.PointOfSale.ItemCart = class {
                         <div>0.00</div>
                     </div>
                     <div class="rounding-adjustment-container">
-                        <div>Grand Total</div>
+                        <div>Rounding Adjustment</div>
                         <div>0.00</div>
                     </div>
                      <div class="rounded-total-container">
@@ -275,44 +275,93 @@ erpnext.PointOfSale.ItemCart = class {
         this.$component.on('click', '.checkout-btn', function () {
             if ($(this).attr('style').indexOf('--blue-500') == -1) return;
             const frm = me.events.get_frm();
-            let grand_total = frm.doc.grand_total;
+            let rounded_total = frm.doc.rounded_total;
             let payments = frm.doc.payments;
-            payments[0].amount = grand_total;
-            payments[0].base_amount =grand_total;
-            frappe.model.set_value(frm.doctype, frm.docname, 'paid_amount', grand_total);
-
+            payments[0].amount = rounded_total;
+            payments[0].base_amount =rounded_total;
+            frappe.model.set_value(frm.doctype, frm.docname, 'paid_amount', rounded_total);
+            $(".add-discount-wrapper").attr('can_click','disabled');
+            $(".add-discount-amount-wrapper").attr('can_click','disabled');
             me.wrapper.find('.customer-cart-container').css('grid-column', 'span 5 / span 5');
             me.events.checkout();
             me.toggle_checkout_btn(false);
+            //rabi
+            if(!frm.doc.additional_discount_percentage || frm.doc.additional_discount_percentage === 0){
+                frappe.model.set_value(frm.doc.doctype, frm.doc.name, 'additional_discount_percentage', 0);
+                me.$add_discount_elem.css({
+                    'border': '1px dashed var(--gray-500)',
+                    'padding': 'var(--padding-sm) var(--padding-md)'
+                });
+                me.$add_discount_elem.html(`${me.get_discount_icon()} Add Discount`);
+                me.discount_field = undefined;
+            }
+            if(!frm.doc.discount_amount || frm.doc.discount_amount === 0) {
+                frappe.model.set_value(frm.doc.doctype, frm.doc.name, 'discount_amount', 0);
+                me.$add_discount_amount_elem.css({
+                    'border': '1px dashed var(--gray-500)',
+                    'padding': 'var(--padding-sm) var(--padding-md)'
+                });
+                me.$add_discount_amount_elem.html(`${me.get_discount_icon()} Add Discount`);
+                me.discount_amount_field = undefined;
+            }
+            if(frm.doc.discount_amount || frm.doc.discount_percentage){
+                // me.hide_discount_control(frm.doc.discount_percentage);
+                this.$add_discount_elem.css({
+                    'border': '1px dashed var(--dark-green-500)',
+                    'padding': 'var(--padding-sm) var(--padding-md)'
+                });
+                this.$add_discount_elem.html(
+                    `<div class="edit-discount-btn">
+                        ${this.get_discount_icon()} ${String(frm.doc.discount_percentage ? frm.doc.discount_percentage : 0).bold()}% discount applied
+                    </div>`
+                );
+                // me.hide_discount_amount_control(frm.doc.discount_amount);
 
-            me.allow_discount_change && me.$add_discount_elem.removeClass("d-none");
-            me.allow_discount_change && me.$add_discount_amount_elem.removeClass("d-none");
+                this.$add_discount_amount_elem.css({
+                    'border': '1px dashed var(--dark-green-500)',
+                    'padding': 'var(--padding-sm) var(--padding-md)'
+                });
+                this.$add_discount_amount_elem.html(
+                    `<div class="edit-discount-amount-btn">
+                        ${this.get_discount_icon()} ${String(frm.doc.discount_amount).bold()}&nbsp;TK discount applied
+                    </div>`
+                );
+            }
+
+            //
+            // me.allow_discount_change && me.$add_discount_elem.removeClass("d-none");
+            // me.allow_discount_change && me.$add_discount_amount_elem.removeClass("d-none");
         });
 
         this.$totals_section.on('click', '.edit-cart-btn', () => {
-
+            $(".add-discount-wrapper").attr('can_click','enabled');
+            $(".add-discount-amount-wrapper").attr('can_click','enabled');
             me.wrapper.find('.customer-cart-container').css('grid-column', 'span 7 / span 7');
             this.events.edit_cart();
-            me.$add_discount_elem.find('input').attr('disabled', 'disabled');
-            me.$add_discount_amount_elem.find('input').attr('disabled', 'disabled');
             this.toggle_checkout_btn(true);
         });
 
         this.$component.on('click', '.add-discount-wrapper', () => {
             const can_edit_discount = this.$add_discount_elem.find('.edit-discount-btn').length;
+            const can_click = $(".add-discount-wrapper").attr('can_click');
 
-            if (!this.discount_field || can_edit_discount){
-                this.show_discount_amount_control();
-                this.show_discount_control();
+            if(can_click === 'enabled'){
+                if (!this.discount_field || can_edit_discount){
+                    this.show_discount_amount_control();
+                    this.show_discount_control();
+                }
             }
         });
         this.$component.on('click', '.add-discount-amount-wrapper', () => {
             const can_edit_discount = this.$add_discount_amount_elem.find('.edit-discount-amount-btn').length;
-
-            if (!this.discount_field || can_edit_discount){
-                this.show_discount_control();
-                this.show_discount_amount_control();
+            const can_click = $(".add-discount-amount-wrapper").attr('can_click');
+            if(can_click === 'enabled'){
+                if (!this.discount_field || can_edit_discount){
+                    this.show_discount_control();
+                    this.show_discount_amount_control();
+                }
             }
+
         });
 
         frappe.ui.form.on("POS Invoice", "paid_amount", frm => {
@@ -919,7 +968,7 @@ erpnext.PointOfSale.ItemCart = class {
         const grand_total = frm.doc.grand_total;
         this.events.set_5_basis_rounded_total(frm.doc.grand_total);
         let base_rounded_total = this.events.get_5_basis_rounded_total();
-        this.events.set_initial_paid_amount(base_rounded_total);
+        this.events.set_initial_paid_amount(frm.doc.rounded_total);
         this.render_grand_total(grand_total);
         // this.render_rounded_total(base_rounded_total);
         this.render_taxes(frm.doc.taxes)
@@ -949,7 +998,7 @@ erpnext.PointOfSale.ItemCart = class {
             `<div>Grand Total: <span>${format_currency(value, currency)}</span></div>`
         );
     }
-
+    // rabi
     render_rounded_total(doc, grand_total) {
         const currency = this.events.get_frm().doc.currency;
         let adjustment = doc.rounded_total - doc.grand_total;
@@ -1012,12 +1061,13 @@ erpnext.PointOfSale.ItemCart = class {
     }
 
     update_5_basis_rounded(){
-                // rounded_total : M rounds to 5 basis ( 12.49 will be 10 and 12.5 will  be 15)
+                // rounded_total : M rounds to 5 basis ( 12.49 will be 10 and 12.5 will  be 15) rabi
         const frm = this.events.get_frm()
+        let grand_total = frm.doc.grand_total;
         let rounded_total = this.events.get_5_basis_rounded(frm.doc.grand_total)
-        frappe.model.set_value(frm.doc.doctype, frm.doc.name, 'rounding_adjustment', rounded_total - frm.doc.grand_total)
-        frappe.model.set_value(frm.doc.doctype, frm.doc.name, 'grand_total', rounded_total)
-        frappe.model.set_value(frm.doc.doctype, frm.doc.name, 'base_grand_total', rounded_total)
+        frappe.model.set_value(frm.doc.doctype, frm.doc.name, 'rounding_adjustment', rounded_total - grand_total)
+        // frappe.model.set_value(frm.doc.doctype, frm.doc.name, 'grand_total', rounded_total)
+        // frappe.model.set_value(frm.doc.doctype, frm.doc.name, 'base_grand_total', rounded_total)
         frappe.model.set_value(frm.doc.doctype, frm.doc.name, 'rounded_total', rounded_total)
         frappe.model.set_value(frm.doc.doctype, frm.doc.name, 'base_rounded_total', null)
         frappe.model.set_value(frm.doc.doctype, frm.doc.name, 'base_paid_amount', null)
@@ -1142,7 +1192,6 @@ erpnext.PointOfSale.ItemCart = class {
             if(item_qty){
                 if(/^-?\d+$/.test(item_qty) === true){
                     // console.log("item qty: "+ item_qty);
-                    // rabi
                     let docname = $(this).attr('docname');
                     let item_code = $(this).attr('item_code');
                     frappe.model.set_value("POS Invoice Item", docname, 'qty', item_qty)
@@ -1845,6 +1894,35 @@ erpnext.PointOfSale.ItemCart = class {
 
             });
 
+        }
+
+    }
+
+
+    async update_item_qty_(){
+        const me = this;
+        const frm = me.events.get_frm()
+        let items = frm.doc.items;
+        if(frm.doc.is_return && items.length){
+            frappe.call({
+                method: "bbb.bbb.controllers.utils.apply_items_pricing_rules",
+                args: {"return_against": frm.doc.return_against},
+                callback: (r) => {
+                    items.forEach(item => {
+                        var item_code = item.item_code
+                        var item_qty = item.qty;
+                        frappe.model.set_value("POS Invoice Item", item.name, 'qty', 0)
+                            .then(function () {
+                                frappe.model.set_value("POS Invoice Item", item.name, 'qty', item_qty)
+                                    .then(function () {
+                                        let data = (r.message)[item_code];
+                                        frappe.model.set_value("POS Invoice Item", item.name, 'margin_type', data.margin_type)
+                                        frappe.model.set_value("POS Invoice Item", item.name, 'discount_percentage', data.discount_percentage)
+                                    })
+                            })
+                    })
+                }
+            })
         }
 
     }
