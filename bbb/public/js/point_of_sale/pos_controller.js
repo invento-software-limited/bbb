@@ -464,6 +464,7 @@ erpnext.PointOfSale.Controller = class {
                 update_paid_amount: () => this.update_paid_amount,
                 get_initial_paid_amount: () => this.initial_paid_amount,
                 set_initial_paid_amount: (paid_amount) => this.set_initial_paid_amount(paid_amount),
+                check_free_item_pricing_rules: () => this.check_free_item_pricing_rules()
             }
         })
     }
@@ -774,7 +775,7 @@ erpnext.PointOfSale.Controller = class {
             }
             frm.reload_doc();
         }
-        console.log(this);
+        // console.log(this);
     }
 
     get_new_frm(_frm) {
@@ -824,12 +825,12 @@ erpnext.PointOfSale.Controller = class {
             const {item_code, batch_no, serial_no, uom, rate, mrp, title, start_date, end_date, discount_amount, update_rules} = item;
 			item_row = this.get_item_from_frm(item);
 			const item_row_exists = !$.isEmptyObject(item_row);
-
+            const free_item = item_row.free_item_rules;
 			const from_selector = field === 'qty' && value === "+1";
 			if (from_selector)
 				value = flt(item_row.qty) + flt(value);
 
-			if (item_row_exists) {
+			if (item_row_exists && free_item === undefined) {
 				if (field === 'qty')
 					value = flt(value);
 
@@ -852,7 +853,8 @@ erpnext.PointOfSale.Controller = class {
 				if (!item_code)
 					return;
 
-				const new_item = { item_code, batch_no, rate, [field]: value };
+				// const new_item = { item_code, batch_no, rate, [field]: value };
+				const new_item = { item_code, batch_no, rate, [field]: 1 };
 
 				if (serial_no) {
 					await this.check_serial_no_availablilty(item_code, this.frm.doc.set_warehouse, serial_no);
@@ -861,7 +863,7 @@ erpnext.PointOfSale.Controller = class {
 
 				if (field === 'serial_no')
 					new_item['qty'] = value.split(`\n`).length || 0;
-
+                console.log(new_item)
 				item_row = this.frm.add_child('items', new_item);
 
 				if (field === 'qty' && value !== 0 && !this.allow_negative_stock)
@@ -884,6 +886,8 @@ erpnext.PointOfSale.Controller = class {
 			console.log(error);
 		} finally {
 			frappe.dom.unfreeze();
+
+            this.check_free_item_pricing_rules()
 			return item_row;
 		}
 	}
@@ -909,7 +913,7 @@ erpnext.PointOfSale.Controller = class {
         })
     }
 
-    async insert_search_product_log(item_code) {
+    insert_search_product_log(item_code) {
         // console.log(this.frm.doc);
         // console.log(item_code, item_name);
 
@@ -1229,5 +1233,32 @@ erpnext.PointOfSale.Controller = class {
     }
     set_initial_paid_amount(paid_amount){
         this.initial_paid_amount = paid_amount;
+    }
+
+    check_free_item_pricing_rules(){
+        const doc = this.frm.doc
+        const items = doc.items
+        if(doc.total_qty <= 1){
+            return
+        }
+        var free_items = []
+        let min_qty = 0
+        let free_qty = 0
+        items.forEach(function(item, index){
+            if(item.free_item_rules){
+                free_items.push({'docname': item.name, 'mrp': item.price_list_rate})
+                min_qty = item.min_qty;
+                free_qty +=item.free_qty;
+            }
+        });
+        free_items.sort((a, b) => parseFloat(a.mrp) - parseFloat(b.mrp));
+        free_qty = Math.floor(free_qty/2)
+        free_items.forEach(function (item, index){
+            if(index < free_qty && free_items.length > min_qty){
+                frappe.model.set_value("POS Invoice Item", free_items[index]['docname'], 'rate', 0)
+            }else{
+                frappe.model.set_value("POS Invoice Item", free_items[index]['docname'], 'rate', item.mrp)
+            }
+        })
     }
 };

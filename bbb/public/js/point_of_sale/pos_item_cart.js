@@ -642,6 +642,12 @@ erpnext.PointOfSale.ItemCart = class {
                                 </a>
                             </li>
                             <li>
+                                <a class="grey-link dropdown-item" href="#" id="update_pricing_rules">
+                    
+                                    <span class="menu-item-label" data-label="Toggle Sidebar"><span class="alt-underline">Update</span>Pricing Rules</span>
+                                </a>
+                            </li>
+                            <li>
                                 <a class="grey-link dropdown-item" href="#" id="close_pos">
                     
                                     <span class="menu-item-label" data-label="Toggle Sidebar"><span class="alt-underline">C</span>lose the POS</span>
@@ -748,8 +754,8 @@ erpnext.PointOfSale.ItemCart = class {
 
                     const grand_total = cint(frappe.sys_defaults.disable_rounded_total) ? frm.doc.grand_total : frm.doc.rounded_total;
                     me.events.set_5_basis_rounded_total(grand_total)
-                    console.log(me.events.base_rounded_total);
-                    console.log($('.payment_amount_value').html(format_currency(me.events.base_rounded_total, frm.doc.currency)));
+                    // console.log(me.events.base_rounded_total);
+                    // console.log($('.payment_amount_value').html(format_currency(me.events.base_rounded_total, frm.doc.currency)));
                 },
 
             },
@@ -966,14 +972,14 @@ erpnext.PointOfSale.ItemCart = class {
 
         this.render_net_total(frm.doc.net_total);
         const grand_total = frm.doc.grand_total;
-        this.events.set_5_basis_rounded_total(frm.doc.grand_total);
-        let base_rounded_total = this.events.get_5_basis_rounded_total();
-        this.events.set_initial_paid_amount(frm.doc.rounded_total);
+        //this.events.set_5_basis_rounded_total(frm.doc.grand_total);
+        //let base_rounded_total = this.events.get_5_basis_rounded_total();
+        //this.events.set_initial_paid_amount(frm.doc.rounded_total);
         this.render_grand_total(grand_total);
         // this.render_rounded_total(base_rounded_total);
         this.render_taxes(frm.doc.taxes)
         this.update_item_cart_total_section(frm)
-        this.render_rounded_total(frm.doc, grand_total)
+        this.render_rounded_total(frm.doc)
 
     }
 
@@ -999,7 +1005,7 @@ erpnext.PointOfSale.ItemCart = class {
         );
     }
     // rabi
-    render_rounded_total(doc, grand_total) {
+    render_rounded_total(doc) {
         const currency = this.events.get_frm().doc.currency;
         let adjustment = doc.rounded_total - doc.grand_total;
         this.$totals_section.find('.rounded-total-container').html(
@@ -1061,13 +1067,11 @@ erpnext.PointOfSale.ItemCart = class {
     }
 
     update_5_basis_rounded(){
-                // rounded_total : M rounds to 5 basis ( 12.49 will be 10 and 12.5 will  be 15) rabi
+        // rounded_total : M rounds to 5 basis ( 12.49 will be 10 and 12.5 will  be 15) rabi
         const frm = this.events.get_frm()
         let grand_total = frm.doc.grand_total;
         let rounded_total = this.events.get_5_basis_rounded(frm.doc.grand_total)
         frappe.model.set_value(frm.doc.doctype, frm.doc.name, 'rounding_adjustment', rounded_total - grand_total)
-        // frappe.model.set_value(frm.doc.doctype, frm.doc.name, 'grand_total', rounded_total)
-        // frappe.model.set_value(frm.doc.doctype, frm.doc.name, 'base_grand_total', rounded_total)
         frappe.model.set_value(frm.doc.doctype, frm.doc.name, 'rounded_total', rounded_total)
         frappe.model.set_value(frm.doc.doctype, frm.doc.name, 'base_rounded_total', null)
         frappe.model.set_value(frm.doc.doctype, frm.doc.name, 'base_paid_amount', null)
@@ -1146,7 +1150,7 @@ erpnext.PointOfSale.ItemCart = class {
 					<div class="item-row-disc"><span>${(item_data.price_list_rate - item_data.rate) || 0}</span></div>
 					<div class="item-row-rate"><span>${item_data.rate || 0}</span></div>
 					<div class="item-row-qty"><!--<span>${item_data.qty || 0}</span>-->
-					<input class="form-control item_qty" type="text" value="${item_data.qty || 0}" item_code="${item_data.item_code}" docname="${item_data.name}" style="width: 50px;text-align: center;">
+					<input class="form-control item_qty" type="text" value="${item_data.qty || 0}" item_code="${item_data.item_code}" docname="${item_data.name}" style="width: 50px;text-align: center;" free_item="${item_data.free_item_rules || 'undefined'}">
 					</div>
 					
 					<!--<div class="item-row-damaged-cost">
@@ -1191,9 +1195,21 @@ erpnext.PointOfSale.ItemCart = class {
 
             if(item_qty){
                 if(/^-?\d+$/.test(item_qty) === true){
-                    // console.log("item qty: "+ item_qty);
+
                     let docname = $(this).attr('docname');
                     let item_code = $(this).attr('item_code');
+                    let free_item = $(this).attr('free_item');
+                    console.log('free_item ', free_item)
+                    if(free_item !== 'undefined'){
+                        frappe.dom.unfreeze();
+                        frappe.show_alert({
+                            message: __('Item qty should be 1 for applied promotion'),
+                            indicator: 'orange'
+                        });
+                        frappe.utils.play_sound("error");
+                        $(this).val(item_qty)
+                        return
+                    }
                     frappe.model.set_value("POS Invoice Item", docname, 'qty', item_qty)
                         .then(function (){
                             if(frm.doc.is_return){
@@ -1203,7 +1219,7 @@ erpnext.PointOfSale.ItemCart = class {
                                     callback: (r) => {
                                         frappe.model.set_value("POS Invoice Item", docname, 'margin_type', r.message.margin_type)
                                         frappe.model.set_value("POS Invoice Item", docname, 'discount_percentage', r.message.discount_percentage)
-                                        console.log(frm.doc.items)
+                                        // console.log(frm.doc.items)
                                     }
                                 })
                             }
@@ -1215,14 +1231,16 @@ erpnext.PointOfSale.ItemCart = class {
                         indicator: 'red',
                         message: message
                     });
+
+                    $(this).val(item_qty)
                 }
             }
         });
         $(".item-image").on('click', function (){
-
+            //rabi
             frappe.dom.freeze();
             let docname = $(this).attr('docname');
-            console.log(docname);
+            // console.log(docname);
             let doctype = "POS Invoice Item"
             let item = frappe.model.get_doc(doctype, docname);
             const $item = me.get_cart_item(item);
@@ -1231,7 +1249,7 @@ erpnext.PointOfSale.ItemCart = class {
                 () => frappe.model.set_value(doctype, docname, 'rate', 0),
                 () => frappe.model.clear_doc(doctype, docname),
                 () => $item && $item.next().remove() && $item.remove(),
-                // () => me.update_item_html(item, true),
+                () => me.events.check_free_item_pricing_rules(),
                 // () => frappe.model.clear_doc(doctype, docname),
                 () => frappe.dom.unfreeze()
             ])
@@ -1816,7 +1834,7 @@ erpnext.PointOfSale.ItemCart = class {
             })
         });
         frm.reload_doc();
-        console.log(frm.doc)
+        // console.log(frm.doc)
     }
 
     check_out_validation(show) {
@@ -1870,13 +1888,13 @@ erpnext.PointOfSale.ItemCart = class {
         const me = this;
         const frm = me.events.get_frm()
         let items = frm.doc.items;
-        console.log(items);
+        // console.log(items);
         if(items.length){
             items.forEach(item => {
                 var item_qty = item.qty;
                 frappe.model.set_value("POS Invoice Item", item.name, 'qty', 0)
                     .then(function (){
-                        console.log(item_qty)
+                        // console.log(item_qty)
                         frappe.model.set_value("POS Invoice Item", item.name, 'qty', item_qty)
                             .then(function (){
                                 if(frm.doc.is_return){
