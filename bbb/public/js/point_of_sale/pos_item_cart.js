@@ -1199,7 +1199,6 @@ erpnext.PointOfSale.ItemCart = class {
                     let docname = $(this).attr('docname');
                     let item_code = $(this).attr('item_code');
                     let free_item = $(this).attr('free_item');
-                    console.log('free_item ', free_item)
                     if(free_item !== 'undefined'){
                         frappe.dom.unfreeze();
                         frappe.show_alert({
@@ -1207,7 +1206,7 @@ erpnext.PointOfSale.ItemCart = class {
                             indicator: 'orange'
                         });
                         frappe.utils.play_sound("error");
-                        $(this).val(item_qty)
+                        $(this).val(1)
                         return
                     }
                     frappe.model.set_value("POS Invoice Item", docname, 'qty', item_qty)
