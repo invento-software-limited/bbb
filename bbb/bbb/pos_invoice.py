@@ -1,6 +1,10 @@
 import frappe
 import json
 from frappe.utils import money_in_words, flt, cint
+from frappe import _
+
+
+class CustomerValidationError(frappe.ValidationError): pass
 
 
 def after_insert_or_on_submit(doc, method):
@@ -295,3 +299,8 @@ def get_past_order_list(search_term, status, limit=3):
                                          filters={"status": ["!=", "Draft"], 'owner': frappe.session.user},
                                          fields=fields, limit=3)
     return invoice_list
+
+
+def validate(doc, method):
+    if not doc.customer:
+        frappe.throw(_("You must select a customer before submit"), CustomerValidationError, title="Missing")
