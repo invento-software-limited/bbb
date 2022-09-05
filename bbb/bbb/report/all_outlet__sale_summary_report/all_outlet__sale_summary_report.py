@@ -3,6 +3,7 @@
 
 import frappe
 from frappe import _
+import copy
 
 
 def execute(filters=None):
@@ -147,18 +148,15 @@ def get_invoice_data(filters):
     for payment in payment_result:
         if payment.get('pos_profile') in payments:
             pos_payment = payments.get(payment.get('pos_profile'))
-
-            if pos_payment.get(payment.get('payment_type')):
-                if payment.get('payment_type') == 'Cash':
-                    pos_payment[payment.get('payment_type')] = (pos_payment[payment.get('payment_type')] + payment.get(
-                        'payment_amount')) - payment.get('change_amount', 0)
-                else:
-                    pos_payment[payment.get('payment_type')] = pos_payment[payment.get('payment_type')] + payment.get(
-                        'payment_amount')
+            if payment.get('payment_type') == "Cash":
+                pos_payment[payment.get('payment_type')] = (pos_payment[payment.get('payment_type')] + payment.get(
+                    'payment_amount')) - payment.get('change_amount', 0)
             else:
-                pos_payment[payment.get('payment_type')] = payment.get('payment_amount')
+                pos_payment[payment.get('payment_type')] = pos_payment[payment.get('payment_type')] + payment.get(
+                    'payment_amount')
+
         else:
-            payments[payment.get('pos_profile')] = payment_type_dict
+            payments[payment.get('pos_profile')] = copy.deepcopy(payment_type_dict)
             if payment.get('payment_type') == 'Cash':
                 payments[payment.get('pos_profile')][payment.get('payment_type')] = payment.get('payment_amount') - payment.get('change_amount')
             else:
@@ -171,12 +169,12 @@ def get_invoice_data(filters):
             pos_data['mrp_total'] = pos_data['mrp_total'] + result['mrp_total']
             pos_data['discount'] = pos_data['discount'] + result['discount']
             pos_data['total_item_qty'] = pos_data['total_item_qty'] + result['quantity']
+            pos_data['buying_total'] = pos_data['buying_total'] + result['buying_total']
 
             if result.get('name') != pos_data.get('name'):
                 pos_data['number_of_invoice'] += 1
                 pos_data['rounding_adjustment'] = pos_data['rounding_adjustment'] + result['rounding_adjustment']
                 pos_data['net_total'] = pos_data['net_total'] + result['net_total']
-                pos_data['buying_total'] = pos_data['buying_total'] + result['buying_total']
                 pos_data['special_discount'] = pos_data['special_discount'] + result['special_discount']
                 pos_data['total'] = pos_data['total'] + result['total']
                 pos_data['total_taxes_and_charges'] = pos_data['total_taxes_and_charges'] + result[
