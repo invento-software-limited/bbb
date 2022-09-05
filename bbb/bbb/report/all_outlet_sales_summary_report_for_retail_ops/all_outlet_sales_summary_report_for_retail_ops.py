@@ -180,7 +180,6 @@ def get_invoice_data(filters):
                 pos_data['rounded_total'] = pos_data['rounded_total'] + result['rounded_total']
                 pos_data['name'] = result.get('name')
                 pos_data['vat'] = pos_data['vat'] + result['vat']
-                pos_data['rounding_adjustment'] = pos_data['rounding_adjustment'] + result['rounding_adjustment']
         else:
             result['number_of_invoice'] = 1
             result['total_item_qty'] = result['quantity']
