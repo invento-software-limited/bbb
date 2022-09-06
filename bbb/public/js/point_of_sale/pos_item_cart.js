@@ -1933,8 +1933,11 @@ erpnext.PointOfSale.ItemCart = class {
                                 frappe.model.set_value("POS Invoice Item", item.name, 'qty', item_qty)
                                     .then(function () {
                                         let data = (r.message)[item_code];
-                                        frappe.model.set_value("POS Invoice Item", item.name, 'margin_type', data.margin_type)
-                                        frappe.model.set_value("POS Invoice Item", item.name, 'discount_percentage', data.discount_percentage)
+                                        console.log(data, item.item_code, item.item_name)
+                                        setTimeout(function(){
+                                            frappe.model.set_value("POS Invoice Item", item.name, 'margin_type', data.margin_type)
+                                            frappe.model.set_value("POS Invoice Item", item.name, 'discount_percentage', data.discount_percentage)
+                                        }, 300)
                                     })
                             })
                     })
