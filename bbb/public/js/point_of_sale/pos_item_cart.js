@@ -1922,7 +1922,7 @@ erpnext.PointOfSale.ItemCart = class {
         let items = frm.doc.items;
         if(frm.doc.is_return && items.length){
             frappe.call({
-                method: "bbb.bbb.controllers.utils.apply_items_pricing_rules",
+                method: "bbb.bbb.controllers.utils.apply_all_items_pricing_rules",
                 args: {"return_against": frm.doc.return_against},
                 callback: (r) => {
                     items.forEach(item => {

@@ -245,16 +245,26 @@ def apply_item_pricing_rule(return_against, item_code):
 
 
 @frappe.whitelist()
-def apply_items_pricing_rules(return_against):
+def apply_all_items_pricing_rules(return_against):
     return_against_doc = frappe.get_doc('POS Invoice', {'name': return_against})
-    pricing_rule_data_dict = dict()
+    # pricing_rule_data_dict = dict()
 
-    for pricing_rule in return_against_doc.pricing_rules:
-        pricing_rule_doc = frappe.get_doc('Pricing Rule', {'name': pricing_rule.pricing_rule})
-        margin_type = pricing_rule_doc.margin_type
-        discount_percentage = pricing_rule_doc.discount_percentage
-        discount_amount = pricing_rule_doc.discount_amount
-        pricing_rule_data_dict[pricing_rule.item_code] = {'margin_type': margin_type,
-                                                          'discount_amount': discount_amount,
-                                                          'discount_percentage': discount_percentage}
-    return pricing_rule_data_dict
+    # for pricing_rule in return_against_doc.pricing_rules:
+    #     pricing_rule_doc = frappe.get_doc('Pricing Rule', {'name': pricing_rule.pricing_rule})
+    #     margin_type = pricing_rule_doc.margin_type
+    #     discount_percentage = pricing_rule_doc.discount_percentage
+    #     discount_amount = pricing_rule_doc.discount_amount
+    #     pricing_rule_data_dict[pricing_rule.item_code] = {'margin_type': margin_type,
+    #                                                       'discount_amount': discount_amount,
+    #                                                       'discount_percentage': discount_percentage
+    #                                                       }
+
+    item_wise_discount_percentage = dict()
+    for item in return_against_doc.items:
+        item_wise_discount_percentage[item.item_code] = {'margin_type': item.margin_type,
+                                                          'discount_amount': item.discount_amount,
+                                                          'discount_percentage': item.discount_percentage
+                                                          }
+
+
+    return item_wise_discount_percentage
