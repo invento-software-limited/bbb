@@ -1974,6 +1974,7 @@ erpnext.PointOfSale.ItemCart = class {
                     items.forEach(item => {
                         var item_code = item.item_code
                         var item_qty = item.qty;
+                        frappe.model.set_value("POS Invoice Item", item.name, 'rate', 0)
                         frappe.model.set_value("POS Invoice Item", item.name, 'qty', 0)
                             .then(function () {
                                 frappe.model.set_value("POS Invoice Item", item.name, 'qty', item_qty)
@@ -1981,7 +1982,7 @@ erpnext.PointOfSale.ItemCart = class {
                                         let data = (r.message)[item_code];
                                         console.log(data, item.item_code, item.item_name)
                                             frappe.model.set_value("POS Invoice Item", item.name, 'margin_type', data.margin_type)
-                                            frappe.model.set_value("POS Invoice Item", item.name, 'discount_percentage', data.discount_percentage)
+                                            frappe.model.set_value("POS Invoice Item", item.name, 'rate', data.rate)
 
                                     })
                             })
