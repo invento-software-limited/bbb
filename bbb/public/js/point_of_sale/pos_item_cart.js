@@ -1973,16 +1973,17 @@ erpnext.PointOfSale.ItemCart = class {
                 callback: (r) => {
                     items.forEach(item => {
                         var item_code = item.item_code
+                        var data = (r.message)[item_code];
                         var item_qty = item.qty;
-                        frappe.model.set_value("POS Invoice Item", item.name, 'rate', 0)
-                        frappe.model.set_value("POS Invoice Item", item.name, 'qty', 0)
+                        frappe.model.set_value("POS Invoice Item", item.name, 'rate', 0);
+                        frappe.model.set_value("POS Invoice Item", item.name, 'qty', 0);
+                        frappe.model.set_value("POS Invoice Item", item.name, 'rate', data.rate)
                             .then(function () {
                                 frappe.model.set_value("POS Invoice Item", item.name, 'qty', item_qty)
                                     .then(function () {
-                                        let data = (r.message)[item_code];
                                         console.log(data, item.item_code, item.item_name)
-                                            frappe.model.set_value("POS Invoice Item", item.name, 'margin_type', data.margin_type)
-                                            frappe.model.set_value("POS Invoice Item", item.name, 'rate', data.rate)
+                                            frappe.model.set_value("POS Invoice Item", item.name, 'margin_type', data.margin_type);
+                                            frappe.model.set_value("POS Invoice Item", item.name, 'rate', data.rate);
 
                                     })
                             })
