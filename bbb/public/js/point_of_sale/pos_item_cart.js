@@ -665,12 +665,6 @@ erpnext.PointOfSale.ItemCart = class {
                                 </a>
                             </li>
                             <li>
-                                <a class="grey-link dropdown-item" href="#" id="update_pricing_rules">
-                    
-                                    <span class="menu-item-label" data-label="Toggle Sidebar"><span class="alt-underline">Update</span>Pricing Rules</span>
-                                </a>
-                            </li>
-                            <li>
                                 <a class="grey-link dropdown-item" href="#" id="close_pos">
                     
                                     <span class="menu-item-label" data-label="Toggle Sidebar"><span class="alt-underline">C</span>lose the POS</span>
@@ -1977,23 +1971,21 @@ erpnext.PointOfSale.ItemCart = class {
                 method: "bbb.bbb.controllers.utils.apply_all_items_pricing_rules",
                 args: {"return_against": frm.doc.return_against},
                 callback: (r) => {
-                    setTimeout(function(){
-                        items.forEach(item => {
-                            var item_code = item.item_code
-                            var item_qty = item.qty;
-                            frappe.model.set_value("POS Invoice Item", item.name, 'qty', 0)
-                                .then(function () {
-                                    frappe.model.set_value("POS Invoice Item", item.name, 'qty', item_qty)
-                                        .then(function () {
-                                            let data = (r.message)[item_code];
-                                            console.log(data, item.item_code, item.item_name)
-                                                frappe.model.set_value("POS Invoice Item", item.name, 'margin_type', data.margin_type)
-                                                frappe.model.set_value("POS Invoice Item", item.name, 'discount_percentage', data.discount_percentage)
+                    items.forEach(item => {
+                        var item_code = item.item_code
+                        var item_qty = item.qty;
+                        frappe.model.set_value("POS Invoice Item", item.name, 'qty', 0)
+                            .then(function () {
+                                frappe.model.set_value("POS Invoice Item", item.name, 'qty', item_qty)
+                                    .then(function () {
+                                        let data = (r.message)[item_code];
+                                        console.log(data, item.item_code, item.item_name)
+                                            frappe.model.set_value("POS Invoice Item", item.name, 'margin_type', data.margin_type)
+                                            frappe.model.set_value("POS Invoice Item", item.name, 'discount_percentage', data.discount_percentage)
 
-                                        })
-                                })
-                        })
-                    }, 500)
+                                    })
+                            })
+                    })
                 }
             })
         }
