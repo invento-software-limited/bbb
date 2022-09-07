@@ -70,6 +70,8 @@ erpnext.PointOfSale.ItemCart = class {
 
     reset_customer_selector() {
         const frm = this.events.get_frm();
+        if(frm.doc.is_return === 1) return;
+        // if($('.checkout-btn').is(":visible")) return;
         frm.set_value('customer', '');
         this.make_customer_selector();
         this.customer_field.set_focus();
@@ -77,12 +79,17 @@ erpnext.PointOfSale.ItemCart = class {
 
     reset_served_by_selector() {
         const frm = this.events.get_frm();
+        if(frm.doc.is_return === 1) return;
+        // if($('.checkout-btn').is(":visible")) return;
+
         frm.set_value('served_by', '');
         this.make_served_by_selector();
         this.served_by_field.set_focus();
     }
     reset_ignore_discount_selector() {
         const frm = this.events.get_frm();
+        if(frm.doc.is_return === 1) return;
+        // if($('.checkout-btn').is(":visible")) return;
         frm.set_value('ignore_pricing_rule', 0);
         this.make_discount_price_selector();
         this.price_rule_ignore_discount_field.set_focus();
@@ -331,6 +338,12 @@ erpnext.PointOfSale.ItemCart = class {
             //
             // me.allow_discount_change && me.$add_discount_elem.removeClass("d-none");
             // me.allow_discount_change && me.$add_discount_amount_elem.removeClass("d-none");
+
+            $('.reset-customer-btn').css('display', 'none');
+            $('.reset-served-by-btn').css('display', 'none');
+            $('.reset-ignore_pricing-rule-btn').css('display', 'none');
+
+
         });
 
         this.$totals_section.on('click', '.edit-cart-btn', () => {
@@ -339,6 +352,16 @@ erpnext.PointOfSale.ItemCart = class {
             me.wrapper.find('.customer-cart-container').css('grid-column', 'span 7 / span 7');
             this.events.edit_cart();
             this.toggle_checkout_btn(true);
+            const frm = me.events.get_frm();
+            if(frm.doc.is_return === 0) {
+                $('.reset-customer-btn').css('display', 'flex');
+                $('.reset-served-by-btn').css('display', 'flex');
+                // $('.reset-ignore_pricing-rule-btn').css('display', 'flex');
+            }else{
+                $('.reset-customer-btn').css('display', 'none');
+                $('.reset-served-by-btn').css('display', 'none');
+                $('.reset-ignore_pricing-rule-btn').css('display', 'none');
+            }
         });
 
         this.$component.on('click', '.add-discount-wrapper', () => {
@@ -886,7 +909,7 @@ erpnext.PointOfSale.ItemCart = class {
                     <div class="pricing-discount-desc">
                         <div class="pricing-discount-name">${ignore_pricing_rule}</div>
                     </div>
-                    <div class="reset-ignore_pricing-rule-btn" data-pricing-discount="${escape(ignore_pricing_rule)}">
+                    <div class="reset-ignore_pricing-rule-btn" reset-ignore-pricing-rule-attr="" data-pricing-discount="${escape(ignore_pricing_rule)}">
                         <svg width="32" height="32" viewBox="0 0 14 14" fill="none">
                             <path d="M4.93764 4.93759L7.00003 6.99998M9.06243 9.06238L7.00003 6.99998M7.00003 6.99998L4.93764 9.06238L9.06243 4.93759" stroke="#8D99A6"/>
                         </svg>
@@ -897,7 +920,12 @@ erpnext.PointOfSale.ItemCart = class {
     }
 
     update_served_by_section() {
-        const me = this;
+        const frm = this.events.get_frm();
+        let style=''
+        if(frm.doc.is_return){
+            style = "display: none;";
+        }
+
         const {served_by} = this.served_by_info || {};
         if (served_by) {
             let served_by_name = served_by.split('-')[0]
@@ -907,7 +935,7 @@ erpnext.PointOfSale.ItemCart = class {
 						<div class="served-by-name-desc">
 							<div class="served-by-name">${served_by_name}</div>
 						</div>
-						<div class="reset-served-by-btn" data-served-by="${escape(served_by)}">
+						<div class="reset-served-by-btn" reset-served-attr="" data-served-by="${escape(served_by)}" style="${style}">
 							<svg width="32" height="32" viewBox="0 0 14 14" fill="none">
 								<path d="M4.93764 4.93759L7.00003 6.99998M9.06243 9.06238L7.00003 6.99998M7.00003 6.99998L4.93764 9.06238L9.06243 4.93759" stroke="#8D99A6"/>
 							</svg>
@@ -922,7 +950,11 @@ erpnext.PointOfSale.ItemCart = class {
     }
 
     update_customer_section() {
-        const me = this;
+        const frm = this.events.get_frm();
+        let style=''
+        if(frm.doc.is_return){
+            style = "display: none;";
+        }
         const {customer, customer_name, email_id = '', mobile_no = '', image} = this.customer_info || {};
         if (customer) {
             this.$customer_section.html(
@@ -931,7 +963,7 @@ erpnext.PointOfSale.ItemCart = class {
 						<div class="customer-name-desc">
 							<div class="customer-name">${customer_name}</div>
 						</div>
-						<div class="reset-customer-btn" data-customer="${escape(customer)}">
+						<div class="reset-customer-btn" reset-customer-attr="" data-customer="${escape(customer)}" style="${style}">
 							<svg width="32" height="32" viewBox="0 0 14 14" fill="none">
 								<path d="M4.93764 4.93759L7.00003 6.99998M9.06243 9.06238L7.00003 6.99998M7.00003 6.99998L4.93764 9.06238L9.06243 4.93759" stroke="#8D99A6"/>
 							</svg>
@@ -1058,6 +1090,13 @@ erpnext.PointOfSale.ItemCart = class {
 
         const no_of_cart_items = this.$cart_items_wrapper.find('.cart-item-wrapper').length;
         this.highlight_checkout_btn(no_of_cart_items > 0);
+        if(no_of_cart_items > 0){
+            $('.reset-ignore_pricing-rule-btn').css('display', 'none');
+            // $('.reset-customer-btn').css('display', 'none');
+        }else if(no_of_cart_items < 1){
+            $('.reset-ignore_pricing-rule-btn').css('display', 'flex');
+            // $('.reset-customer-btn').css('display', 'flex');
+        }
 
         this.update_empty_cart_section(no_of_cart_items);
         this.update_5_basis_rounded()
@@ -1236,6 +1275,7 @@ erpnext.PointOfSale.ItemCart = class {
             }
         });
         $(".item-image").on('click', function (){
+            if($('.edit-cart-btn').is(":visible") === true) return;
             //rabi
             frappe.dom.freeze();
             let docname = $(this).attr('docname');
@@ -1250,11 +1290,21 @@ erpnext.PointOfSale.ItemCart = class {
                 () => $item && $item.next().remove() && $item.remove(),
                 () => me.events.check_free_item_pricing_rules(),
                 // () => frappe.model.clear_doc(doctype, docname),
+                () => me.toggle_ignore_pricing_rule_button(),
                 () => frappe.dom.unfreeze()
             ])
         });
     }
-
+    toggle_ignore_pricing_rule_button(){
+        const no_of_cart_items = this.$cart_items_wrapper.find('.cart-item-wrapper').length;
+        if(no_of_cart_items>0){
+            $('.reset-ignore_pricing-rule-btn').css('display', 'none');
+            // $('.reset-customer-btn').css('display', 'none');
+        }else if(no_of_cart_items < 1){
+            $('.reset-ignore_pricing-rule-btn').css('display', 'flex');
+            // $('.reset-customer-btn').css('display', 'flex');
+        }
+    }
     handle_broken_image($img) {
         const item_abbr = $($img).attr('alt');
         $($img).parent().replaceWith(`<div class="item-image item-abbr">${item_abbr}</div>`);
@@ -1290,6 +1340,7 @@ erpnext.PointOfSale.ItemCart = class {
             this.$cart_container.find('.checkout-btn').css({
                 'background-color': 'var(--blue-200)'
             });
+
         }
     }
 
@@ -1656,6 +1707,7 @@ erpnext.PointOfSale.ItemCart = class {
         });
         // }
         this.$cart_items_wrapper.html('');
+        // pos return
         // if(frm.doc.is_return){
         //     const item_data = frm.doc.items;
         //     frm.doc.items = [];
@@ -1883,7 +1935,7 @@ erpnext.PointOfSale.ItemCart = class {
 
     }
 
-    async update_item_qty(){
+    update_item_qty(){
         const me = this;
         const frm = me.events.get_frm()
         let items = frm.doc.items;
@@ -1916,7 +1968,7 @@ erpnext.PointOfSale.ItemCart = class {
     }
 
 
-    async update_item_qty_(){
+    update_item_qty_(){
         const me = this;
         const frm = me.events.get_frm()
         let items = frm.doc.items;
@@ -1925,25 +1977,26 @@ erpnext.PointOfSale.ItemCart = class {
                 method: "bbb.bbb.controllers.utils.apply_all_items_pricing_rules",
                 args: {"return_against": frm.doc.return_against},
                 callback: (r) => {
-                    items.forEach(item => {
-                        var item_code = item.item_code
-                        var item_qty = item.qty;
-                        frappe.model.set_value("POS Invoice Item", item.name, 'qty', 0)
-                            .then(function () {
-                                frappe.model.set_value("POS Invoice Item", item.name, 'qty', item_qty)
-                                    .then(function () {
-                                        let data = (r.message)[item_code];
-                                        console.log(data, item.item_code, item.item_name)
-                                        setTimeout(function(){
-                                            frappe.model.set_value("POS Invoice Item", item.name, 'margin_type', data.margin_type)
-                                            frappe.model.set_value("POS Invoice Item", item.name, 'discount_percentage', data.discount_percentage)
-                                        }, 300)
-                                    })
-                            })
-                    })
+                    setTimeout(function(){
+                        items.forEach(item => {
+                            var item_code = item.item_code
+                            var item_qty = item.qty;
+                            frappe.model.set_value("POS Invoice Item", item.name, 'qty', 0)
+                                .then(function () {
+                                    frappe.model.set_value("POS Invoice Item", item.name, 'qty', item_qty)
+                                        .then(function () {
+                                            let data = (r.message)[item_code];
+                                            console.log(data, item.item_code, item.item_name)
+                                                frappe.model.set_value("POS Invoice Item", item.name, 'margin_type', data.margin_type)
+                                                frappe.model.set_value("POS Invoice Item", item.name, 'discount_percentage', data.discount_percentage)
+
+                                        })
+                                })
+                        })
+                    }, 500)
                 }
             })
         }
-
     }
+
 }
