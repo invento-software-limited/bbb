@@ -263,7 +263,8 @@ def apply_all_items_pricing_rules(return_against):
     for item in return_against_doc.items:
         item_wise_discount_percentage[item.item_code] = {'margin_type': item.margin_type,
                                                           'discount_amount': item.discount_amount,
-                                                          'discount_percentage': item.discount_percentage
+                                                          'discount_percentage': item.discount_percentage,
+                                                          'rate': item.rate,
                                                           }
 
 
