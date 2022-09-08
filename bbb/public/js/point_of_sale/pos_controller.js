@@ -672,7 +672,8 @@ erpnext.PointOfSale.Controller = class {
                                     () => me.cart.load_pricing_rules(),
                                     () => me.item_selector.toggle_component(true),
                                     // () => console.log(me.frm.doc.items),
-                                    () => me.cart.update_item_qty_()
+                                    () => me.cart.update_item_qty_(),
+                                    () => me.ignore_pricing_rule_on_return()
                                 ])
                             });
                             // () => setTimeout(function(){me.cart.load_invoice()}, 5000),
@@ -705,7 +706,9 @@ erpnext.PointOfSale.Controller = class {
             }
         })
     }
-
+    ignore_pricing_rule_on_return(){
+        frappe.model.set_value('POS Invoice', this.frm.doc.name, 'ignore_pricing_rule', 1);
+    }
     toggle_recent_order_list(show) {
         this.toggle_components(!show);
         this.recent_order_list.toggle_component(show);
@@ -859,6 +862,9 @@ erpnext.PointOfSale.Controller = class {
 			} else {
 				if (!this.frm.doc.customer)
 					return this.raise_customer_selection_alert();
+
+				if (!this.frm.doc.served_by)
+					return this.raise_served_by_selection_alert();
 
 
 				if (!item_code)
@@ -1247,6 +1253,7 @@ erpnext.PointOfSale.Controller = class {
     }
 
     check_free_item_pricing_rules(){
+        if(this.frm.doc.is_return === 1) return;
         const doc = this.frm.doc
         const items = doc.items
         if(doc.total_qty <= 1){

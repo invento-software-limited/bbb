@@ -1285,6 +1285,7 @@ erpnext.PointOfSale.ItemCart = class {
                 () => me.events.check_free_item_pricing_rules(),
                 // () => frappe.model.clear_doc(doctype, docname),
                 () => me.toggle_ignore_pricing_rule_button(),
+                () => me.update_item_cart_total_section(frm),
                 () => frappe.dom.unfreeze()
             ])
         });
@@ -1896,19 +1897,20 @@ erpnext.PointOfSale.ItemCart = class {
     //     this.$customer_section.find('.customer-section').setAttribute('disabled');
     // }
 
-    async update_item_cart_total_section(frm){
+    update_item_cart_total_section(frm){
         const item_section = $('.cart-item-wrapper').is(':visible');
         if(item_section == true){
             const items = frm.doc.items;
             let total_mrp = 0;
             let total_disc = 0;
             let total_after_disc = 0;
-            let total_qty = frm.doc.total_qty;
+            let total_qty = 0;
             let total_amount = frm.doc.total;
             items.forEach(item => {
                 total_mrp += parseFloat(item.price_list_rate);
                 total_after_disc += parseFloat(item.rate);
                 total_disc += (parseFloat(item.price_list_rate) - parseFloat(item.rate));
+                total_qty += item.qty
             });
             $('.mrp-label').html(total_mrp);
             $('.disc-label').html(total_disc);
