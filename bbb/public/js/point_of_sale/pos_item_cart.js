@@ -1973,9 +1973,10 @@ erpnext.PointOfSale.ItemCart = class {
                 method: "bbb.bbb.controllers.utils.apply_all_items_pricing_rules",
                 args: {"return_against": frm.doc.return_against},
                 callback: (r) => {
-                    items.forEach(item => {
-                        var item_code = item.item_code
-                        var data = (r.message)[item_code];
+                    let item_list = r.message;
+                    items.forEach((item, index) => {
+                        var item_code = index + "_" + item.item_code
+                        const data = item_list.find(i => i.item_code === item_code);
                         var item_qty = item.qty;
                         frappe.model.set_value("POS Invoice Item", item.name, 'rate', 0);
                         frappe.model.set_value("POS Invoice Item", item.name, 'qty', 0);
@@ -1983,7 +1984,6 @@ erpnext.PointOfSale.ItemCart = class {
                             .then(function () {
                                 frappe.model.set_value("POS Invoice Item", item.name, 'qty', item_qty)
                                     .then(function () {
-                                        console.log(data, item.item_code, item.item_name)
                                             frappe.model.set_value("POS Invoice Item", item.name, 'margin_type', data.margin_type);
                                             frappe.model.set_value("POS Invoice Item", item.name, 'rate', data.rate);
 
