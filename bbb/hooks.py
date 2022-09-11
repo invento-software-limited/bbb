@@ -190,7 +190,7 @@ jenv = {
 
 # User Data Protection
 # --------------------
-
+boot_session = "bbb.startup.boot.boot_session"
 user_data_fields = [
     {
         "doctype": "{doctype_1}",
