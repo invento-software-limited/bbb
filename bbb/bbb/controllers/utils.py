@@ -259,13 +259,12 @@ def apply_all_items_pricing_rules(return_against):
     #                                                       'discount_percentage': discount_percentage
     #                                                       }
 
-    item_wise_discount_percentage = dict()
-    for item in return_against_doc.items:
-        item_wise_discount_percentage[item.item_code] = {'margin_type': item.margin_type,
+    item_wise_discount_percentage = []
+    for index, item in enumerate(return_against_doc.items):
+        item_wise_discount_percentage.append({'margin_type': item.margin_type,
                                                           'discount_amount': item.discount_amount,
                                                           'discount_percentage': item.discount_percentage,
                                                           'rate': item.rate,
-                                                          }
-
-
+                                                          'item_code': str(index) + "_" + item.item_code,
+                                                         })
     return item_wise_discount_percentage
