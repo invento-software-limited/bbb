@@ -104,9 +104,9 @@ erpnext.PointOfSale.ItemCart = class {
 						<div class="name-header">Product</div>
 						<div class="mrp-header">MRP</div>
 						<div class="discount-header">Disc</div>
+						<div class="damaged-header">Damaged</div>
 						<div class="after-discount-header">After Disc</div>
 						<div class="qty-header">Qty</div>
-<!--						<div class="qty-header">Damaged Cost</div>-->
 						<div class="rate-amount-header">Amount</div>
 					</div>
 					<div class="cart-items-section"></div>
@@ -155,6 +155,7 @@ erpnext.PointOfSale.ItemCart = class {
                 <div class="total-label" >Total</div>
                 <div class="mrp-label" >0</div>
                 <div class="disc-label" >0</div>
+                <div class="damaged-label" >0</div>
                 <div class="after-disc-label" >0</div>
                 <div class="qty-label" >0</div>
                 <div class="final-amount-total-label">0</div>
@@ -1178,12 +1179,17 @@ erpnext.PointOfSale.ItemCart = class {
             // 	.then(r => {
             // 		// item_mrp = r.message.standard_rate;
             // 	})
+
+            var is_return = (frm.doc.is_return ? 'enabled' : 'disabled');
             return `
 					<div class="item-row-mrp"><span>${item_data.price_list_rate || 0}</span></div>
-					<div class="item-row-disc"><span>${(item_data.price_list_rate - item_data.rate) || 0}</span></div>
+					<div class="item-row-disc"><span>${(item_data.discount_amount) || 0}</span></div>
+					<div class="item-row-damaged"><!--<span>${item_data.qty || 0}</span>-->
+					<input class="form-control item-row-damaged damaged_cost" type="text" ${is_return} data-item-code="${item_data.item_code}" data-index="${item_data.idx}" data-rate="${item_data.rate || 0}" data-damaged-rate="" data-discount="" value="${item_data.total_damaged_cost || 0}" item_mrp_rate="${item_data.price_list_rate}" docname="${item_data.name}" discount_amount="${item_data.discount_amount}" style="width: 50px;text-align: center;" item_qty="${item_data.qty || 'undefined'}">
+					</div>
 					<div class="item-row-rate"><span>${item_data.rate || 0}</span></div>
 					<div class="item-row-qty"><!--<span>${item_data.qty || 0}</span>-->
-					<input class="form-control item_qty" type="text" value="${item_data.qty || 0}" item_code="${item_data.item_code}" docname="${item_data.name}" style="width: 50px;text-align: center;" free_item="${item_data.free_item_rules || 'undefined'}">
+					<input class="form-control item_qty" type="text" data-rate="${item_data.rate || 0}" value="${item_data.qty || 0}" item_code="${item_data.item_code}" docname="${item_data.name}" style="width: 50px;text-align: center;" free_item="${item_data.free_item_rules || 'undefined'}">
 					</div>
 					
 					<!--<div class="item-row-damaged-cost">
@@ -1223,7 +1229,7 @@ erpnext.PointOfSale.ItemCart = class {
         }
 
         $(".item_qty").on('change', function (){
-
+            const item_qty_root = $(this);
             let item_qty = $(this).val();
 
             if(item_qty){
@@ -1249,8 +1255,35 @@ erpnext.PointOfSale.ItemCart = class {
                                     method: "bbb.bbb.controllers.utils.apply_item_pricing_rule",
                                     args: {"return_against": frm.doc.return_against, 'item_code': item_code},
                                     callback: (r) => {
-                                        frappe.model.set_value("POS Invoice Item", docname, 'margin_type', r.message.margin_type)
-                                        frappe.model.set_value("POS Invoice Item", docname, 'discount_percentage', r.message.discount_percentage)
+                                        let damaged_cost_div = item_qty_root.parent().siblings('div.item-row-damaged').children('')
+                                        let damaged_cost = damaged_cost_div.val();
+                                        if(damaged_cost > 0){
+                                            frappe.model.set_value("POS Invoice Item", docname, 'margin_type', r.message.margin_type)
+                                            frappe.model.set_value("POS Invoice Item", docname, 'discount_percentage', r.message.discount_percentage).then(function(){
+                                                let item_wise_cost = Math.round(damaged_cost / item_qty);
+                                                let total_damaged_cost = item_wise_cost * item_qty;
+                                                frappe.call({
+                                                    method: "bbb.bbb.controllers.utils.get_item_rate_discount",
+                                                    args: {"return_against": frm.doc.return_against, 'item_code': item_code},
+                                                    callback: (r) => {
+                                                        let item = r.message;
+                                                        if (item) {
+                                                            let new_rate = (item.rate || 0) + item_wise_cost;
+                                                            frappe.model.set_value("POS Invoice Item", docname, 'damaged_cost', (-1 * item_wise_cost));
+                                                            frappe.model.set_value("POS Invoice Item", docname, 'rate', new_rate);
+                                                            frappe.model.set_value("POS Invoice Item", docname, 'total_damaged_cost', total_damaged_cost);
+                                                        }
+                                                    }
+                                                })
+                                                damaged_cost_div.val(total_damaged_cost);
+                                                me.update_item_cart_total_section(frm)
+                                            })
+                                        }else {
+                                            frappe.model.set_value("POS Invoice Item", docname, 'margin_type', r.message.margin_type)
+                                            frappe.model.set_value("POS Invoice Item", docname, 'discount_percentage', r.message.discount_percentage)
+                                        }
+
+
                                         // console.log(frm.doc.items)
                                     }
                                 })
@@ -1266,6 +1299,41 @@ erpnext.PointOfSale.ItemCart = class {
 
                     $(this).val(item_qty)
                 }
+            }
+        });
+
+        $(".damaged_cost").on('change', function(){
+            let damaged_cost =  parseInt($(this).val());
+            if(isNaN(damaged_cost)){
+                $(this).val(0)
+                return;
+            }else {
+                if (frm.doc.is_return == 0) return;
+                let docname = $(this).attr('docname');
+                let item_qty = parseInt($(this).attr('item_qty'));
+                let damaged_cost = parseInt($(this).val());
+                let item_wise_cost = Math.round(damaged_cost / item_qty);
+                let total_damaged_cost = item_wise_cost * item_qty;
+                let data_item_code = $(this).attr('data-item-code');
+
+                frappe.call({
+                    method: "bbb.bbb.controllers.utils.get_item_rate_discount",
+                    args: {"return_against": frm.doc.return_against, 'item_code': data_item_code},
+                    callback: (r) => {
+                        let item = r.message;
+                        if (item) {
+                            let new_rate = (item.rate || 0) + item_wise_cost;
+                            frappe.model.set_value("POS Invoice Item", docname, 'damaged_cost', (-1 * item_wise_cost));
+                            frappe.model.set_value("POS Invoice Item", docname, 'rate', new_rate);
+                            frappe.model.set_value("POS Invoice Item", docname, 'total_damaged_cost', total_damaged_cost);
+                        } else {
+                            $(".damaged_cost").val(0);
+                        }
+                    }
+                })
+
+                $(this).val(total_damaged_cost);
+                me.update_item_cart_total_section(frm)
             }
         });
         $(".item-image").on('click', function (){
@@ -1906,13 +1974,16 @@ erpnext.PointOfSale.ItemCart = class {
             let total_after_disc = 0;
             let total_qty = 0;
             let total_amount = frm.doc.total;
+            let total_damaged_cost = 0
             items.forEach(item => {
                 total_mrp += parseFloat(item.price_list_rate);
                 total_after_disc += parseFloat(item.rate);
                 total_disc += (parseFloat(item.price_list_rate) - parseFloat(item.rate));
-                total_qty += item.qty
+                total_qty += item.qty;
+                total_damaged_cost += item.total_damaged_cost ? item.total_damaged_cost : 0;
             });
             $('.mrp-label').html(total_mrp);
+            $('.damaged-label').html(total_damaged_cost);
             $('.disc-label').html(total_disc);
             $('.after-disc-label').html(total_after_disc.toFixed(0));
             $('.qty-label').html(total_qty);

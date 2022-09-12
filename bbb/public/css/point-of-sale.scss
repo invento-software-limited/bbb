@@ -784,7 +784,14 @@
 						//flex: 1 2 20px;
 						flex: 0.5 0 0;
 					}
-
+                    >.damaged-header {
+                        display: flex;
+                        margin-right: var(--margin-lg);
+                        text-align: center;
+                        justify-content: center;
+                        //flex: 1 2 20px;
+                        flex: 0.5 0 0;
+                    }
 					> .map-rate {
 						margin-right: var(--margin-sm);
 						text-align: center;
@@ -837,7 +844,7 @@
 
 							> .item-image-name-dec{
 								display: flex;
-								flex: 6.3 0 0;
+								flex: 5.8 0 0;
 								align-items: baseline;
 
 								> .item-abbr {
@@ -998,6 +1005,15 @@
 							font-weight: 700;
 							flex: 0.5 0 0;
 						}
+						>.damaged-label {
+                            display: flex;
+                            margin-right: var(--margin-lg);
+                            text-align: center;
+                            justify-content: center;
+                            //flex: 1 2 20px;
+                            font-weight: 700;
+                            flex: 0.5 0 0;
+                        }
 						> .final-amount-total-label{
 							display: flex;
 							font-weight: 700;

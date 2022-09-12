@@ -262,9 +262,22 @@ def apply_all_items_pricing_rules(return_against):
     item_wise_discount_percentage = []
     for index, item in enumerate(return_against_doc.items):
         item_wise_discount_percentage.append({'margin_type': item.margin_type,
-                                                          'discount_amount': item.discount_amount,
-                                                          'discount_percentage': item.discount_percentage,
-                                                          'rate': item.rate,
-                                                          'item_code': str(index) + "_" + item.item_code,
-                                                         })
+                                              'discount_amount': item.discount_amount,
+                                              'discount_percentage': item.discount_percentage,
+                                              'rate': item.rate,
+                                              'item_code': str(index) + "_" + item.item_code,
+                                              })
     return item_wise_discount_percentage
+
+
+@frappe.whitelist()
+def get_item_rate_discount(return_against, item_code):
+    return_against_doc = frappe.get_doc('POS Invoice', {'name': return_against})
+
+    for index, item in enumerate(return_against_doc.items):
+        if item.item_code == item_code and item.discount_percentage < 100:
+            return {'discount_amount': item.discount_amount, 'discount_percentage': item.discount_percentage,
+                    'rate': item.rate, }
+
+
+
