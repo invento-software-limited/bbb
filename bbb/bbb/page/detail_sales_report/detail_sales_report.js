@@ -96,7 +96,8 @@ erpnext.DetailSalesReport = class DetailSalesReport {
                 to_date: to_date,
                 outlet: outlet,
                 switch_invoice: switch_invoice
-            }
+            },
+            freeze: true
         }).then(r => {
             let diff = r.message;
             this.render(switch_invoice, diff);
