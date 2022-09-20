@@ -1,4 +1,5 @@
-frappe.pages['detail-sales-report'].on_page_load = function (wrapper) {
+frappe.pages['detail-sales-report'].on_page_load = (wrapper) =>{
+
     var page = frappe.ui.make_app_page({
         parent: wrapper,
         title: 'Detail Sales Report',
@@ -12,8 +13,71 @@ erpnext.DetailSalesReport = class DetailSalesReport {
     constructor(page) {
         this.page = page;
         this.make_form();
+        this.make_menu();
+    }
+    make_menu = () =>{
+        this.page.add_menu_item("Export", ()=>{
+            let {from_date, to_date, outlet, switch_invoice} = this.form.get_values();
+            if (!from_date) {
+                this.form.get_field('preview').html('');
+                return;
+            }
+            // frappe.call('bbb.bbb.page.detail_sales_report.detail_sales_report.generate_excel_data', {
+            //     filters: {
+            //         from_date: from_date,
+            //         to_date: to_date,
+            //         outlet: outlet,
+            //         switch_invoice: switch_invoice
+            //     },
+            //     // freeze: true
+            // }).then(r => {
+            //     let url = r.message;
+            //     window.open(url, '_blank');
+            //     // window.location.href = diff;
+            //     // setTimeout(function (){
+            //     //     window.location.href = diff;
+            //     // },2000)
+            //
+            // });
+
+            var url = `/api/method/bbb.bbb.page.detail_sales_report.detail_sales_report.generate_excel_data`;
+            url = url + `?from_date=${from_date}&to_date=${to_date || ''}&outlet=${outlet || ''}&switch_invoice=${switch_invoice}`;
+            // window.open(url, '_blank');
+            window.location.href = url;
+
+        });
+
+        // this.page.add_action_icon('', ()=>{
+        //     let {from_date, to_date, outlet, switch_invoice} = this.form.get_values();
+        //     if (!from_date) {
+        //         this.form.get_field('preview').html('');
+        //         return;
+        //     }
+        //     frappe.call('bbb.bbb.page.detail_sales_report.detail_sales_report.generate_table_data', {
+        //         filters: {
+        //             from_date: from_date,
+        //             to_date: to_date,
+        //             outlet: outlet,
+        //             switch_invoice: switch_invoice
+        //         },
+        //         freeze: true
+        //     }).then(r => {
+        //         let diff = r.message;
+        //         this.render(switch_invoice, diff);
+        //     });
+        // });
     }
 
+    // download_group_file: function (frm) {
+    //     if (has_ga_file(frm)) {
+    //         var url = `/api/method/generate_analysis.generate_analysis.doctype.generate_analysis.generate_analysis.download_group_file`;
+    //         url = url + `?ga_name=${frm.doc.name}`;
+    //         window.open(url, '_blank');
+    //     }
+    //     else{
+    //         frappe.msgprint("There is no generate analysis file on Generate Analysis Brands");
+    //     }
+    // },
     make_form = () => {
         this.form = new frappe.ui.FieldGroup({
             fields: [
@@ -90,7 +154,7 @@ erpnext.DetailSalesReport = class DetailSalesReport {
         		${__("Fetching...")}
         	</div>
         `);
-        frappe.call('bbb.bbb.page.detail_sales_report.detail_sales_report.get_invoice_data', {
+        frappe.call('bbb.bbb.page.detail_sales_report.detail_sales_report.generate_table_data', {
             filters: {
                 from_date: from_date,
                 to_date: to_date,
@@ -107,7 +171,7 @@ erpnext.DetailSalesReport = class DetailSalesReport {
     render = (switch_invoice, diff) => {
         let table_header = this.table_header();
         let table_body = this.table_body(diff);
-        this.form.get_field('preview').html(`<table class="table table-bordered">${table_header}${table_body}</table>`);
+        this.form.get_field('preview').html(`<table class="table table-bordered" id="export_excel">${table_header}${table_body}</table>`);
     }
 
     table_header = () =>{
@@ -129,7 +193,6 @@ erpnext.DetailSalesReport = class DetailSalesReport {
         return table_header;
     }
     table_body = (diff) =>{
-        console.log(diff);
         var html = "<tbody>";
         for (var key in diff) {
             html+=diff[key].join(" ");
