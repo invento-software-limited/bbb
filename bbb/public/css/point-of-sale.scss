@@ -117,7 +117,8 @@
 			display: grid;
 			grid-template-columns: repeat(12, minmax(0, 1fr));
 			background-color: var(--fg-color);
-			padding: var(--padding-lg);
+			padding: var(--padding-sm);
+			//padding-bottom: var(--padding-sm);
 			padding-bottom: var(--padding-sm);
 			align-items: center;
 
@@ -131,7 +132,8 @@
 				grid-column: span 7 / span 7;
 				display: flex;
 				align-items: center;
-				margin: 0px var(--margin-sm);
+				//margin: 0px var(--margin-sm);
+				margin-right: var(--margin-sm);
 			}
 
 			> .item-group-field {
@@ -145,7 +147,7 @@
 			display: grid;
 			grid-template-columns: repeat(2, minmax(0, 1fr));
 			gap: var(--margin-lg);
-			padding: var(--padding-lg);
+			padding: var(--padding-sm);
 			padding-top: var(--padding-xs);
 			overflow-y: scroll;
 			overflow-x: hidden;
@@ -181,8 +183,8 @@
 					border-radius: var(--border-radius-md);
 					margin: var(--margin-sm);
 					margin-bottom: 0px;
-					min-height: 6rem;
-					height: 6rem;
+					min-height: 8rem;
+					height: 10rem;
 					color: var(--gray-500);
 
 					> img {
@@ -230,13 +232,16 @@
 				display: flex;
 				margin-right:2%;
 				flex-direction: column;
-				padding: var(--padding-md) var(--padding-lg);
+				//padding: var(--padding-md) var(--padding-lg);
+				//padding: var(--padding-sm);
+				//padding-right: 10px;
+				padding: 10px;
 				overflow: visible;
 
 				> .customer-field {
 					display: flex;
 					align-items: center;
-					padding-top: var(--padding-xs);
+					//padding-top: var(--padding-xs);
 				}
 
 				> .customer-details {
@@ -356,13 +361,16 @@
 				display: flex;
 				margin-right: 2%;
 				flex-direction: column;
-				padding: var(--padding-md) var(--padding-lg);
+				//padding: var(--padding-md) var(--padding-lg);
+				//padding: var(--padding-sm);
+				//padding-right: 10px;
+				padding: 10px;
 				overflow: visible;
 
 				> .served-by-field {
 					display: flex;
 					align-items: center;
-					padding-top: var(--padding-xs);
+					//padding-top: var(--padding-xs);
 				}
 
 				> .served-by-details {
@@ -482,13 +490,16 @@
 				display: flex;
 				flex-direction: column;
 				margin-right: 2%;
-				padding: var(--padding-md) var(--padding-lg);
+				//padding: var(--padding-md) var(--padding-lg);
+				//padding: var(--padding-sm);
+				//padding-right: 10px;
+				padding: 10px;
 				overflow: visible;
 
 				> .pricing-discount-field {
 					display: flex;
 					align-items: center;
-					padding-top: var(--padding-xs);
+					//padding-top: var(--padding-xs);
 				}
 
 				> .pricing-discount-details {
@@ -589,13 +600,16 @@
 				display: flex;
 				flex-direction: column;
 				margin-right: 2%;
-				padding: var(--padding-md) var(--padding-lg);
+				//padding: var(--padding-md) var(--padding-lg);
+				//padding: var(--padding-sm);
+				//padding-right: 10px;
+				padding: 10px;
 				overflow: visible;
 
 				> .pos-profile-field {
 					display: flex;
 					align-items: center;
-					padding-top: var(--padding-xs);
+					//padding-top: var(--padding-xs);
 				}
 
 				> .pos-profile-details {
@@ -698,7 +712,10 @@
 				@extend .pos-card;
 				width: 5%;
 				flex-direction: column;
-				padding: var(--padding-md) var(--padding-lg);
+				//padding: var(--padding-md) var(--padding-lg);
+				//padding: var(--padding-sm);
+				//padding-right: 10px;
+				padding: 10px;
 				overflow: visible;
 				//position: absolute;
 
@@ -725,7 +742,7 @@
 				position: absolute;
 				display: flex;
 				flex-direction: column;
-				padding: var(--padding-md);
+				padding: var(--padding-sm);
 				width: 100%;
 				height: 100%;
 
@@ -855,11 +872,10 @@
 									display: flex;
 									align-items: center;
 									justify-content: center;
-									width: 2rem;
-									height: 2rem;
 									border-radius: var(--border-radius-md);
 									color: var(--gray-500);
-									margin-right: var(--margin-md);
+									//margin-right: var(--margin-md);
+									flex: 0 0 2rem;
 
 									> img {
 										object-fit: cover;

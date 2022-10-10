@@ -113,7 +113,7 @@ erpnext.PointOfSale.ItemSelector = class {
 					return `
 							<div class="item-display">
 								<div class="item-name">
-									${frappe.ellipsis(item.item_name, 50)}
+									${frappe.ellipsis(item.item_name, 500)}
 								</div>
 							</div>
 							<div class="item-qty-pill">
@@ -192,6 +192,7 @@ erpnext.PointOfSale.ItemSelector = class {
 
 	set_search_value(value) {
 		$(this.search_field.$input[0]).val(value).trigger("input");
+
 	}
 
 	bind_events() {
@@ -349,6 +350,10 @@ erpnext.PointOfSale.ItemSelector = class {
 
 	add_filtered_item_to_cart() {
 		this.$items_container.find(".item-wrapper").click();
+		// console.log(this.barcode_scanned);
+		// if(this.barcode_scanned === true){
+		// 	this.$items_container.find(".item-wrapper").click();
+		// }
 	}
 
 	resize_selector(minimize) {

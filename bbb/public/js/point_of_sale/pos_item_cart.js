@@ -642,11 +642,11 @@ erpnext.PointOfSale.ItemCart = class {
                                     <span class="menu-item-label" data-label="Check Item Stock"><span class="alt-underline">C</span>heck Item Stock</span>
                                 </a>
                             </li>
-                            <li>
-                                <a class="grey-link dropdown-item" href="#" id="add_damaged_product">
-                                    <span class="menu-item-label" data-label=""><span class="alt-underline">A</span>dd Damaged Product</span>
-                                </a>
-                            </li>
+<!--                            <li>-->
+<!--                                <a class="grey-link dropdown-item" href="#" id="add_damaged_product">-->
+<!--                                    <span class="menu-item-label" data-label=""><span class="alt-underline">A</span>dd Damaged Product</span>-->
+<!--                                </a>-->
+<!--                            </li>-->
                             <li>
                                 <a class="grey-link dropdown-item" href="#" id="reset_cart">
                     
@@ -766,9 +766,13 @@ erpnext.PointOfSale.ItemCart = class {
                 placeholder: (discount ? discount + '%' : __('Enter discount percentage.')),
                 input_class: 'input-xs',
                 onchange: function () {
-                frappe.run_serially([
-                        ()=> me.update_additional_discount(me, this, frm, 'additional_discount_percentage'),
-                    ])
+                // frappe.run_serially([
+                //         ()=> me.update_additional_discount(me, this, frm, 'additional_discount_percentage'),
+                //     ])
+                    const input_ = this;
+                    setTimeout(function (){
+                        me.update_additional_discount(me, input_, frm, 'additional_discount_percentage')
+                    },1000)
 
                     const grand_total = cint(frappe.sys_defaults.disable_rounded_total) ? frm.doc.grand_total : frm.doc.rounded_total;
                     me.events.set_5_basis_rounded_total(grand_total)
@@ -803,6 +807,10 @@ erpnext.PointOfSale.ItemCart = class {
                 frappe.run_serially([
                         ()=> me.update_additional_discount(me, this, frm, 'discount_amount'),
                     ])
+                const input_ = this;
+                setTimeout(function (){
+                    me.update_additional_discount(me, input_, frm, 'additional_discount_percentage')
+                },1000)
                 //
                 //     const grand_total = cint(frappe.sys_defaults.disable_rounded_total) ? frm.doc.grand_total : frm.doc.rounded_total;
                 //     me.events.set_5_basis_rounded_total(grand_total)
@@ -1180,10 +1188,13 @@ erpnext.PointOfSale.ItemCart = class {
             // 		// item_mrp = r.message.standard_rate;
             // 	})
 
-            var is_return = (frm.doc.is_return ? 'enabled' : 'disabled');
+            let is_return = (frm.doc.is_return ? 'enabled' : 'disabled');
+            let discount_amount = (item_data.discount_amount) || 0
+            let damaged_cost = (item_data.damaged_cost) || 0
+            let actual_discount_amount = discount_amount - damaged_cost // after adding damaged cost
             return `
 					<div class="item-row-mrp"><span>${item_data.price_list_rate || 0}</span></div>
-					<div class="item-row-disc"><span>${(item_data.discount_amount) || 0}</span></div>
+					<div class="item-row-disc"><span>${actual_discount_amount || 0}</span></div>
 					<div class="item-row-damaged"><!--<span>${item_data.qty || 0}</span>-->
 					<input class="form-control item-row-damaged damaged_cost" type="text" ${is_return} data-item-code="${item_data.item_code}" data-index="${item_data.idx}" data-rate="${item_data.rate || 0}" data-damaged-rate="" data-discount="" value="${item_data.total_damaged_cost || 0}" item_mrp_rate="${item_data.price_list_rate}" docname="${item_data.name}" discount_amount="${item_data.discount_amount}" style="width: 50px;text-align: center;" item_qty="${item_data.qty || 'undefined'}">
 					</div>
