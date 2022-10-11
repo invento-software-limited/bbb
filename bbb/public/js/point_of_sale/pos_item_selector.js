@@ -349,11 +349,10 @@ erpnext.PointOfSale.ItemSelector = class {
 	}
 
 	add_filtered_item_to_cart() {
-		this.$items_container.find(".item-wrapper").click();
-		// console.log(this.barcode_scanned);
-		// if(this.barcode_scanned === true){
-		// 	this.$items_container.find(".item-wrapper").click();
-		// }
+		if(this.barcode_scanned){
+			this.$items_container.find(".item-wrapper").click();
+			this.barcode_scanned = false
+		}
 	}
 
 	resize_selector(minimize) {
