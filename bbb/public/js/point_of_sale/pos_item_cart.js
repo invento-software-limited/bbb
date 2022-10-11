@@ -804,12 +804,12 @@ erpnext.PointOfSale.ItemCart = class {
                 placeholder: (discount ? discount : __('Enter discount amount.')),
                 input_class: 'input-xs',
                 onchange: function () {
-                frappe.run_serially([
-                        ()=> me.update_additional_discount(me, this, frm, 'discount_amount'),
-                    ])
+                // frappe.run_serially([
+                //         ()=> me.update_additional_discount(me, this, frm, 'discount_amount'),
+                //     ])
                 const input_ = this;
                 setTimeout(function (){
-                    me.update_additional_discount(me, input_, frm, 'additional_discount_percentage')
+                    me.update_additional_discount(me, input_, frm, 'discount_amount')
                 },1000)
                 //
                 //     const grand_total = cint(frappe.sys_defaults.disable_rounded_total) ? frm.doc.grand_total : frm.doc.rounded_total;
