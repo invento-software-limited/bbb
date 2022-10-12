@@ -378,6 +378,7 @@ erpnext.PointOfSale.Payment = class {
 		payments.forEach(p => {
 			const mode = p.mode_of_payment.replace(/ +/g, "_").toLowerCase();
 			const me = this;
+			const frm = me.events.get_frm();
 			// console.log('mode ', mode)
 			this[`${mode}_control`] = frappe.ui.form.make_control({
 				df: {
@@ -387,13 +388,16 @@ erpnext.PointOfSale.Payment = class {
 					onchange: function() {
 						const current_value = frappe.model.get_value(p.doctype, p.name, 'amount');
 						if (current_value != this.value) {
-							let rounded_amount = me.events.get_5_basis_rounded(this.value)
+							// let rounded_amount = me.events.get_5_basis_rounded(this.value)
 							frappe.model
 								.set_value(p.doctype, p.name, 'amount', this.value)
-								.then(() => me.update_totals_section())
+								.then(
+									() => frm.refresh(),
+									() => me.update_totals_section()
+								)
 							// me.events.set_initial_paid_amount(this.value);
 
-							const formatted_currency = format_currency(rounded_amount, currency);
+							// const formatted_currency = format_currency(rounded_amount, currency);
 							me.$payment_modes.find(`.${mode}-amount`).html(format_currency(this.value, currency));
 						}
 					}
