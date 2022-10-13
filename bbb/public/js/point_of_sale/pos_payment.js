@@ -389,12 +389,15 @@ erpnext.PointOfSale.Payment = class {
 						const current_value = frappe.model.get_value(p.doctype, p.name, 'amount');
 						if (current_value != this.value) {
 							// let rounded_amount = me.events.get_5_basis_rounded(this.value)
+							frappe.model.set_value(frm.doc.doctype, frm.doc.name, 'paid_amount', this.value)
+							let paid_amount = this.value
 							frappe.model
 								.set_value(p.doctype, p.name, 'amount', this.value)
-								.then(
-									() => frm.refresh(),
-									() => me.update_totals_section()
-								)
+								.then(function(){
+									frappe.model.set_value(frm.doc.doctype, frm.doc.name, 'paid_amount', paid_amount)
+									me.update_totals_section()
+								});
+
 							// me.events.set_initial_paid_amount(this.value);
 
 							// const formatted_currency = format_currency(rounded_amount, currency);
