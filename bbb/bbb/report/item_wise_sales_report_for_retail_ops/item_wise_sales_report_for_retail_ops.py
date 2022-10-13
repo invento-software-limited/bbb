@@ -80,7 +80,7 @@ def get_invoice_data(filters):
     			(sales_invoice_item.qty * item.buying_rate) as buying_total, sales_invoice_item.net_amount, sales_invoice_item.amount as sell_value, 
     			item.brand, item.item_group, item.item_name, bin.actual_qty as current_stock
     		from `tab%s` sales_invoice, `tab%s Item` sales_invoice_item, `tabItem` item, `tabBin` bin
-    		where sales_invoice.name = sales_invoice_item.parent and item.item_code = sales_invoice_item.item_code and bin.item_code = sales_invoice_item.item_code
+    		where sales_invoice.name = sales_invoice_item.parent and item.item_code = sales_invoice_item.item_code and bin.item_code = item.item_code and bin.warehouse=sales_invoice.set_warehouse
     			and sales_invoice.docstatus = 1 and %s
     		order by sales_invoice.name
     		""" % (invoice_type, invoice_type, conditions), as_dict=1)
