@@ -379,6 +379,7 @@ erpnext.PointOfSale.Payment = class {
 			const mode = p.mode_of_payment.replace(/ +/g, "_").toLowerCase();
 			const me = this;
 			const frm = me.events.get_frm();
+			const payments = frm.doc.payments
 			// console.log('mode ', mode)
 			this[`${mode}_control`] = frappe.ui.form.make_control({
 				df: {
@@ -394,7 +395,11 @@ erpnext.PointOfSale.Payment = class {
 							frappe.model
 								.set_value(p.doctype, p.name, 'amount', this.value)
 								.then(function(){
-									frappe.model.set_value(frm.doc.doctype, frm.doc.name, 'paid_amount', paid_amount)
+									let total_paid_amount = 0
+									payments.forEach(function (d, i){
+										total_paid_amount += d.amount
+									})
+									frappe.model.set_value(frm.doc.doctype, frm.doc.name, 'paid_amount', total_paid_amount)
 									me.update_totals_section()
 								});
 
