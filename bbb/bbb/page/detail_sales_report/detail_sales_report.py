@@ -364,7 +364,7 @@ def generate_table_data(filters):
                     special_disc_amount += result['special_discount']
                     sales_data[invoice_name].append(tr_total_row)
                     if result['special_note']:
-                        sales_data[result['return_against']].append(tr_special_note)
+                        sales_data[invoice_name].append(tr_special_note)
     sales_data['total_amount_row'] = [f"""
                         <tr class='font-weight-bold'>
                             <td rowspan='2'>Total </td>
