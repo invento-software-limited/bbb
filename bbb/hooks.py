@@ -37,7 +37,10 @@ page_js = {
 }
 
 # include js in doctype views
-# doctype_js = {"*": 'public/js/taxes_and_totals.js'}
+doctype_js = {
+    # "User": 'public/js/user.js',
+    "Role Profile": 'public/js/role_profile.js'
+}
 # doctype_list_js = {
 #     "Item": "public/js/items.js"
 # }
