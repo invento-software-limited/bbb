@@ -396,24 +396,12 @@ erpnext.PointOfSale.Payment = class {
 					onchange: function() {
 						const current_value = frappe.model.get_value(p.doctype, p.name, 'amount');
 						if (current_value != this.value) {
-							// let rounded_amount = me.events.get_5_basis_rounded(this.value)
-							// frappe.model.set_value(frm.doc.doctype, frm.doc.name, 'paid_amount', this.value)
-							// let paid_amount = this.value
-							frappe.model.set_value(p.doctype, p.name, 'amount', this.value)
-							frm.refresh_doc();
-								// .then(function(){
-								// 	let total_paid_amount = 0
-								// 	payments.forEach(function (d, i){
-								// 		total_paid_amount += d.amount
-								// 	})
-								// 	frappe.model.set_value(frm.doc.doctype, frm.doc.name, 'paid_amount', total_paid_amount)
-								// 	me.update_totals_section()
-								// });
+							frappe.model
+								.set_value(p.doctype, p.name, 'amount', flt(this.value))
+								.then(() => me.update_totals_section())
 
-							// me.events.set_initial_paid_amount(this.value);
-
-							// const formatted_currency = format_currency(rounded_amount, currency);
-							me.$payment_modes.find(`.${mode}-amount`).html(format_currency(this.value, currency));
+							const formatted_currency = format_currency(this.value, currency);
+							me.$payment_modes.find(`.${mode}-amount`).html(formatted_currency);
 						}
 					}
 				},
