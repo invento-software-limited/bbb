@@ -44,7 +44,7 @@ def get_invoice_data(filters):
         pass
 
     conditions = get_conditions(filters)
-    invoice_type = filters.get('switch_invoice', "Sales Invoice")
+    invoice_type = filters.get('switch_invoice', "POS Invoice")
     query_result = frappe.db.sql("""
     		select
     			sales_invoice.pos_profile, sales_invoice.total_taxes_and_charges as vat, sales_invoice.name, sales_invoice.posting_date, sales_invoice.posting_time, 
@@ -63,6 +63,7 @@ def get_invoice_data(filters):
     		""" % (invoice_type, invoice_type, conditions), as_dict=1)
 
     data = {}
+
     for index, result in enumerate(query_result):
         if data.get(result.get('name'), None):
             sales_data = data.get(result.get('name'))
@@ -83,7 +84,6 @@ def get_invoice_data(filters):
 
         elif data.get(result['return_against'], None):
 
-
             sales_data = data.get(result['return_against'])
 
             if sales_data['exchange_item'] < 0:
@@ -99,7 +99,6 @@ def get_invoice_data(filters):
         else:
             result['exchange_item'] = -1
 
-
             if result['is_return'] < 0:
                 result['exchange_item'] = result['idx']
 
@@ -114,6 +113,7 @@ def get_invoice_data(filters):
                 result['total_amount_'] = result['total_amount']
                 result['total_mrp_price'] = result['mrp']
                 result['total_return_amount'] = ''
+
             else:
                 result['total_selling_rate'] = ''
                 result['total_discount'] = ''
@@ -162,9 +162,9 @@ def generate_table_data(filters):
 
         time_obj = datetime.strptime(f"{result['posting_time']}", '%H:%M:%S.%f').strftime("%I:%M %p")
         style = 'style="background:#ffff0085"' if result['special_discount'] > 0 else ''
-        exchange_amount = 0 if invoice_item_total['total_return_amount'] == '' else invoice_item_total['total_return_amount']
-        total = result['rounded_total'] + exchange_amount
-
+        total_amount = result['rounded_total'] if invoice_item_total['total_return_amount'] == '' else invoice_item_total['total_return_amount'] + result['rounded_total']
+        total = result['rounded_total']
+        # total = result['rounded_total'] + exchange_amount
 
         tr_first_row = f"""
             <tr>
@@ -183,7 +183,7 @@ def generate_table_data(filters):
                 <td rowspan='{invoice_item_total['total_item_row']}'>{result['total_taxes_and_charges']}</td>
                 <td rowspan='{invoice_item_total['total_item_row']}'>{result['rounded_total']}</td>
                 <td rowspan='{invoice_item_total['total_item_row']}'>{invoice_item_total['total_return_amount']}</td>
-                <td rowspan='{invoice_item_total['total_item_row']}'>{total}</td>
+                <td rowspan='{invoice_item_total['total_item_row']}'>{total_amount}</td>
             </tr>
 
             <tr>
@@ -280,16 +280,18 @@ def generate_table_data(filters):
                 if result['is_return'] == 1:
                     if sales_data == {}:
                         sales_data[invoice_name] = [tr_return_with_header]
+                        total_exchange_amount += invoice_item_total['total_return_amount']
                     elif sales_data.get(result['return_against']):
                         if invoice_item_total['exchange_item'] == result['idx']:
                             sales_data[result['return_against']].append(tr_return_head)
                         sales_data[result['return_against']].append(tr_return_row)
                     else:
                         sales_data[invoice_name] = [tr_return_with_header]
+                        total_exchange_amount += invoice_item_total['total_return_amount']
                 else:
                     sales_data[invoice_name] = [tr_first_row]
                     rounded_total_amount += result['rounded_total']
-                    total_exchange_amount += 0 if invoice_item_total['total_return_amount'] == '' else invoice_item_total['total_return_amount']
+                    # total_exchange_amount += invoice_item_total['total_exchange_amount_']
                     special_disc_amount += result['special_discount']
 
         elif next_invoice and invoice_name != next_invoice:
@@ -308,6 +310,7 @@ def generate_table_data(filters):
                         if invoice_item_total['exchange_item'] == result['idx']:
                             sales_data[invoice_name].append(tr_return_head)
                         sales_data[invoice_name] = [tr_return_with_header]
+                        total_exchange_amount += invoice_item_total['total_return_amount']
                         if result['special_note']:
                             sales_data[invoice_name].append(tr_special_note)
                     elif sales_data.get(result['return_against']):
@@ -318,12 +321,13 @@ def generate_table_data(filters):
                             sales_data[result['return_against']].append(tr_special_note)
                     else:
                         sales_data[invoice_name] = [tr_return_with_header]
+                        total_exchange_amount += invoice_item_total['total_return_amount']
                     # if result['special_note']:
                     #     sales_data[result['return_against']].append(tr_special_note)
                 else:
                     sales_data[invoice_name] = [tr_first_row]
                     rounded_total_amount += result['rounded_total']
-                    total_exchange_amount += 0 if invoice_item_total['total_return_amount'] == '' else invoice_item_total['total_return_amount']
+                    # total_exchange_amount += invoice_item_total['total_exchange_amount_']
                     special_disc_amount += result['special_discount']
                     sales_data[invoice_name].append(tr_total_row)
                     if result['special_note']:
@@ -346,6 +350,7 @@ def generate_table_data(filters):
                         if invoice_item_total['exchange_item'] == result['idx']:
                             sales_data[invoice_name].append(tr_return_head)
                         sales_data[invoice_name] = [tr_return_with_header]
+                        total_exchange_amount += invoice_item_total['total_return_amount']
                         if result['special_note']:
                             sales_data[invoice_name].append(tr_special_note)
                     elif sales_data.get(result['return_against']):
@@ -356,15 +361,17 @@ def generate_table_data(filters):
                             sales_data[result['return_against']].append(tr_special_note)
                     else:
                         sales_data[invoice_name] = [tr_return_with_header]
+                        total_exchange_amount += invoice_item_total['total_return_amount']
                     # sales_data[result['return_against']].append(tr_special_note)
                 else:
                     sales_data[invoice_name] = [tr_first_row]
                     rounded_total_amount += result['rounded_total']
-                    total_exchange_amount += 0 if invoice_item_total['total_return_amount'] == '' else invoice_item_total['total_return_amount']
+                    # total_exchange_amount += invoice_item_total['total_exchange_amount_']
                     special_disc_amount += result['special_discount']
                     sales_data[invoice_name].append(tr_total_row)
                     if result['special_note']:
                         sales_data[invoice_name].append(tr_special_note)
+    total_row_data = get_total_data(filters)
     sales_data['total_amount_row'] = [f"""
                         <tr class='font-weight-bold'>
                             <td rowspan='2'>Total </td>
@@ -372,14 +379,17 @@ def generate_table_data(filters):
                             <td rowspan='2' colspan='6'>Unit Total={unit_total_amount} <br>Product Disc={product_discount_amount}</td>
                             <td rowspan='2' >Invoice Total={unit_total_amount - product_discount_amount}</td>
                             <td rowspan='2' >Special Discount={special_disc_amount}</td>
-                            <td rowspan='2' colspan='2'>Sale Amount={rounded_total_amount}</td>
-                            <td rowspan='2' colspan='2'>Exchange Amount={total_exchange_amount}</td>
-                            <td rowspan='2' colspan='2'>Actual Sale Amount={rounded_total_amount + total_exchange_amount}</td>
+                            <td rowspan='2' colspan='2'>Sale Amount={total_row_data['rounded_total']}</td>
+                            <td rowspan='2' colspan='2'>Exchange Amount={total_row_data['exchange_amount']}</td>
+                            <td rowspan='2' colspan='2'>Actual Sale Amount={total_row_data['rounded_total'] + total_row_data['exchange_amount']}</td>
                         </tr>
                         """]
     return sales_data
 
+
 font = Font(size=9)
+
+
 def get_item_description_header(ws, row_count):
     ws.cell(row=row_count, column=3).value = 'Name'
     ws.cell(row=row_count, column=4).value = 'MRP'
@@ -394,7 +404,6 @@ def get_item_description_header(ws, row_count):
     ws.cell(row=row_count, column=6).font = font
     ws.cell(row=row_count, column=7).font = font
     ws.cell(row=row_count, column=8).font = font
-
 
 
 def get_item_description_value(ws, row_count, result):
@@ -432,7 +441,6 @@ def get_item_return_value(ws, row_count, result):
     ws.cell(row=row_count, column=6).font = font
     ws.cell(row=row_count, column=7).font = font
     ws.cell(row=row_count, column=8).font = font
-
 
     ws.cell(row=row_count, column=4).fill = PatternFill(fgColor="00FFFF00", fill_type="solid")
     ws.cell(row=row_count, column=5).fill = PatternFill(fgColor="00FFFF00", fill_type="solid")
@@ -472,7 +480,10 @@ def merge_row(ws, start_row, end_row):
 
 
 def get_others_value(ws, row_count, result, invoice_total):
-    total = result['rounded_total'] + (0 if invoice_total['total_return_amount'] == '' else invoice_total['total_return_amount'])
+    if result.get('is_return') == 0 and result.get('total_return_amount') != '':
+        total = result['rounded_total'] + result['total_return_amount']
+    else:
+        total = result['rounded_total']
     ws.cell(row=row_count, column=9).value = result['served_by']
     ws.cell(row=row_count, column=10).value = result['set_warehouse']
     ws.cell(row=row_count, column=11).value = result['special_discount']
@@ -517,8 +528,7 @@ def get_total_row_value(ws, row_count, invoice_item_total):
     ws.cell(row=row_count, column=8).font = font
     ws.merge_cells(start_row=row_count, start_column=3, end_row=row_count,
                    end_column=4)
-
-
+'''
 @frappe.whitelist()
 def export_excel(filters):
     generate_excel_data(filters)
@@ -605,25 +615,6 @@ def export_excel(filters):
                     extra_row += 1
                     get_item_return_value(ws, row_count + 2, result)
                     pos_sales_data.append(invoice_name)
-
-                    # elif result['return_against'] in pos_sales_data:
-                    #     if invoice_item_total['exchange_item'] == result['idx']:
-                    #         ws.cell(row=row_count, column=3).value = 'Exchange Product List'
-                    #         ws.merge_cells(start_row=row_count, start_column=3, end_row=row_count, end_column=8)
-                    #         get_item_return_value(ws, row_count + 1, result)
-                    #     else:
-                    #         get_item_return_value(ws, row_count, result)
-                    # else:
-                    # pos_sales_data[invoice_name] = [tr_return_with_header]
-                    # get_item_description_header(ws, row_count)
-                    # ws.merge_cells(start_row=row_count, start_column=1,
-                    #                end_row=invoice_item_total['total_item_row'],
-                    #                end_column=2)
-                    # ws.merge_cells(start_row=row_count, start_column=9,
-                    #                end_row=invoice_item_total['total_item_row'],
-                    #                end_column=12)
-                    # extra_row += 1
-                    # get_item_return_value(ws, row_count + 1, result)
                 else:
                     ws.cell(row=row_count, column=1).value = sl_number
                     ws.cell(row=row_count, column=2).value = invoice_with_customer_info
@@ -693,68 +684,6 @@ def export_excel(filters):
                                        end_column=8)
             else:
                 if result['is_return'] == 1:
-                    # if pos_sales_data == []:
-                    #     if invoice_item_total['exchange_item'] == result['idx']:
-                    #         ws.cell(row=row_count, column=1).value = sl_number
-                    #         ws.cell(row=row_count, column=2).value = invoice_with_customer_info
-                    #         ws.cell(row=row_count, column=1).alignment = Alignment(horizontal='center', vertical='center')
-                    #         ws.cell(row=row_count, column=2).alignment = Alignment(horizontal='center', vertical='center')
-                    #         get_item_description_header(ws, row_count)
-                    #         ws.merge_cells(start_row=row_count, start_column=1,
-                    #                        end_row=invoice_item_total['total_item_row'] + row_count - 1,
-                    #                        end_column=2)
-                    #         ws.merge_cells(start_row=row_count, start_column=9,
-                    #                        end_row=invoice_item_total['total_item_row'] + row_count - 1,
-                    #                        end_column=12)
-                    #         extra_row += 1
-                    #         ws.cell(row=row_count + 1, column=3).value = 'Exchange Product List'
-                    #         ws.cell(row=row_count + 1, column=3).fill = PatternFill(fgColor="a9d18e", fill_type="solid")
-                    #         ws.cell(row=row_count + 1, column=3).border = Border(top=thin, left=thin, right=thin,
-                    #                                                          bottom=thin)
-                    #         ws.cell(row=row_count + 1, column=3).alignment = Alignment(horizontal='center', vertical='center')
-                    #         ws.merge_cells(start_row=row_count + 1, start_column=3, end_row=row_count + 1, end_column=8)
-                    #         extra_row += 1
-                    #         get_item_return_value(ws, row_count + 2, result)
-                    #         merge_row(ws, row_count + 2, invoice_item_total['total_item_row'])
-                    #         if result['special_note']:
-                    #             extra_row += 1
-                    #             ws.cell(row=row_count + 3, column=3).value = "Note:" + result['special_note']
-                    #             ws.cell(row=row_count + 3, column=3).fill = PatternFill(fgColor="a9d18e", fill_type="solid")
-                    #             ws.cell(row=row_count + 3, column=3).border = Border(top=thin, left=thin, right=thin,
-                    #                                                              bottom=thin)
-                    #             ws.merge_cells(start_row=row_count + 3, start_column=3, end_row=row_count + 3,
-                    #                            end_column=8)
-                    #         pos_sales_data.append(invoice_name)
-
-                    # if result['return_against'] in pos_sales_data:
-                    #     if invoice_item_total['exchange_item'] == result['idx']:
-                    #         ws.cell(row=row_count, column=3).value = 'Exchange Product List'
-                    #         ws.cell(row=row_count, column=3).fill = PatternFill(fgColor="a9d18e", fill_type="solid")
-                    #         ws.cell(row=row_count + 3, column=3).border = Border(top=thin, left=thin, right=thin,
-                    #                                                              bottom=thin)
-                    #         ws.cell(row=row_count, column=3).alignment = Alignment(horizontal='center', vertical='center')
-                    #         ws.merge_cells(start_row=row_count, start_column=3, end_row=row_count, end_column=8)
-                    #         extra_row += 1
-                    #         get_item_return_value(ws, row_count + 1, result)
-                    #         if result['special_note']:
-                    #             extra_row += 1
-                    #             ws.cell(row=row_count + 2, column=3).value = "Note:" + result['special_note']
-                    #             ws.cell(row=row_count + 2, column=3).fill = PatternFill(fgColor="a9d18e", fill_type="solid")
-                    #             ws.cell(row=row_count + 2, column=3).border = Border(top=thin, left=thin, right=thin,
-                    #                                                              bottom=thin)
-                    #             ws.merge_cells(start_row=row_count + 2, start_column=3, end_row=row_count + 2,
-                    #                            end_column=8)
-                    #     else:
-                    #         get_item_return_value(ws, row_count, result)
-                    #         if result['special_note']:
-                    #             extra_row += 1
-                    #             ws.cell(row=row_count + 1, column=3).value = "Note:" + result['special_note']
-                    #             ws.cell(row=row_count + 1, column=3).fill = PatternFill(fgColor="a9d18e", fill_type="solid")
-                    #             ws.cell(row=row_count + 1, column=3).border = Border(top=thin, left=thin, right=thin,
-                    #                                                              bottom=thin)
-                    #             ws.merge_cells(start_row=row_count + 1, start_column=3, end_row=row_count + 2,
-                    #                            end_column=8)
-                    # else:
                     ws.cell(row=row_count, column=1).value = sl_number
                     ws.cell(row=row_count, column=2).value = invoice_with_customer_info
                     ws.cell(row=row_count, column=1).alignment = Alignment(horizontal='center', vertical='center')
@@ -807,21 +736,6 @@ def export_excel(filters):
                     get_others_value(ws, row_count, result, invoice_item_total)
                     pos_sales_data.append(invoice_name)
         elif next_invoice == False:
-            # if invoice_name in pos_sales_data:
-            #     if result['is_return'] == 1:
-            #         get_item_return_value(ws, row_count, result)
-            #     # else:
-            #     #     get_total_row_value(ws, row_count, result)
-            #     if result['is_return'] == 0:
-            #         get_item_description_value(ws, row_count, result)
-            #         extra_row += 1
-            #         get_total_row_value(ws, row_count + 1, invoice_item_total)
-            #     if result['special_note']:
-            #         extra_row += 1
-            #         ws.cell(row=row_count + 2, column=3).value = "Note:" + result['special_note']
-            #         ws.cell(row=row_count + 2, column=3).fill = PatternFill(fgColor="a9d18e", fill_type="solid")
-            #         ws.cell(row=row_count + 2, column=3).border = Border(top=thin, left=thin, right=thin, bottom=thin)
-            #         ws.merge_cells(start_row=row_count + 2, start_column=3, end_row=row_count + 2, end_column=8)
 
             if invoice_name in pos_sales_data:
                 if result['is_return'] == 1:
@@ -1188,7 +1102,7 @@ def export_excel(filters):
     wb.save(save_folder_path + 'detail_sales_report.xlsx')
     url = urljoin(frappe.utils.get_url(), 'files/detail_sales_report.xlsx')
     return url
-
+'''
 
 @frappe.whitelist()
 def generate_excel_data(**filters):
@@ -1328,9 +1242,9 @@ def generate_excel_data(**filters):
         row_length = len(sales_data[invoice_name]) + row_count
 
         invoice_discount += res.get('special_discount', 0)
-        total_exchange_amount += 0 if invoice_item_total.get('total_return_amount') == '' else invoice_item_total.get('total_return_amount')
-        sale_amount += res.get('rounded_total', 0)
-
+        total_exchange_amount += 0 if invoice_item_total.get('total_return_amount') == '' else invoice_item_total.get(
+            'total_return_amount')
+        sale_amount += 0 if res.get('return_head') else res.get('rounded_total', 0)
         merge_row(ws, row_count, row_length)
         row_count += 1
 
@@ -1375,15 +1289,15 @@ def generate_excel_data(**filters):
     ws.cell(row=row_count, column=15).value = "Org Sale.=" + str(sale_amount + total_exchange_amount)
 
     for column in range(1, 17):
-        ws.merge_cells(start_row=row_count, start_column=column, end_row=row_count+1,
+        ws.merge_cells(start_row=row_count, start_column=column, end_row=row_count + 1,
                        end_column=column)
-    ws.merge_cells(start_row=row_count, start_column=3, end_row=row_count+1,
+    ws.merge_cells(start_row=row_count, start_column=3, end_row=row_count + 1,
                    end_column=8)
-    ws.merge_cells(start_row=row_count, start_column=11, end_row=row_count+1,
+    ws.merge_cells(start_row=row_count, start_column=11, end_row=row_count + 1,
                    end_column=12)
-    ws.merge_cells(start_row=row_count, start_column=13, end_row=row_count+1,
+    ws.merge_cells(start_row=row_count, start_column=13, end_row=row_count + 1,
                    end_column=14)
-    ws.merge_cells(start_row=row_count, start_column=15, end_row=row_count+1,
+    ws.merge_cells(start_row=row_count, start_column=15, end_row=row_count + 1,
                    end_column=16)
 
     # column_widths = []
@@ -1413,8 +1327,6 @@ def generate_excel_data(**filters):
     # # Must close zip for all contents to be written
     # # zf.close()
 
-
-
     with open(file_path, "rb") as file:
         frappe.local.response.filename = 'detail_sales_report_2.xlsx'
         frappe.local.response.filecontent = file.read()
@@ -1422,3 +1334,27 @@ def generate_excel_data(**filters):
 
     return file_path
 
+def get_total_data(filters):
+    try:
+        filters = json.loads(filters)
+    except:
+        pass
+
+    conditions = get_conditions(filters)
+    invoice_type = filters.get('switch_invoice', "POS Invoice")
+    query_result = frappe.db.sql("""
+    		select sales_invoice.is_return, sales_invoice.rounded_total, sales_invoice.net_total
+    		from `tab%s` sales_invoice where sales_invoice.docstatus = 1 and %s
+    		order by sales_invoice.posting_date, sales_invoice.posting_time asc 
+    		""" % (invoice_type, conditions), as_dict=1)
+
+    data = {'rounded_total': 0, 'exchange_amount': 0}
+    for result in query_result:
+        if result['is_return'] == 0:
+            if 'rounded_total' in data.keys():
+                data['rounded_total'] += result['rounded_total']
+        elif result['is_return'] == 1:
+            if 'exchange_amount' in data.keys():
+                data['exchange_amount'] += result['rounded_total']
+
+    return data
