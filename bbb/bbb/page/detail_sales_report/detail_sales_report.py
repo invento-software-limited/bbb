@@ -281,6 +281,7 @@ def generate_table_data(filters):
                     if sales_data == {}:
                         sales_data[invoice_name] = [tr_return_with_header]
                         total_exchange_amount += invoice_item_total['total_return_amount']
+                        special_disc_amount += result['special_discount']
                     elif sales_data.get(result['return_against']):
                         if invoice_item_total['exchange_item'] == result['idx']:
                             sales_data[result['return_against']].append(tr_return_head)
@@ -288,6 +289,7 @@ def generate_table_data(filters):
                     else:
                         sales_data[invoice_name] = [tr_return_with_header]
                         total_exchange_amount += invoice_item_total['total_return_amount']
+                        special_disc_amount += result['special_discount']
                 else:
                     sales_data[invoice_name] = [tr_first_row]
                     rounded_total_amount += result['rounded_total']
@@ -313,6 +315,7 @@ def generate_table_data(filters):
                         total_exchange_amount += invoice_item_total['total_return_amount']
                         if result['special_note']:
                             sales_data[invoice_name].append(tr_special_note)
+                        special_disc_amount += result['special_discount']
                     elif sales_data.get(result['return_against']):
                         if invoice_item_total['exchange_item'] == result['idx']:
                             sales_data[result['return_against']].append(tr_return_head)
@@ -322,6 +325,7 @@ def generate_table_data(filters):
                     else:
                         sales_data[invoice_name] = [tr_return_with_header]
                         total_exchange_amount += invoice_item_total['total_return_amount']
+                        special_disc_amount += result['special_discount']
                     # if result['special_note']:
                     #     sales_data[result['return_against']].append(tr_special_note)
                 else:
@@ -351,6 +355,7 @@ def generate_table_data(filters):
                             sales_data[invoice_name].append(tr_return_head)
                         sales_data[invoice_name] = [tr_return_with_header]
                         total_exchange_amount += invoice_item_total['total_return_amount']
+                        special_disc_amount += result['special_discount']
                         if result['special_note']:
                             sales_data[invoice_name].append(tr_special_note)
                     elif sales_data.get(result['return_against']):
@@ -362,6 +367,7 @@ def generate_table_data(filters):
                     else:
                         sales_data[invoice_name] = [tr_return_with_header]
                         total_exchange_amount += invoice_item_total['total_return_amount']
+                        special_disc_amount += result['special_discount']
                     # sales_data[result['return_against']].append(tr_special_note)
                 else:
                     sales_data[invoice_name] = [tr_first_row]
