@@ -19,7 +19,9 @@ def validate(doc, method):
                 1000 * one_thousand_taka_note + 500 * five_hundred_taka_note + 200 * two_hundred_taka_note +
                 100 * one_hundred_taka_note + 50 * fifty_taka_note + 20 * twenty_taka_note + 10 * ten_taka_note +
                 5 * five_taka_note + 5 * five_taka_coin + 2 * two_taka_note + 2 * two_taka_coin + one_taka_note + one_taka_coin)
+        payment_types = str(payment.mode_of_payment).split(' ')
+        if "Cash" in payment_types:
+            payment.closing_amount = total_amount
 
         payment.total_amount = total_amount
-        payment.closing_amount = total_amount
         payment.withdrawal_amount = total_amount - payment.opening_amount
