@@ -1,3 +1,6 @@
+import frappe
+from frappe.utils import flt, get_datetime
+
 def validate(doc, method):
     payment_reconciliation = doc.payment_reconciliation
     for payment in payment_reconciliation:
@@ -25,3 +28,30 @@ def validate(doc, method):
 
         payment.total_amount = total_amount
         payment.withdrawal_amount = total_amount - payment.opening_amount
+
+
+# Copyright (c) 2018, Frappe Technologies Pvt. Ltd. and contributors
+# For license information, please see license.txt
+
+@frappe.whitelist()
+def get_pos_invoices(start, end, pos_profile, user):
+	data = frappe.db.sql(
+		"""
+	select
+		name, timestamp(posting_date, posting_time) as "timestamp"
+	from
+		`tabPOS Invoice`
+	where
+		owner = %s and docstatus = 1 and pos_profile = %s and ifnull(consolidated_invoice,'') = '' order by posting_date asc
+	""",
+		(user, pos_profile),
+		as_dict=1,
+	)
+
+	data = list(
+		filter(lambda d: get_datetime(start) <= get_datetime(d.timestamp) <= get_datetime(end), data)
+	)
+	# need to get taxes and payments so can't avoid get_doc
+	data = [frappe.get_doc("POS Invoice", d.name).as_dict() for d in data]
+
+	return data
