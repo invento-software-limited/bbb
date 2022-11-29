@@ -104,7 +104,7 @@ def get_item_price_qty_data(filters):
                 data["selling_price_list"] = selling_price_map.get(price_list)["Selling Price List"] or ""
                 data["selling_rate"] = selling_price_map.get(price_list)["Selling Rate"] or 0
 
-            result.append(data)
+                result.append(data)
 
     return result
 

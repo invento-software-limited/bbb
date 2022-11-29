@@ -88,6 +88,6 @@ def get_item_price_qty_data(filters):
     item_results = frappe.db.sql(
         """select pos_opening_entry.posting_date as opening_date, pos_opening_entry.pos_profile, pos_opening_entry.period_end_date,
          pos_opening_entry.status, pos_opening_entry.name as opening_id, pos_opening_entry.pos_closing_entry as closing_id, pos_closing_entry.posting_date as closing_date
-        from `tabPOS Opening Entry` pos_opening_entry left join `tabPOS Closing Entry` pos_closing_entry ON pos_opening_entry.pos_profile=pos_closing_entry.pos_profile {}""".format(conditions), as_dict=1)
-    print(item_results)
+        from `tabPOS Opening Entry` pos_opening_entry left join `tabPOS Closing Entry` pos_closing_entry ON pos_opening_entry.name=pos_closing_entry.pos_opening_entry {}""".format(conditions), as_dict=1)
+
     return item_results
