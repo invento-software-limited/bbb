@@ -888,6 +888,11 @@ erpnext.PointOfSale.Controller = class {
 
 				await this.trigger_new_item_events(item_row);
 
+                var today = new Date();
+                if(start_date !== undefined && end_date !== undefined && discount_amount !== undefined && today >= start_date && today <= end_date && this.frm.doc.ignore_pricing_rule == 0){
+                    await frappe.model.set_value("POS Invoice Item", item_row.child_docname, 'rate', (mrp-discount_amount));
+                }
+
 				this.update_cart_html(item_row);
 
 				// if (this.item_details.$component.is(':visible'))
