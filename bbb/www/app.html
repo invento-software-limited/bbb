@@ -1,0 +1,195 @@
+<!DOCTYPE html>
+<html data-theme="{{ desk_theme.lower() }}" dir={{ layout_direction }} lang="{{ lang }}">
+	<head>
+		<!-- Chrome, Firefox OS and Opera -->
+		<meta name="theme-color" content="#0089FF">
+		<!-- Windows Phone -->
+		<meta name="msapplication-navbutton-color" content="#0089FF">
+		<!-- iOS Safari -->
+		<meta name="apple-mobile-web-app-status-bar-style" content="#0089FF">
+		<meta content="text/html;charset=utf-8" http-equiv="Content-Type">
+		<meta content="utf-8" http-equiv="encoding">
+		<meta name="author" content="">
+		<meta name="viewport" content="width=device-width, initial-scale=1.0,
+			maximum-scale=1.0, minimum-scale=1.0, user-scalable=no, minimal-ui">
+		<meta name="apple-mobile-web-app-capable" content="yes">
+		<meta name="apple-mobile-web-app-status-bar-style" content="white">
+		<meta name="mobile-web-app-capable" content="yes">
+		<title>Frappe</title>
+		<link rel="shortcut icon"
+			href="{{ favicon or "/assets/frappe/images/frappe-favicon.svg" }}" type="image/x-icon">
+		<link rel="icon"
+			href="{{ favicon or "/assets/frappe/images/frappe-favicon.svg" }}" type="image/x-icon">
+		{% for include in include_css -%}
+		<link type="text/css" rel="stylesheet" href="{{ include }}?ver={{ build_version }}">
+		{%- endfor -%}
+    {% if subscription_end == True %}
+    <style>
+        .navbar-fixed-top {
+            top: 32px;
+        }
+        .subscription-warn{
+            text-align: center;
+            background: #60bdf4f2;
+            font-size: 17px;
+            padding: 4px;
+        }
+        #page-desktop{
+            top: 32px;
+        }
+        .page_head{
+            top : 60px !important;
+        }
+        .page-container {
+            margin-top: 55px;
+        }
+    </style>
+    {% endif %}
+
+    {% if subscription == True %}
+        <style>
+            .page-card {
+                max-width: 360px;
+                padding: 15px;
+                margin: 70px auto;
+                border: 1px solid #d1d8dd;
+                border-radius: 4px;
+                background-color: #fff;
+                box-shadow: 0px 3px 6px rgba(0, 0, 0, 0.1);
+            }
+
+            .page-card .page-card-head {
+                padding: 10px 15px;
+                margin: -15px;
+                margin-bottom: 15px;
+                border-bottom: 1px solid #d1d8dd;
+            }
+
+            .page-card .page-card-head .indicator {
+                color: #36414C;
+                font-size: 14px;
+            }
+
+            .page-card .page-card-head .indicator::before {
+                margin: 0 6px 0.5px 0px;
+            }
+
+            .page-card .btn {
+                margin-top: 30px;
+            }
+
+            .page-card p {
+                font-size: 14px;
+            }
+
+        </style>
+    {% endif %}
+	</head>
+	<body>
+		{% include "public/icons/timeless/symbol-defs.svg" %}
+{#		<div class="centered splash">#}
+{#			<img src="{{ splash_image or "/assets/frappe/images/frappe-framework-logo.png" }}"#}
+{#				style="max-width: 100px; max-height: 100px;">#}
+{#		</div>#}
+{#		<div class="main-section">#}
+{#			<header></header>#}
+{#			<div id="body"></div>#}
+{#			<footer></footer>#}
+{#		</div>#}
+    {% if subscription == False %}
+        {% if subscription_end == True %}
+            <div class="subscription-warn">
+                <a href="https://invento.com.bd/pos-renewal/" target="_blank"> সম্মানিত গ্রাহক ! আপনার লাইসেন্সের মেয়াদ উত্তীর্ণ হতে {% if date_count == 0 %} আজকের {% else %}{{ date_count }} {% endif %} দিন বাকি আছে। নিরবচ্ছিন্ন ভাবে চালিয়ে যেতে  ক্লিক করুন </a>
+            </div>
+        {% endif %}
+		<div class="centered splash">
+			<img src="{{ splash_image or "/assets/frappe/images/frappe-framework-logo.png" }}"
+				style="max-width: 100px; max-height: 100px;">
+		</div>
+		<div class="main-section">
+			<header></header>
+            {% if subscription_end == True %}
+			    <div id="body" style="margin-top: -50px"></div>
+            {% else %}
+                <div id="body"></div>
+            {% endif %}
+			<footer></footer>
+		</div>
+    {% elif subscription == True %}
+        <div class="main-section">
+            <header></header>
+            <div class="page_content" style="margin-top: 200px">
+                <div class="page-card">
+                    <h5 class="page-card-head">
+                        <span class="indicator red">Not Permitted</span>
+                    </h5>
+                    <div class="page-card-body">
+                        <p>সম্মানিত গ্রাহক ! আপনার লাইসেন্সের মেয়াদ উত্তীর্ণ হয়ে গেছে। লাইসেন্স নবায়ন করতে ক্লিক করুন</p>
+                        <div class=""><a href="https://invento.com.bd/pos-renewal/" target="_blank" class="btn btn-primary btn-sm"> Click Here</a>
+        <!--                    <a href="/?cmd=web_logout" class="btn btn-primary btn-sm pull-right">-->
+        <!--                    Logout</a>-->
+                        </div>
+                    </div>
+                </div>
+            </div>
+            <footer></footer>
+        </div>
+    {% endif %}
+
+		<script type="text/javascript" src="/assets/frappe/js/lib/jquery/jquery.min.js"></script>
+
+		<script type="text/javascript">
+			window._version_number = "{{ build_version }}";
+			// browser support
+			window.app = true;
+			window.dev_server = {{ dev_server }};
+
+			if (!window.frappe) window.frappe = {};
+
+			frappe.boot = {{ boot }};
+			frappe._messages = frappe.boot["__messages"];
+			frappe.csrf_token = "{{ csrf_token }}";
+     function clickHere(){
+         window.open('https://invento.com.bd/pos-renewal/');
+         window.open('/?cmd=web_logout', "_blank");
+     }
+	</script>
+    {% if subscription_end == True %}
+        <script type="text/javascript">
+            $(window).scroll(function() {
+                 let scroll_top =  $(window).scrollTop();
+                 // let margin_top = 20 -scroll_top
+                 if(scroll_top > 18){
+                     $('.navbar-fixed-top').css({ 'top'  : 0})
+                     $('#page-desktop').css({ 'top'  : 0})
+                     $('.page-head').css({ 'top'  : 41})
+                     $('.page-container').css({ 'top'  : 40})
+                 }else if(scroll_top < 18){
+                     $('.navbar-fixed-top').css({ 'top'  : 32})
+                     $('#page-desktop').css({ 'top'  : 32})
+                     $('.page-head').css({ 'top'  : 60})
+                     $('.page-container').css({ 'top'  : 55})
+                 }
+             });
+            $(document).ready(function (){
+                  setTimeout(
+                    function() {
+                      $('.page-head').css({ 'top'  : 60});
+                    }, 2000);
+            })
+        </script>
+    {% endif %}
+
+		{% for include in include_js %}
+		<script type="text/javascript" src="{{ include }}?ver={{ build_version }}"></script>
+		{% endfor %}
+		{% include "templates/includes/app_analytics/google_analytics.html" %}
+		{% include "templates/includes/app_analytics/mixpanel_analytics.html" %}
+
+		{% for sound in (sounds or []) %}
+		<audio preload="auto" id="sound-{{ sound.name }}" volume={{ sound.volume or 1 }}>
+			<source src="{{ sound.src }}"></source>
+		</audio>
+		{% endfor %}
+	</body>
+</html>

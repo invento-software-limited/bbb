@@ -1,0 +1,66 @@
+{
+ "creation": "2021-07-19 13:23:14.073967",
+ "doctype": "DocType",
+ "editable_grid": 1,
+ "engine": "InnoDB",
+ "field_order": [
+  "subscription_start_date",
+  "subscription_end_date",
+  "subscription_plan",
+  "subscription_amount",
+  "number_of_days_for_notice"
+ ],
+ "fields": [
+  {
+   "default": "2021-01-01",
+   "fieldname": "subscription_start_date",
+   "fieldtype": "Date",
+   "label": "Subscription Start Date"
+  },
+  {
+   "default": "2030-12-31",
+   "fieldname": "subscription_end_date",
+   "fieldtype": "Date",
+   "label": "Subscription End Date"
+  },
+  {
+   "fieldname": "subscription_plan",
+   "fieldtype": "Select",
+   "label": "Subscription Plan",
+   "options": "Half-Yearly\nYearly"
+  },
+  {
+   "fieldname": "subscription_amount",
+   "fieldtype": "Int",
+   "label": "Subscription Amount"
+  },
+  {
+   "default": "9",
+   "fieldname": "number_of_days_for_notice",
+   "fieldtype": "Int",
+   "label": "Number of days for Notice"
+  }
+ ],
+ "issingle": 1,
+ "modified": "2021-07-19 15:17:29.883522",
+ "modified_by": "Administrator",
+ "module": "Invento Bangladesh",
+ "name": "Monthly Subscription Plan",
+ "owner": "Administrator",
+ "permissions": [
+  {
+   "create": 1,
+   "delete": 1,
+   "email": 1,
+   "print": 1,
+   "read": 1,
+   "role": "System Manager",
+   "share": 1,
+   "write": 1
+  }
+ ],
+ "quick_entry": 1,
+ "sort_field": "modified",
+ "sort_order": "DESC",
+ "track_changes": 1
+}
