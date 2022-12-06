@@ -61,13 +61,14 @@ def get_context(context):
 	})
 
 	# Subscription
-	if frappe.session.user != "Administrator" or frappe.session.user != "munim@invento.com.bd":
+	allowed_users = ["Administrator", "munim@invento.com.bd"]
+	if frappe.session.user not in allowed_users:
 		doc = frappe.get_doc('Monthly Subscription Plan')
 		subscription_end_date = datetime.datetime.strptime(doc.subscription_end_date, "%Y-%m-%d").date()
 		warn_date_count = int(doc.number_of_days_for_notice)
 		today = datetime.datetime.now().date()
 		date_count = ((subscription_end_date - today).days)
-		if date_count <=	 warn_date_count:
+		if date_count <= warn_date_count:
 			context.update({"date_count": date_count if date_count == 0 else date_count + 1})
 			context.update({"subscription_end": True})
 		else:
