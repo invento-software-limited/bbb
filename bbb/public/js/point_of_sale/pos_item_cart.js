@@ -845,12 +845,22 @@ erpnext.PointOfSale.ItemCart = class {
             }
         }else{
             if (discount_section !==0) {
-                this.$add_discount_elem.css({'padding': '0px', 'border': 'none'});
-                this.$add_discount_elem.html(
-                    `<div class="add-discount-field"></div>`
-                );
-                frappe.model.set_value(frm.doc.doctype, frm.doc.name, field_name, parseFloat(discount_section.value));
-                me.hide_discount_amount_control(discount_section.value);
+                const total_amount = parseFloat($(".final-amount-total-label").html())
+                if(total_amount == parseFloat(discount_section.value)){
+                    this.$add_discount_elem.css({'padding': '0px', 'border': 'none'});
+                    this.$add_discount_elem.html(
+                        `<div class="add-discount-field"></div>`
+                    );
+                    frappe.model.set_value(frm.doc.doctype, frm.doc.name, 'additional_discount_percentage', flt(100));
+                    me.hide_discount_amount_control(discount_section.value);
+                }else{
+                    this.$add_discount_elem.css({'padding': '0px', 'border': 'none'});
+                    this.$add_discount_elem.html(
+                        `<div class="add-discount-field"></div>`
+                    );
+                    frappe.model.set_value(frm.doc.doctype, frm.doc.name, field_name, parseFloat(discount_section.value));
+                    me.hide_discount_amount_control(discount_section.value);
+                }
             } else {
                 frappe.model.set_value(frm.doc.doctype, frm.doc.name, field_name, 0);
                 me.$add_discount_amount_elem.css({
