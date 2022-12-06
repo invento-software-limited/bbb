@@ -838,6 +838,7 @@ erpnext.PointOfSale.Controller = class {
             let {field, value, item, item_quantity} = args;
             const {item_code, batch_no, serial_no, uom, rate, mrp, title, start_date, end_date, discount_amount, update_rules} = item;
 			item_row = this.get_item_from_frm(item);
+
 			const item_row_exists = !$.isEmptyObject(item_row);
             const free_item = item_row.free_item_rules;
 			const from_selector = field === 'qty' && value === "+1";
@@ -860,6 +861,7 @@ erpnext.PointOfSale.Controller = class {
                 this.insert_search_product_log(item_code);
 
 			} else {
+
 				if (!this.frm.doc.customer)
 					return this.raise_customer_selection_alert();
 
@@ -880,7 +882,7 @@ erpnext.PointOfSale.Controller = class {
 
 				if (field === 'serial_no')
 					new_item['qty'] = value.split(`\n`).length || 0;
-                console.log(new_item)
+
 				item_row = this.frm.add_child('items', new_item);
 
 				if (field === 'qty' && value !== 0 && !this.allow_negative_stock)
@@ -892,7 +894,9 @@ erpnext.PointOfSale.Controller = class {
                 if(start_date !== undefined && end_date !== undefined && discount_amount !== undefined && today >= start_date && today <= end_date && this.frm.doc.ignore_pricing_rule == 0){
                     await frappe.model.set_value("POS Invoice Item", item_row.child_docname, 'rate', (mrp-discount_amount));
                 }
-
+                else if(start_date !== undefined && end_date !== undefined && discount_amount !== undefined && today >= start_date && today <= end_date && this.frm.doc.ignore_pricing_rule == 1 && this.frm.doc.is_return == 1){
+                    await frappe.model.set_value("POS Invoice Item", item_row.child_docname, 'rate', (mrp-discount_amount));
+                }
 				this.update_cart_html(item_row);
 
 				// if (this.item_details.$component.is(':visible'))
