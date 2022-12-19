@@ -70,11 +70,11 @@ class CustomPOSInvoice(POSInvoice):
                             )
                         )
 
-        item_doc = frappe.get_doc("Item", item.item_code)
-        today = datetime.datetime.today().date()
-        if item_doc.start_date and item_doc.end_date and item_doc.discount_amount and item_doc.start_date <= today and item_doc.end_date >= today:
-            item.rate = item_doc.standard_rate - item_doc.discount_amount
-            item.set('rate', item_doc.standard_rate - item_doc.discount_amount)
+        # item_doc = frappe.get_doc("Item", item.item_code)
+        # today = datetime.datetime.today().date()
+        # if item_doc.start_date and item_doc.end_date and item_doc.discount_amount and item_doc.start_date <= today and item_doc.end_date >= today:
+        #     item.rate = item_doc.standard_rate - item_doc.discount_amount
+        #     item.set('rate', item_doc.standard_rate - item_doc.discount_amount)
 
     def validate_qty(self):
         """Validates qty at row level"""

@@ -4,6 +4,9 @@ import frappe
 import datetime
 from frappe.permissions import get_doctypes_with_read
 from frappe.utils import cint, cstr
+from frappe.utils import cint, flt, fmt_money, get_link_to_form, getdate, today, cstr
+
+from erpnext.accounts.doctype.pricing_rule.utils import filter_pricing_rules_for_qty_amount
 
 
 def cint(s, default=0):
@@ -280,4 +283,78 @@ def get_item_rate_discount(return_against, item_code):
                     'rate': item.rate, }
 
 
-
+# def get_tag_conditions(values):
+#     conditions = '''apply_on = "Transaction"'''
+#     conditions += ''' and `tabPricing Rule`.applicable_for="Tag" '''
+#     conditions += ''' and "{}" between ifnull(`tabPricing Rule`.valid_from, '2000-01-01')
+# 		and ifnull(`tabPricing Rule`.valid_upto, '2500-12-31')'''.format(today)
+#
+#     return conditions
+#
+#
+# def calculate_discount_amount(doc, pricing_rule):
+#     items = doc.get('items', [])
+#     total_amount = 0
+#     discount_amount = 0
+#     for item in items:
+#         if item.price_rule_tag == pricing_rule.tag:
+#             # if item.net_amount:
+#             # 	total_amount += item.net_amount
+#             # elif item.price_list_rate and item.discount_amount:
+#             # 	total_amount += (item.price_list_rate - item.discount_amount) * item.qty
+#             # elif item.rate:
+#             # 	total_amount += item.rate * item.qty
+#             total_amount += item.rate * item.qty
+#
+#     if pricing_rule.get('discount_percentage'):
+#         discount_amount = (total_amount * (pricing_rule.get('discount_percentage') / 100))
+#     elif pricing_rule.get('discount_amount'):
+#         discount_amount = pricing_rule.get('discount_amount')
+#
+#     return discount_amount
+#
+#
+# # Transaction base discount
+# @frappe.whitelist()
+# def apply_pricing_rule_on_tag(doc):
+#     values = {}
+#     conditions = get_tag_conditions(values)
+#     pricing_rules = frappe.db.sql(
+#         """ Select `tabPricing Rule`.* from `tabPricing Rule`
+#         where  {conditions} and `tabPricing Rule`.disable = 0 order by `tabPricing Rule`.priority desc
+#     """.format(
+#             conditions=conditions
+#         ),
+#         values,
+#         as_dict=1,
+#     )
+#     discount_amount = None
+#     if pricing_rules:
+#         total_amount = 0
+#         total_qty = 0
+#         items = doc.get('items', [])
+#         for item in items:
+#             if not item.price_rule_tag:
+#                 continue
+#             if item.price_rule_tag == pricing_rules[0].get('tag', None):
+#                 total_amount += item.net_amount * item.qty
+#                 total_qty += item.qty
+#
+#         pricing_rules = filter_pricing_rules_for_qty_amount(total_qty, total_amount, pricing_rules)
+#
+#         for d in pricing_rules:
+#             if d.price_or_product_discount == "Price":
+#
+#                 discount_amount = calculate_discount_amount(doc, d)
+#
+#                 if d.apply_discount_on:
+#                     doc.set("apply_discount_on", d.apply_discount_on)
+#                     doc.set("additional_discount_percentage", None)
+#                     doc.set("discount_amount", flt(discount_amount))
+#                 doc.calculate_taxes_and_totals()
+#                 return True
+#
+#     if not discount_amount:
+#         return False
+#     else:
+#         return True
