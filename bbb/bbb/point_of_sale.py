@@ -94,6 +94,7 @@ def get_items(start, page_length, price_list, item_group, pos_profile, search_te
 			item.start_date,
 			item.end_date,
 			item.discount_amount,
+			item.price_rule_tag,
 			item.image AS item_image,
 			item.is_stock_item
 		FROM

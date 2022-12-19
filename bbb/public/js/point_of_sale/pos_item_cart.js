@@ -1210,7 +1210,7 @@ erpnext.PointOfSale.ItemCart = class {
 					</div>
 					<div class="item-row-rate"><span>${item_data.rate || 0}</span></div>
 					<div class="item-row-qty"><!--<span>${item_data.qty || 0}</span>-->
-					<input class="form-control item_qty" type="text" data-rate="${item_data.rate || 0}" value="${item_data.qty || 0}" item_code="${item_data.item_code}" docname="${item_data.name}" style="width: 50px;text-align: center;" free_item="${item_data.free_item_rules || 'undefined'}">
+					<input class="form-control item_qty" type="text" data-tag="${item_data.price_rule_tag}"data-rate="${item_data.rate || 0}" value="${item_data.qty || 0}" item_code="${item_data.item_code}" docname="${item_data.name}" style="width: 50px;text-align: center;" free_item="${item_data.free_item_rules || 'undefined'}">
 					</div>
 					
 					<!--<div class="item-row-damaged-cost">
@@ -1259,6 +1259,7 @@ erpnext.PointOfSale.ItemCart = class {
                     let docname = $(this).attr('docname');
                     let item_code = $(this).attr('item_code');
                     let free_item = $(this).attr('free_item');
+                    let price_rule_tag = $(this).attr('data-tag');
                     if(free_item !== 'undefined'){
                         frappe.dom.unfreeze();
                         frappe.show_alert({
@@ -1293,15 +1294,22 @@ erpnext.PointOfSale.ItemCart = class {
                                                             frappe.model.set_value("POS Invoice Item", docname, 'damaged_cost', (-1 * item_wise_cost));
                                                             frappe.model.set_value("POS Invoice Item", docname, 'rate', new_rate);
                                                             frappe.model.set_value("POS Invoice Item", docname, 'total_damaged_cost', total_damaged_cost);
+
                                                         }
                                                     }
                                                 })
                                                 damaged_cost_div.val(total_damaged_cost);
                                                 me.update_item_cart_total_section(frm)
+                                                me.update_totals_section(frm)
+                                                // console.log("Called Damage")
+                                                // me.events.update_additional_discount_on_tag()
                                             })
                                         }else {
                                             frappe.model.set_value("POS Invoice Item", docname, 'margin_type', r.message.margin_type)
                                             frappe.model.set_value("POS Invoice Item", docname, 'discount_percentage', r.message.discount_percentage)
+
+                                            // console.log("Called Else")
+                                            // me.events.update_additional_discount_on_tag()
                                         }
 
 
@@ -1309,6 +1317,7 @@ erpnext.PointOfSale.ItemCart = class {
                                     }
                                 })
                             }
+                            me.events.update_additional_discount_on_tag()
                         })
 
                 }else{
@@ -1375,6 +1384,7 @@ erpnext.PointOfSale.ItemCart = class {
                 // () => frappe.model.clear_doc(doctype, docname),
                 () => me.toggle_ignore_pricing_rule_button(),
                 () => me.update_item_cart_total_section(frm),
+                () => me.events.update_additional_discount_on_tag(),
                 () => frappe.dom.unfreeze()
             ])
         });
@@ -1792,6 +1802,11 @@ erpnext.PointOfSale.ItemCart = class {
         // }
         this.$cart_items_wrapper.html('');
         // pos return
+        // if(frm.doc.is_return == 1) {
+        // frappe.model.set_value(frm.doc.doctype, frm.doc.name, 'ignore_pricing_rule', 0);
+        // }
+
+        // pos return
         // if(frm.doc.is_return){
         //     const item_data = frm.doc.items;
         //     frm.doc.items = [];
@@ -2063,6 +2078,7 @@ erpnext.PointOfSale.ItemCart = class {
         if(frm.doc.is_return && items.length){
             frappe.call({
                 method: "bbb.bbb.controllers.utils.apply_all_items_pricing_rules",
+                // async:false,
                 args: {"return_against": frm.doc.return_against},
                 callback: (r) => {
                     let item_list = r.message;
@@ -2078,6 +2094,7 @@ erpnext.PointOfSale.ItemCart = class {
                                     .then(function () {
                                             frappe.model.set_value("POS Invoice Item", item.name, 'margin_type', data.margin_type);
                                             frappe.model.set_value("POS Invoice Item", item.name, 'rate', data.rate);
+
 
                                     })
                             })

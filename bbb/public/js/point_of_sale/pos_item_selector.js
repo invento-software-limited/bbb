@@ -80,7 +80,7 @@ erpnext.PointOfSale.ItemSelector = class {
 	get_item_html(item) {
 		const me = this;
 		// eslint-disable-next-line no-unused-vars
-		const { item_image, serial_no, batch_no, barcode, actual_qty, mrp, stock_uom, price_list_rate, start_date, end_date, discount_amount } = item;
+		const { item_image, serial_no, batch_no, barcode, actual_qty, mrp, stock_uom, price_list_rate, start_date, end_date, discount_amount, price_rule_tag } = item;
 		const indicator_color = actual_qty > 10 ? "green" : actual_qty <= 0 ? "red" : "orange";
 		const precision = flt(price_list_rate, 2) % 1 != 0 ? 2 : 0;
 
@@ -127,7 +127,7 @@ erpnext.PointOfSale.ItemSelector = class {
 				data-item-code="${escape(item.item_code)}" data-serial-no="${escape(serial_no)}"
 				data-batch-no="${escape(batch_no)}" data-uom="${escape(stock_uom)}" data-start-date="${escape(item.start_date)}" 
 				data-end-date="${escape(item.end_date)}" data-discount-amount="${escape(item.discount_amount)}"
-				data-rate="${escape(price_list_rate || 0)}" data-mrp="${escape(price_list_rate || 0)}"
+				data-rate="${escape(price_list_rate || 0)}" data-mrp="${escape(price_list_rate || 0)}" data-tag="${escape(price_rule_tag || '')}"
 				title="${item.item_name}">
 
 				${get_item_image_html()}
@@ -246,6 +246,7 @@ erpnext.PointOfSale.ItemSelector = class {
 			let start_date= unescape($item.attr('data-start-date'));
 			let end_date = unescape($item.attr('data-end-date'));
 			let discount_amount = unescape($item.attr('data-discount-amount'));
+			let tag = unescape($item.attr('data-tag'));
 			// console.log(start_date, end_date, item_discount_amount)
 			// escape(undefined) returns "undefined" then unescape returns "undefined"
 			batch_no = batch_no === "undefined" ? undefined : batch_no;
@@ -261,7 +262,7 @@ erpnext.PointOfSale.ItemSelector = class {
 			me.events.item_selected({
 				field: 'qty',
 				value: "+1",
-				item: { item_code, batch_no, serial_no, uom, rate, mrp, title, start_date, end_date, discount_amount, update_rules: false},
+				item: { item_code, batch_no, serial_no, uom, rate, mrp, title, start_date, end_date, discount_amount, tag, update_rules: false},
 				item_quantity: 1
 			});
 			me.set_search_value('');

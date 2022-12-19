@@ -464,7 +464,8 @@ erpnext.PointOfSale.Controller = class {
                 update_paid_amount: () => this.update_paid_amount,
                 get_initial_paid_amount: () => this.initial_paid_amount,
                 set_initial_paid_amount: (paid_amount) => this.set_initial_paid_amount(paid_amount),
-                check_free_item_pricing_rules: () => this.check_free_item_pricing_rules()
+                check_free_item_pricing_rules: () => this.check_free_item_pricing_rules(),
+                update_additional_discount_on_tag: () => this.update_additional_discount_on_tag()
             }
         })
     }
@@ -673,7 +674,7 @@ erpnext.PointOfSale.Controller = class {
                                     () => me.item_selector.toggle_component(true),
                                     // () => console.log(me.frm.doc.items),
                                     () => me.cart.update_item_qty_(),
-                                    () => me.ignore_pricing_rule_on_return()
+                                    // () => me.ignore_pricing_rule_on_return()
                                 ])
                             });
                             // () => setTimeout(function(){me.cart.load_invoice()}, 5000),
@@ -707,7 +708,7 @@ erpnext.PointOfSale.Controller = class {
         })
     }
     ignore_pricing_rule_on_return(){
-        frappe.model.set_value('POS Invoice', this.frm.doc.name, 'ignore_pricing_rule', 1);
+        frappe.model.set_value('POS Invoice', this.frm.doc.name, 'ignore_pricing_rule', 0);
     }
     toggle_recent_order_list(show) {
         this.toggle_components(!show);
@@ -836,7 +837,7 @@ erpnext.PointOfSale.Controller = class {
 		try {
 			// let { field, value, item } = args;
             let {field, value, item, item_quantity} = args;
-            const {item_code, batch_no, serial_no, uom, rate, mrp, title, start_date, end_date, discount_amount, update_rules} = item;
+            const {item_code, batch_no, serial_no, uom, rate, mrp, title, start_date, end_date, discount_amount, tag, update_rules} = item;
 			item_row = this.get_item_from_frm(item);
 
 			const item_row_exists = !$.isEmptyObject(item_row);
@@ -858,6 +859,10 @@ erpnext.PointOfSale.Controller = class {
 					await frappe.model.set_value(item_row.doctype, item_row.name, field, value);
 					this.update_cart_html(item_row);
 				}
+                const me = this
+                setTimeout(function (){
+                    me.update_additional_discount_on_tag(item_row)
+                }, 1000)
                 this.insert_search_product_log(item_code);
 
 			} else {
@@ -890,20 +895,18 @@ erpnext.PointOfSale.Controller = class {
 
 				await this.trigger_new_item_events(item_row);
 
-                var today = new Date();
-                if(start_date !== undefined && end_date !== undefined && discount_amount !== undefined && today >= start_date && today <= end_date && this.frm.doc.ignore_pricing_rule == 0){
-                    await frappe.model.set_value("POS Invoice Item", item_row.child_docname, 'rate', (mrp-discount_amount));
-                }
-                else if(start_date !== undefined && end_date !== undefined && discount_amount !== undefined && today >= start_date && today <= end_date && this.frm.doc.ignore_pricing_rule == 1 && this.frm.doc.is_return == 1){
-                    await frappe.model.set_value("POS Invoice Item", item_row.child_docname, 'rate', (mrp-discount_amount));
-                }
-				this.update_cart_html(item_row);
 
+				this.update_cart_html(item_row);
+                this.update_item_tag(item_row, tag)
 				// if (this.item_details.$component.is(':visible'))
 				// 	this.edit_item_details_of(item_row);
                 //
 				// if (this.check_serial_batch_selection_needed(item_row) && !this.item_details.$component.is(':visible'))
 				// 	this.edit_item_details_of(item_row);
+                const me = this
+                setTimeout(function (){
+                    me.update_additional_discount_on_tag(item_row)
+                }, 500)
 
                 this.insert_search_product_log(item_code);
 			}
@@ -917,7 +920,18 @@ erpnext.PointOfSale.Controller = class {
 			return item_row;
 		}
 	}
+    async update_item_tag(item_row, tag){
+        frappe.model.set_value("POS Invoice Item", item_row.child_docname, 'price_rule_tag', tag)
+    }
 
+    update_additional_discount_on_tag(item_row=undefined){
+        const me = this
+        let additional_discount = me.apply_pricing_rule_on_tag(this.frm.doc)
+        if(additional_discount !== undefined){
+            me.cart.update_additional_discount(me.cart, {value: flt(additional_discount)}, me.frm, 'discount_amount');
+            me.cart.update_totals_section(me.frm);
+        }
+    }
     async update_paid_amount(){
         let payments = this.frm.doc.payments
         frappe.model.set_value(this.frm.doctype, this.frm.docname, 'paid_amount', this.base_rounded_total);
@@ -1109,6 +1123,7 @@ erpnext.PointOfSale.Controller = class {
                 frappe.model.clear_doc(doctype, name);
                 this.update_cart_html(current_item, true);
                 this.item_details.toggle_item_details_section(null);
+                this.update_additional_discount_on_tag()
                 frappe.dom.unfreeze();
             })
             .catch(e => console.log(e));
@@ -1287,5 +1302,19 @@ erpnext.PointOfSale.Controller = class {
                 frappe.model.set_value("POS Invoice Item", free_items[index]['docname'], 'rate', item.mrp)
             }
         })
+    }
+    apply_pricing_rule_on_tag(doc){
+        var discount_amount = 0
+        frappe.call({
+                method: 'bbb.bbb.pos_invoice.apply_pricing_rule_on_tag',
+                async:false,
+                args: {
+                    "doc": doc,
+                },
+                callback: function(r) {
+                    discount_amount = r.message
+                }
+            });
+        return discount_amount
     }
 };
