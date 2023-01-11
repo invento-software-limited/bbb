@@ -670,10 +670,11 @@ erpnext.PointOfSale.Controller = class {
 
                                 frappe.run_serially([
                                     () => me.cart.load_invoice(),
-                                    () => me.cart.load_pricing_rules(),
+                                    // () => me.reload_item_cart(me.frm),
+                                    // () => me.cart.load_pricing_rules(),
                                     () => me.item_selector.toggle_component(true),
                                     // () => console.log(me.frm.doc.items),
-                                    () => me.cart.update_item_qty_(),
+                                    // () => me.cart.update_item_qty_(),
                                     // () => me.ignore_pricing_rule_on_return()
                                 ])
                             });
@@ -1316,5 +1317,25 @@ erpnext.PointOfSale.Controller = class {
                 }
             });
         return discount_amount
+    }
+
+    reload_item_cart(frm){
+        let items = frm.doc.items;
+        let me = this;
+        frm.doc.items = [];
+
+        let cart_items_wrapper = $('.cart-items-section');
+        cart_items_wrapper.children().remove();
+        items.forEach(item => {
+            const new_item = { item_code: item.item_code, 'rate': item.rate, 'discount_amount': item.discount_amount, 'qty': item.qty};
+            const item_row = this.frm.add_child('items', new_item);
+            this.trigger_new_item_events(item_row)
+            me.update_cart_html(item_row)
+            frappe.model.set_value("POS Invoice Item", item_row.name, 'qty', item.qty * (-1))
+
+        });
+        frm.refresh_field('items');
+        console.log(frm)
+
     }
 };
