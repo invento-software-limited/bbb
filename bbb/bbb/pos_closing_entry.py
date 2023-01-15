@@ -2,6 +2,16 @@ import frappe
 from frappe.utils import flt, get_datetime
 
 def validate(doc, method):
+    total_closing_amount = 0
+    rounded_total = 0
+    link_invoices = doc.pos_transactions
+    for link_invoice in link_invoices:
+        pos_rounded_total = frappe.db.get_value('POS Invoice', link_invoice.pos_invoice, 'rounded_total')
+        rounded_total+= pos_rounded_total
+        
+    doc.rounded_total = rounded_total
+    
+    
     payment_reconciliation = doc.payment_reconciliation
     for payment in payment_reconciliation:
         one_thousand_taka_note = payment.one_thousand_taka_note if payment.one_thousand_taka_note else 0
@@ -28,8 +38,23 @@ def validate(doc, method):
 
         payment.total_amount = total_amount
         payment.withdrawal_amount = total_amount - payment.opening_amount
-
-
+        
+        if int(payment.expected_amount) > 0 and (int(payment.closing_amount) == int(payment.expected_amount)):
+            payment.closing_status = 'Matched'
+        elif int(payment.closing_amount) != int(payment.expected_amount):
+            payment.closing_status = 'Mismatched'
+        else:
+            payment.closing_status = ''
+            
+            
+        total_closing_amount += payment.closing_amount
+    
+    
+    if int(total_closing_amount) != int(doc.rounded_total):
+        frappe.msgprint('Closing Amount And Rounded Total Not Matched')
+    elif int(total_closing_amount) == int(doc.rounded_total):
+        frappe.msgprint('Closing Amount And Rounded Total Matched')
+        
 # Copyright (c) 2018, Frappe Technologies Pvt. Ltd. and contributors
 # For license information, please see license.txt
 
