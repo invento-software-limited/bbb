@@ -1249,7 +1249,7 @@ erpnext.PointOfSale.ItemCart = class {
             }
         }
 
-        $(".item_qty").unbind().change(function(){
+        $(".item_qty").on('change', function (){
             const item_qty_root = $(this);
             let item_qty = $(this).val();
 
@@ -1271,43 +1271,54 @@ erpnext.PointOfSale.ItemCart = class {
                         return
                     }
                     frappe.model.set_value("POS Invoice Item", docname, 'qty', item_qty)
-                    frm.refresh();
+                        .then(function (){
+                            if(frm.doc.is_return){
+                                frappe.call({
+                                    method: "bbb.bbb.controllers.utils.apply_item_pricing_rule",
+                                    args: {"return_against": frm.doc.return_against, 'item_code': item_code},
+                                    callback: (r) => {
+                                        let damaged_cost_div = item_qty_root.parent().siblings('div.item-row-damaged').children('')
+                                        let damaged_cost = damaged_cost_div.val();
+                                        if(damaged_cost > 0){
+                                            frappe.model.set_value("POS Invoice Item", docname, 'margin_type', r.message.margin_type)
+                                            frappe.model.set_value("POS Invoice Item", docname, 'discount_percentage', r.message.discount_percentage).then(function(){
+                                                let item_wise_cost = Math.round(damaged_cost / item_qty);
+                                                let total_damaged_cost = item_wise_cost * item_qty;
+                                                frappe.call({
+                                                    method: "bbb.bbb.controllers.utils.get_item_rate_discount",
+                                                    args: {"return_against": frm.doc.return_against, 'item_code': item_code},
+                                                    callback: (r) => {
+                                                        let item = r.message;
+                                                        if (item) {
+                                                            let new_rate = (item.rate || 0) + item_wise_cost;
+                                                            frappe.model.set_value("POS Invoice Item", docname, 'damaged_cost', (-1 * item_wise_cost));
+                                                            frappe.model.set_value("POS Invoice Item", docname, 'rate', new_rate);
+                                                            frappe.model.set_value("POS Invoice Item", docname, 'total_damaged_cost', total_damaged_cost);
 
-                    if(frm.doc.is_return){
-                        // frappe.call({
-                        //     method: "bbb.bbb.controllers.utils.apply_item_pricing_rule",
-                        //     async:false,
-                        //     args: {"return_against": frm.doc.return_against, 'item_code': item_code},
-                        //     callback: (r) => {
-                                let damaged_cost_div = item_qty_root.parent().siblings('div.item-row-damaged').children('');
-                                let damaged_cost = damaged_cost_div.val();
-                                if(damaged_cost > 0){
-                                    // frappe.model.set_value("POS Invoice Item", docname, 'margin_type', r.message.margin_type)
-                                    // frappe.model.set_value("POS Invoice Item", docname, 'discount_percentage', r.message.discount_percentage).then(function(){
-                                        let item_wise_cost = Math.round(damaged_cost / item_qty);
-                                        let total_damaged_cost = item_wise_cost * item_qty;
-                                        let item_rate_discount = me.get_item_rate_discount(frm.doc.return_against, item_code)
-                                        let new_rate = (item_rate_discount.rate || 0) + item_wise_cost;
-                                        frappe.model.set_value("POS Invoice Item", docname, 'damaged_cost', (-1 * item_wise_cost));
-                                        frappe.model.set_value("POS Invoice Item", docname, 'rate', new_rate);
-                                        frappe.model.set_value("POS Invoice Item", docname, 'total_damaged_cost', total_damaged_cost);
-                                        damaged_cost_div.val(total_damaged_cost);
-                                        me.update_item_cart_total_section(frm)
-                                        me.update_totals_section(frm)
-                                    // })
-                                }else {
-                                    // let item_rate_discount = me.get_item_rate_discount(frm.doc.return_against, item_code)
-                                    // frappe.model.set_value("POS Invoice Item", docname, 'rate', parseInt(item_rate_discount.rate))
+                                                        }
+                                                    }
+                                                })
+                                                damaged_cost_div.val(total_damaged_cost);
+                                                me.update_item_cart_total_section(frm)
+                                                me.update_totals_section(frm)
+                                                // console.log("Called Damage")
+                                                // me.events.update_additional_discount_on_tag()
+                                            })
+                                        }else {
+                                            frappe.model.set_value("POS Invoice Item", docname, 'margin_type', r.message.margin_type)
+                                            frappe.model.set_value("POS Invoice Item", docname, 'discount_percentage', r.message.discount_percentage)
 
-                                    // frappe.model.set_value("POS Invoice Item", docname, 'margin_type', r.message.margin_type)
-                                    // frappe.model.set_value("POS Invoice Item", docname, 'discount_percentage', r.message.discount_percentage)
+                                            // console.log("Called Else")
+                                            // me.events.update_additional_discount_on_tag()
+                                        }
 
-                                }
-                                console.log(me.events.get_frm())
-                            // }
-                        // })
-                    }
-                    me.events.update_additional_discount_on_tag()
+
+                                        // console.log(frm.doc.items)
+                                    }
+                                })
+                            }
+                            me.events.update_additional_discount_on_tag()
+                        })
 
                 }else{
                     const message = __('Item quantity must be a number');
@@ -1321,7 +1332,7 @@ erpnext.PointOfSale.ItemCart = class {
             }
         });
 
-        $(".damaged_cost").unbind().change(function(){
+        $(".damaged_cost").on('change', function(){
             let damaged_cost =  parseInt($(this).val());
             if(isNaN(damaged_cost)){
                 $(this).val(0)
@@ -1334,12 +1345,22 @@ erpnext.PointOfSale.ItemCart = class {
                 let item_wise_cost = Math.round(damaged_cost / item_qty);
                 let total_damaged_cost = item_wise_cost * item_qty;
                 let data_item_code = $(this).attr('data-item-code');
-                let item_rate_discount = me.get_item_rate_discount(frm.doc.return_against, data_item_code)
-                let new_rate = (item_rate_discount.rate || 0) + item_wise_cost;
-                frappe.model.set_value("POS Invoice Item", docname, 'rate', new_rate);
-                frappe.model.set_value("POS Invoice Item", docname, 'damaged_cost', (-1 * item_wise_cost));
-                frappe.model.set_value("POS Invoice Item", docname, 'total_damaged_cost', total_damaged_cost);
-                frm.refresh()
+
+                frappe.call({
+                    method: "bbb.bbb.controllers.utils.get_item_rate_discount",
+                    args: {"return_against": frm.doc.return_against, 'item_code': data_item_code},
+                    callback: (r) => {
+                        let item = r.message;
+                        if (item) {
+                            let new_rate = (item.rate || 0) + item_wise_cost;
+                            frappe.model.set_value("POS Invoice Item", docname, 'damaged_cost', (-1 * item_wise_cost));
+                            frappe.model.set_value("POS Invoice Item", docname, 'rate', new_rate);
+                            frappe.model.set_value("POS Invoice Item", docname, 'total_damaged_cost', total_damaged_cost);
+                        } else {
+                            $(".damaged_cost").val(0);
+                        }
+                    }
+                })
 
                 $(this).val(total_damaged_cost);
                 me.update_item_cart_total_section(frm)
