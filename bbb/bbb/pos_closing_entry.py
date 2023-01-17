@@ -51,9 +51,9 @@ def validate(doc, method):
     
     
     if int(total_closing_amount) != int(doc.rounded_total):
-        frappe.msgprint('Closing Amount And Rounded Total Not Matched')
+        frappe.msgprint('Closing Amount And Rounded Total Not Matched', indicator="red", title="Warning")
     elif int(total_closing_amount) == int(doc.rounded_total):
-        frappe.msgprint('Closing Amount And Rounded Total Matched')
+        frappe.msgprint('Closing Amount And Rounded Total Matched', indicator="green")
         
 # Copyright (c) 2018, Frappe Technologies Pvt. Ltd. and contributors
 # For license information, please see license.txt
