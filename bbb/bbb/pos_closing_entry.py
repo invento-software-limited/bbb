@@ -67,7 +67,7 @@ def get_pos_invoices(start, end, pos_profile, user):
 	from
 		`tabPOS Invoice`
 	where
-		owner = %s and docstatus = 1 and pos_profile = %s and ifnull(consolidated_invoice,'') = '' order by posting_date asc
+		owner = %s and docstatus = 1 and pos_profile = %s and ifnull(consolidated_invoice,'') = '' order by timestamp asc
 	""",
 		(user, pos_profile),
 		as_dict=1,
