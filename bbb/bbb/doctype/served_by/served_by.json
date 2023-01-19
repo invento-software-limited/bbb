@@ -8,6 +8,7 @@
  "editable_grid": 1,
  "engine": "InnoDB",
  "field_order": [
+  "disabled",
   "served_by_name",
   "served_by_id",
   "mobile_number",
@@ -55,12 +56,17 @@
    "fieldtype": "Data",
    "in_list_view": 1,
    "label": "Mobile Number"
+  },
+  {
+   "default": "0",
+   "fieldname": "disabled",
+   "fieldtype": "Check",
+   "label": "Disabled"
   }
  ],
  "index_web_pages_for_search": 1,
- "is_submittable": 1,
  "links": [],
- "modified": "2022-05-10 12:57:40.558688",
+ "modified": "2023-01-19 14:04:50.754781",
  "modified_by": "Administrator",
  "module": "Bbb",
  "name": "Served By",
