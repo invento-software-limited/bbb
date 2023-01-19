@@ -790,7 +790,7 @@ def served_by_query(doctype, txt, searchfield, start, page_len, filters):
     searchfields = " or ".join(field + " like %(txt)s" for field in searchfields)
 
     return frappe.db.sql("""select {fields} from `tabServed By`
-		where docstatus < 2
+		where disabled=0
 			and ({scond})
 			{fcond} {mcond}
 		order by
