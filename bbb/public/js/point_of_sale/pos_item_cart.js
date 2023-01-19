@@ -535,14 +535,29 @@ erpnext.PointOfSale.ItemCart = class {
                         frappe.dom.freeze();
                         const frm = me.events.get_frm();
                         frappe.model.set_value(frm.doc.doctype, frm.doc.name, 'served_by', this.value);
-                        frm.script_manager.trigger('served_by', frm.doc.doctype, frm.doc.name);
-                        frappe.run_serially([
-                            // () => me.check_out_validation(true),
-                            () => me.served_by_info = {'served_by': this.value},
-                            // () => me.events.set_cache_data({'pos_served_by': this.value}),
-                            () => me.update_served_by_section(),
-                            () => frappe.dom.unfreeze()
-                        ]);
+                        frappe.db.get_value('Served By', {'served_by_name': this.value}, 'disabled')
+                        .then(r => {
+                            if(r.message.disabled == 0){
+                                frm.script_manager.trigger('served_by', frm.doc.doctype, frm.doc.name);
+                                frappe.run_serially([
+                                    // () => me.check_out_validation(true),
+                                    () => me.served_by_info = {'served_by': this.value},
+                                    // () => me.events.set_cache_data({'pos_served_by': this.value}),
+                                    () => me.update_served_by_section(),
+                                    () => frappe.dom.unfreeze()
+                                ]);
+                            }else{
+                                frappe.msgprint({
+                                    title: __('Warning'),
+                                    indicator: 'red',
+                                    message: __('Disabled users cannot be added')
+                                });
+                                frappe.model.set_value(frm.doc.doctype, frm.doc.name, 'served_by', '');
+                                frappe.dom.unfreeze()
+                            }
+                        })
+                        
+
                     }
                 },
             },
