@@ -159,8 +159,10 @@ def generate_table_data(filters):
         invoice_item_total = data.get(invoice_name)
         if invoice_item_total is None:
             invoice_item_total = data.get(result['return_against'])
-
-        time_obj = datetime.strptime(f"{result['posting_time']}", '%H:%M:%S.%f').strftime("%I:%M %p")
+        try:
+            time_obj = datetime.strptime(f"{result['posting_time']}", '%H:%M:%S.%f').strftime("%I:%M %p")
+        except:
+            time_obj = datetime.strptime(f"{result['posting_time']}", '%H:%M:%S').strftime("%I:%M %p")
         style = 'style="background:#ffff0085"' if result['special_discount'] > 0 else ''
         total_amount = result['rounded_total'] if invoice_item_total['total_return_amount'] == '' else invoice_item_total['total_return_amount'] + result['rounded_total']
         total = result['rounded_total']
@@ -574,7 +576,10 @@ def export_excel(filters):
         if invoice_item_total is None:
             invoice_item_total = data.get(result['return_against'])
 
-        time_obj = datetime.strptime(f"{result['posting_time']}", '%H:%M:%S.%f').strftime("%I:%M %p")
+        try:
+            time_obj = datetime.strptime(f"{result['posting_time']}", '%H:%M:%S.%f').strftime("%I:%M %p")
+        except:
+            time_obj = datetime.strptime(f"{result['posting_time']}", '%H:%M:%S').strftime("%I:%M %p")
         style = 'style="background:#ffff0085"' if result['special_discount'] > 0 else ''
 
         row_count = index + extra_row + 1
@@ -1232,8 +1237,10 @@ def generate_excel_data(**filters):
         invoice_item_total = data.get(invoice_name)
         if invoice_item_total is None:
             invoice_item_total = data.get(sales_data[invoice_name][0]['return_against'])
-
-        time_obj = datetime.strptime(f"{res['posting_time']}", '%H:%M:%S.%f').strftime("%I:%M %p")
+        try:
+            time_obj = datetime.strptime(f"{res['posting_time']}", '%H:%M:%S.%f').strftime("%I:%M %p")
+        except:
+            time_obj = datetime.strptime(f"{res['posting_time']}", '%H:%M:%S').strftime("%I:%M %p")
         invoice_with_customer_info = invoice_name + '\n' + res['customer_name'] + '(' + res[
             'customer_mobile_number'] + ')' + '\n' + str(res['posting_date']) + ' ' + str(time_obj)
         ws.cell(row=row_count, column=1).value = index + 1
