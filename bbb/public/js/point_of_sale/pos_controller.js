@@ -658,24 +658,24 @@ erpnext.PointOfSale.Controller = class {
                     frappe.db.get_doc('POS Invoice', name).then((doc) => {
                         this.make_return_invoice(doc)
                             .then(function (){
-                                // setTimeout(function (){
-                                //     me.cart.load_invoice()
-                                // }, 1000);
-                                // setTimeout(function (){
-                                //     me.item_selector.toggle_component(true)
-                                // }, 1400);
+                                setTimeout(function (){
+                                    me.cart.load_invoice()
+                                }, 1000);
+                                setTimeout(function (){
+                                    me.item_selector.toggle_component(true)
+                                }, 1400);
 
 
 
 
-                                frappe.run_serially([
-                                    () => me.cart.load_invoice(),
-                                    () => me.cart.load_pricing_rules(),
-                                    () => me.item_selector.toggle_component(true),
-                                    // () => console.log(me.frm.doc.items),
-                                    () => me.cart.update_item_qty_(),
-                                    // () => me.ignore_pricing_rule_on_return()
-                                ])
+                                // frappe.run_serially([
+                                //     () => me.cart.load_invoice(),
+                                //     () => me.cart.load_pricing_rules(),
+                                //     () => me.item_selector.toggle_component(true),
+                                //     // () => console.log(me.frm.doc.items),
+                                //     () => me.cart.update_item_qty_(),
+                                //     // () => me.ignore_pricing_rule_on_return()
+                                // ])
                             });
                             // () => setTimeout(function(){me.cart.load_invoice()}, 5000),
                             // () => setTimeout(function(){me.item_selector.toggle_component(true)}, 5100),
@@ -804,6 +804,7 @@ erpnext.PointOfSale.Controller = class {
     }
 
     async make_return_invoice(doc) {
+        const me = this;
         frappe.dom.freeze();
         this.frm = this.get_new_frm(this.frm);
         this.frm.doc.items = [];
@@ -814,8 +815,13 @@ erpnext.PointOfSale.Controller = class {
                 'target_doc': this.frm.doc
             }
         });
-        frappe.model.sync(res.message);
-        await this.set_pos_profile_data();
+        setTimeout(()=>{
+            frappe.model.sync(res.message);
+            me.set_pos_profile_data();
+            frappe.dom.unfreeze();
+        }, 800);
+        // frappe.model.sync(res.message);
+        // await this.set_pos_profile_data();
         frappe.dom.unfreeze();
     }
 
