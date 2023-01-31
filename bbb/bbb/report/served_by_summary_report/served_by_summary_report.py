@@ -89,7 +89,7 @@ def get_invoice_data(filters):
             data[result.get('served_by')] = result
 
     pos_wise_list_data = []
-    print(data)
+
     for key, invoice_data in data.items():
         total_discount = float(invoice_data['discount']) + float(invoice_data['special_discount'])
         invoice_data['basket_value'] = (
@@ -100,7 +100,7 @@ def get_invoice_data(filters):
             float("{:.2f}".format((total_discount / invoice_data['mrp_total']) * 100)))
         pos_wise_list_data.append(invoice_data)
 
-    sorted_list_of_dict = sorted(pos_wise_list_data, key=lambda d: d['total_item_qty'])
+    sorted_list_of_dict = sorted(pos_wise_list_data, key=lambda d: d['total_sell_final'], reverse=True)
 
     for index in range(len(sorted_list_of_dict)):
         sorted_list_of_dict[index]['ranking'] = str(index + 1)

@@ -29,5 +29,14 @@ frappe.query_reports["Served By Summary Report"] = {
 			"reqd": 1,
 			"width": "60px"
 		},
+		{
+			"fieldname":"company",
+			"label": __("Company"),
+			"fieldtype": "Link",
+			"options": "Company",
+			"default": frappe.defaults.get_default("Company"),
+			"reqd": 1,
+			"width": "60px"
+		},
 	]
 };
