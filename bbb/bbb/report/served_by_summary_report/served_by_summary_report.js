@@ -30,6 +30,22 @@ frappe.query_reports["Served By Summary Report"] = {
 			"width": "60px"
 		},
 		{
+			"fieldname":"outlet",
+			"label": __("Outlet"),
+			"fieldtype": "MultiSelectList",
+			get_data: function(txt) {
+				return frappe.db.get_link_options('POS Profile', txt);
+			},
+			"width": "60px"
+		},
+		{
+			"fieldname":"all_outlet",
+			"label": __("All Outlet"),
+			"fieldtype": "Check",
+			"default": 1,
+			"width": "60px"
+		},
+		{
 			"fieldname":"company",
 			"label": __("Company"),
 			"fieldtype": "Link",

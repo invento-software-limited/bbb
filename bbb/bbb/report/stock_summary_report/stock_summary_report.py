@@ -9,7 +9,7 @@ def execute(filters=None):
     if not filters:
         filters = {}
     columns = get_columns()
-    stock = get_total_stock(filters)
+    stock = get_total_stock(filters, columns)
 
     return columns, stock
 
@@ -34,16 +34,28 @@ def get_columns():
     return columns
 
 
-def get_total_stock(filters):
+def get_total_stock(filters, columns):
     conditions = ""
-    columns = ""
-
+    warehouse_conditions = []
     # if filters.get("group_by") == "Warehouse":
     #     if filters.get("company"):
     #         conditions += " AND warehouse.company = %s" % frappe.db.escape(filters.get("company"), percent=False)
     #
     #     conditions += " GROUP BY ledger.warehouse, item.item_code"
     #     columns += "'' as company, ledger.warehouse"
+
+
+    if filters.get('all_warehouse'):
+        pass
+    elif filters.get('warehouse'):
+        warehouse_list = filters.get('warehouse')
+        for warehouse in warehouse_list:
+            warehouse_conditions.append(" ledger.warehouse = '%s'" % warehouse)
+            columns.append({"label": _(warehouse), "fieldname": warehouse, "fieldtype": "Int", "width": 120, "options": "Warehouse"},)
+    if warehouse_conditions:
+        warehouse_conditions = " or ".join(warehouse_conditions)
+        warehouse_conditions = ' and (' + warehouse_conditions + ')'
+        conditions += warehouse_conditions
     if filters.get('item_group'):
         conditions += " and item.item_group = '%s'" % filters.get('item_group')
 
@@ -59,6 +71,9 @@ def get_total_stock(filters):
     elif filters.get("group_by") == "Brand":
         conditions += " GROUP BY item.brand, item.item_code"
 
+
+    print(conditions)
+
     item_data = frappe.db.sql("""
 			SELECT
 				item.item_code,
@@ -66,7 +81,8 @@ def get_total_stock(filters):
 				item.brand,
 				item.item_group,
 				item.standard_rate as mrp,
-				sum(ledger.actual_qty) as actual_qty
+				sum(ledger.actual_qty) as actual_qty,
+                ledger.name
 			FROM
 				`tabBin` AS ledger
 			INNER JOIN `tabItem` AS item
@@ -76,5 +92,10 @@ def get_total_stock(filters):
 
     for index, data in enumerate(item_data):
         item_data[index]['total_value'] = item_data[index]['actual_qty'] * item_data[index]['mrp']
-    print(item_data)
+        warehouse_list = filters.get('warehouse')
+        for warehouse in warehouse_list:
+            actual_qty = frappe.db.get_value('Bin', {'warehouse': warehouse, 'item_code': item_data[index]['item_code']}, 'actual_qty')
+            item_data[index][warehouse] = str(actual_qty) if actual_qty else '0.0'
+
+
     return item_data

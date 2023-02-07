@@ -28,7 +28,22 @@ frappe.query_reports["Stock Summary Report"] = {
             "width": "80",
             "options": "Brand",
             "depends_on": "eval: doc.group_by == 'Brand'",
-        },
+        },		{
+			"fieldname":"warehouse",
+			"label": __("Warehouse"),
+			"fieldtype": "MultiSelectList",
+			get_data: function(txt) {
+				return frappe.db.get_link_options('Warehouse', txt);
+			},
+			"width": "60px"
+		},
+		{
+			"fieldname":"all_warehouse",
+			"label": __("All Warehouse"),
+			"fieldtype": "Check",
+			"default": 0,
+			"width": "60px"
+		},
         {
             "fieldname": "company",
             "label": __("Company"),

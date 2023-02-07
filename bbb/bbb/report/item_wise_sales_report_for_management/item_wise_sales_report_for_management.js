@@ -69,5 +69,31 @@ frappe.query_reports["Item Wise Sales Report For Management"] = {
 			"reqd": 1,
 			"width": "60px"
 		},
+		{
+			"fieldname":"outlet",
+			"label": __("Outlet"),
+			"fieldtype": "MultiSelectList",
+			"get_data": function(txt) {
+				return frappe.db.get_link_options('POS Profile', txt);
+			},
+			"width": "60px",
+			"default":"Baily Road"
+		},
+		{
+			"fieldname":"all_outlet",
+			"label": __("All Outlet"),
+			"fieldtype": "Check",
+			"default": 0,
+			"width": "60px"
+		},
+		{
+			"fieldname":"company",
+			"label": __("Company"),
+			"fieldtype": "Link",
+			"options": "Company",
+			"default": frappe.defaults.get_default("Company"),
+			"reqd": 1,
+			"width": "60px"
+		},
 	]
 };

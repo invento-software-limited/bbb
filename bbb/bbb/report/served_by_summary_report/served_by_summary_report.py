@@ -32,16 +32,27 @@ def get_columns():
 
 
 def get_conditions(filters):
-    conditions = []
 
+    conditions = []
+    pos_conditions = []
     if filters.get("from_date"):
         conditions.append("sales_invoice.posting_date >= '%s'" % filters.get("from_date"))
 
     if filters.get("to_date"):
         conditions.append("sales_invoice.posting_date <= '%s'" % filters.get("to_date"))
 
+    if filters.get("all_outlet"):
+        pass
+    elif filters.get('outlet'):
+        outlet_list = filters.get('outlet')
+        for outlet in outlet_list:
+            pos_conditions.append("sales_invoice.pos_profile = '%s'" % outlet)
     if conditions:
         conditions = " and ".join(conditions)
+    if pos_conditions:
+        pos_conditions = " or ".join(pos_conditions)
+        conditions += "and (" + pos_conditions + ")"
+
     return conditions
 
 
@@ -96,8 +107,11 @@ def get_invoice_data(filters):
                 float(invoice_data['rounded_total']) / float(invoice_data['number_of_invoice']))
         invoice_data['total_discount'] = total_discount
         invoice_data['total_sell_final'] = invoice_data['rounded_total']
-        invoice_data['discount_percentage'] = str(
-            float("{:.2f}".format((total_discount / invoice_data['mrp_total']) * 100)))
+        try:
+            invoice_data['discount_percentage'] = str(
+                float("{:.2f}".format((total_discount / invoice_data['mrp_total']) * 100)))
+        except:
+            invoice_data['discount_percentage'] = '0.00'
         pos_wise_list_data.append(invoice_data)
 
     sorted_list_of_dict = sorted(pos_wise_list_data, key=lambda d: d['total_sell_final'], reverse=True)
