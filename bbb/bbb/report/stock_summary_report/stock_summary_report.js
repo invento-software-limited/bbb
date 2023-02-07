@@ -5,6 +5,23 @@
 frappe.query_reports["Stock Summary Report"] = {
     "filters": [
         {
+              "fieldname":"from_date",
+              "label": __("Date"),
+              "fieldtype": "Date",
+              "width": "80",
+              "reqd": 1,
+              "default": frappe.datetime.get_today(),
+              // "default": frappe.datetime.add_months(frappe.datetime.get_today(), -1),
+        },
+        // {
+        //       "fieldname":"to_date",
+        //       "label": __("To Date"),
+        //       "fieldtype": "Date",
+        //       "width": "80",
+        //       "reqd": 1,
+        //       "default": frappe.datetime.get_today()
+        // },
+        {
             "fieldname": "group_by",
             "label": __("Group By"),
             "fieldtype": "Select",
@@ -32,7 +49,7 @@ frappe.query_reports["Stock Summary Report"] = {
 			"fieldname":"warehouse",
 			"label": __("Warehouse"),
 			"fieldtype": "MultiSelectList",
-			get_data: function(txt) {
+			"get_data" : function(txt) {
 				return frappe.db.get_link_options('Warehouse', txt);
 			},
 			"width": "60px"
