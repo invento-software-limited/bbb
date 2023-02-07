@@ -43,8 +43,6 @@ def get_columns(filters):
          "convertible": "rate", "options": "currency"},
         {"label": _("Sell Value"), "fieldname": "sell_value", "fieldtype": "Currency", "width": 90,
          "convertible": "rate", "options": "currency"},
-        {"label": _("Profit/Loss"), "fieldname": "profit_loss", "fieldtype": "Currency", "width": 100,
-         "convertible": "rate", "options": "currency"},
     ]
 
     return columns
