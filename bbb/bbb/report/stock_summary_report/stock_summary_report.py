@@ -116,7 +116,7 @@ def get_columns(filters):
         },
         {
             "label": _("MRP"),
-            "fieldname": "buying_rate",
+            "fieldname": "standard_rate",
             "fieldtype": "Currency",
             "width": 100,
             "options": "currency",
@@ -325,7 +325,7 @@ def get_item_details(items, sle, filters):
 	res = frappe.db.sql(
 		"""
 		select
-			item.name, item.item_name, item.description, item.item_group, item.brand, item.stock_uom, item.buying_rate %s
+			item.name, item.item_name, item.description, item.item_group, item.brand, item.stock_uom, item.standard_rate %s
 		from
 			`tabItem` item
 			%s
