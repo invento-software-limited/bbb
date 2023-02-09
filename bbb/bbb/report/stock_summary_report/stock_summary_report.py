@@ -77,10 +77,12 @@ def execute(filters=None):
             index = next(
                 (index for (index, d) in enumerate(data) if d['item_code'] == item_code), None)
 
+            report_data.update(item_map[item])
             if index is not None:
+                standard_rate = data[index]['standard_rate']
 
                 data[index]['bal_qty'] = float(data[index]['bal_qty']) + qty_dict['bal_qty']
-                data[index]['bal_val'] = float(data[index]['bal_val']) + qty_dict['bal_val']
+                data[index]['total_value'] = data[index]['total_value'] +  (standard_rate * qty_dict['bal_qty'])
                 data[index][warehouse] = qty_dict['bal_qty']
             else:
                 for wh in warehouse_list:
@@ -88,9 +90,11 @@ def execute(filters=None):
                         report_data[wh] = '0'
                     except:
                         report_data[wh.warehouse_name] = '0'
-                report_data.update(item_map[item])
+
+
                 report_data.update(qty_dict)
                 report_data[warehouse] = qty_dict['bal_qty']
+                report_data['total_value'] = report_data['standard_rate'] * qty_dict['bal_qty']
                 data.append(report_data)
     # add_additional_uom_columns(columns, data, include_uom, conversion_factors)
 
@@ -123,7 +127,7 @@ def get_columns(filters):
         },
         {
             "label": _("Total Value"),
-            "fieldname": "bal_val",
+            "fieldname": "total_value",
             "fieldtype": "Currency",
             "width": 100,
             "options": "currency",
