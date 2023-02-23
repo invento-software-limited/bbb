@@ -392,7 +392,6 @@ def apply_pricing_rule_on_tag(doc):
         values,
         as_dict=1,
     )
-    print("Pricing Rules 1", pricing_rules)
     if pricing_rules:
         total_amount = 0
         total_qty = 0
@@ -407,11 +406,15 @@ def apply_pricing_rule_on_tag(doc):
                 total_qty += cint(item.get('qty'))
 
         pricing_rules = filter_pricing_rules_for_qty_amount(total_qty, total_amount, pricing_rules)
-
+        rules_name_list = []
+        tag_name_list = []
         for d in pricing_rules:
             if d.price_or_product_discount == "Price":
                 discount_amount += calculate_discount_amount(doc, d)
-        return discount_amount
+                rules_name_list.append(d.title)
+                tag_name_list.append(d.tag)
+        return {'discount_amount': discount_amount, 'rules_name_list': rules_name_list, 'tag_name_list': tag_name_list}
+
             # if d.apply_discount_on:
             # 	doc.set("apply_discount_on", d.apply_discount_on)
             # 	doc.set("additional_discount_percentage", None)

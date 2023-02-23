@@ -30,6 +30,10 @@ def search_by_term(search_term, warehouse, price_list):
 				"stock_uom",
 				"image as item_image",
 				"is_stock_item",
+				"start_date",
+				"end_date",
+				"discount_amount",
+				"price_rule_tag"
 			],
 			as_dict=1,
 		)

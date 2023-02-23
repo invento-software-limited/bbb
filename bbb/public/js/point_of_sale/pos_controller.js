@@ -264,7 +264,7 @@ erpnext.PointOfSale.Controller = class {
                         {% endfor %}
                     {% else %}
                         <div class="mt-2 mb-2 text-center">
-                            <span class="text-md-center">Item Not Found!</span>			
+                            <span class="text-md-center">Item Not Found!</span>
                         </div>
                     {% endif %}
                 </div>`;
@@ -884,7 +884,7 @@ erpnext.PointOfSale.Controller = class {
 					return;
 
 				// const new_item = { item_code, batch_no, rate, [field]: value };
-				const new_item = { item_code, batch_no, rate, [field]: 1 };
+				const new_item = { item_code, batch_no, rate, tag, [field]: 1 };
 
 				if (serial_no) {
 					await this.check_serial_no_availablilty(item_code, this.frm.doc.set_warehouse, serial_no);
@@ -903,7 +903,8 @@ erpnext.PointOfSale.Controller = class {
 
 
 				this.update_cart_html(item_row);
-                this.update_item_tag(item_row, tag)
+                let actual_tag_name = tag.split('INV').join(' ');
+                this.update_item_tag(item_row, actual_tag_name)
 				// if (this.item_details.$component.is(':visible'))
 				// 	this.edit_item_details_of(item_row);
                 //
@@ -932,8 +933,15 @@ erpnext.PointOfSale.Controller = class {
 
     update_additional_discount_on_tag(item_row=undefined){
         const me = this
-        let additional_discount = me.apply_pricing_rule_on_tag(this.frm.doc)
+        let res= me.apply_pricing_rule_on_tag(this.frm.doc)
+        let additional_discount = (parseFloat(res.discount_amount)).toFixed(2)
+        let tag_name_list = res.tag_name_list
+        let rules_name_list = res.rules_name_list
         if(additional_discount !== undefined){
+            let tag_name = tag_name_list.join(',');
+            let rules_name = rules_name_list.join(',');
+            frappe.model.set_value('POS Invoice', me.frm.docname, 'additional_discount_tag_name', tag_name)
+            frappe.model.set_value('POS Invoice', me.frm.docname, 'additional_discount_pricing_rule_name', rules_name)
             me.cart.update_additional_discount(me.cart, {value: flt(additional_discount)}, me.frm, 'discount_amount');
             me.cart.update_totals_section(me.frm);
         }
@@ -1311,6 +1319,8 @@ erpnext.PointOfSale.Controller = class {
     }
     apply_pricing_rule_on_tag(doc){
         var discount_amount = 0
+        var tag_name_list = undefined
+        var rules_name_list = undefined
         frappe.call({
                 method: 'bbb.bbb.pos_invoice.apply_pricing_rule_on_tag',
                 async:false,
@@ -1318,10 +1328,14 @@ erpnext.PointOfSale.Controller = class {
                     "doc": doc,
                 },
                 callback: function(r) {
-                    discount_amount = r.message
+                    let res = r.message
+                    discount_amount = res.discount_amount
+                    tag_name_list = res.tag_name_list
+                    rules_name_list = res.rules_name_list
+
                 }
             });
-        return discount_amount
+        return {discount_amount, tag_name_list, rules_name_list}
     }
 
     reload_item_cart(frm){

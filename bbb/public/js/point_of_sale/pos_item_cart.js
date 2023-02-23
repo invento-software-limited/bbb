@@ -556,7 +556,7 @@ erpnext.PointOfSale.ItemCart = class {
                                 frappe.dom.unfreeze()
                             }
                         })
-                        
+
 
                     }
                 },
@@ -664,25 +664,25 @@ erpnext.PointOfSale.ItemCart = class {
 <!--                            </li>-->
                             <li>
                                 <a class="grey-link dropdown-item" href="#" id="reset_cart">
-                    
+
                                     <span class="menu-item-label" data-label="Reset Cart"><span class="alt-underline">R</span>eset Cart</span>
                                 </a>
                             </li>
                             <li>
                                 <a class="grey-link dropdown-item toggle_recent_order-1" href="#" id="toggle_recent_order">
-                    
+
                                     <span class="menu-item-label" data-label="Toggle Sidebar"><span class="alt-underline">T</span>oggle Recent Orders</span>
                                 </a>
                             </li>
                             <li>
                                 <a class="grey-link dropdown-item" href="#" id="save_draft_invoice">
-                    
+
                                     <span class="menu-item-label" data-label="Toggle Sidebar"><span class="alt-underline">S</span>ave as Draft</span>
                                 </a>
                             </li>
                             <li>
                                 <a class="grey-link dropdown-item" href="#" id="close_pos">
-                    
+
                                     <span class="menu-item-label" data-label="Toggle Sidebar"><span class="alt-underline">C</span>lose the POS</span>
                                 </a>
                             </li>
@@ -1159,9 +1159,13 @@ erpnext.PointOfSale.ItemCart = class {
             )
             $item_to_update = this.get_cart_item(item_data);
         }
+        let style = ""
+        if(item_data.tag === "NamINVMatroINVDam"){
+            style = "background-color:#7fffd4"
+        }
 
         $item_to_update.html(
-            `<div class="item-name-desc">
+            `<div class="item-name-desc" style="${style}">
                 <div class="item-image-name-dec">
 			        <div class="item-image" docname="${item_data.name}">
 						<img
@@ -1227,7 +1231,7 @@ erpnext.PointOfSale.ItemCart = class {
 					<div class="item-row-qty"><!--<span>${item_data.qty || 0}</span>-->
 					<input class="form-control item_qty" type="text" data-tag="${item_data.price_rule_tag}"data-rate="${item_data.rate || 0}" value="${item_data.qty || 0}" item_code="${item_data.item_code}" docname="${item_data.name}" style="width: 50px;text-align: center;" free_item="${item_data.free_item_rules || 'undefined'}">
 					</div>
-					
+
 					<!--<div class="item-row-damaged-cost">
 					<input class="form-control damaged-cost" type="text" value="${item_data.qty || 0}" item_code="${item_data.item_code}" docname="${item_data.name}" style="width: 50px;text-align: center;">
 					</div> -->

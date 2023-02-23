@@ -26,7 +26,7 @@ erpnext.PointOfSale.ItemSelector = class {
 				<div class="filter-section">
 <!--					<div class="label">${__(this.pos_profile)}</div>-->
 <!--					<div class="label"><span class="indicator-pill whitespace-nowrap blue"><span>${this.pos_profile}</span></span></div>-->
-					
+
 					<div class="search-field"></div>
 					<div class="item-group-field"></div>
 				</div>
@@ -120,14 +120,19 @@ erpnext.PointOfSale.ItemSelector = class {
 <!--									<span class="indicator-pill whitespace-nowrap ${indicator_color}">${qty_to_display}</span>-->
 								<span class="indicator-pill whitespace-nowrap ${indicator_color}" style="height:17px"></span>
 							</div>`;
-			
+
 		}
+		let tag = null
+		if(price_rule_tag){
+			tag = price_rule_tag.split(' ').join('INV');
+		}
+
 		return (
 			`<div class="item-wrapper"
 				data-item-code="${escape(item.item_code)}" data-serial-no="${escape(serial_no)}"
-				data-batch-no="${escape(batch_no)}" data-uom="${escape(stock_uom)}" data-start-date="${escape(item.start_date)}" 
+				data-batch-no="${escape(batch_no)}" data-uom="${escape(stock_uom)}" data-start-date="${escape(item.start_date)}"
 				data-end-date="${escape(item.end_date)}" data-discount-amount="${escape(item.discount_amount)}"
-				data-rate="${escape(price_list_rate || 0)}" data-mrp="${escape(price_list_rate || 0)}" data-tag="${escape(price_rule_tag || '')}"
+				data-rate="${escape(price_list_rate || 0)}" data-mrp="${escape(price_list_rate || 0)}" data-tag="${escape(tag || '')}"
 				title="${item.item_name}">
 
 				${get_item_image_html()}
@@ -246,7 +251,7 @@ erpnext.PointOfSale.ItemSelector = class {
 			let start_date= unescape($item.attr('data-start-date'));
 			let end_date = unescape($item.attr('data-end-date'));
 			let discount_amount = unescape($item.attr('data-discount-amount'));
-			let tag = unescape($item.attr('data-tag'));
+			let tag = $item.attr('data-tag');
 			// console.log(start_date, end_date, item_discount_amount)
 			// escape(undefined) returns "undefined" then unescape returns "undefined"
 			batch_no = batch_no === "undefined" ? undefined : batch_no;
@@ -258,7 +263,7 @@ erpnext.PointOfSale.ItemSelector = class {
 			start_date = start_date === "undefined" ? undefined : new Date(start_date);
 			end_date = end_date === "undefined" ? undefined : new Date(end_date);
 			discount_amount = discount_amount === "undefined" ? undefined : discount_amount;
-
+			tag = tag === "undefined" ? undefined : tag;
 			me.events.item_selected({
 				field: 'qty',
 				value: "+1",
