@@ -198,7 +198,11 @@ def get_invoice_data(filters):
         invoice_data['sell_include_vat'] = invoice_data['rounded_total']
         invoice_data['sell_exclude_vat'] = invoice_data['net_total']
         invoice_data['profit_loss'] = invoice_data['net_total'] - invoice_data['buying_total']
-        invoice_data['discount_percentage'] = str(
-            float("{:.2f}".format((total_discount / invoice_data['mrp_total']) * 100)))
-        pos_wise_list_data.append(invoice_data)
+        try:
+            invoice_data['discount_percentage'] = str(
+                float("{:.2f}".format((total_discount / invoice_data['mrp_total']) * 100)))
+            pos_wise_list_data.append(invoice_data)
+        except:
+            invoice_data['discount_percentage'] = 0
+            pos_wise_list_data.append(invoice_data)
     return pos_wise_list_data
