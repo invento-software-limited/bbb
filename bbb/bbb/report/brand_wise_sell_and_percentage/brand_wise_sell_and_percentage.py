@@ -14,8 +14,7 @@ def get_columns():
     """return columns"""
     columns = [
         # {"label": _("No"), "fieldname": "serial_no", "fieldtype": "Text", "width": 100},
-        {"label": _("Brand Name"), "fieldname": "brand", "fieldtype": "Link", "options": "Brand",
-         "width": 180},
+        {"label": _("Brand Name"), "fieldname": "brand", "fieldtype": "Text", "width": 180},
         {"label": _("MRP Amount"), "fieldname": "mrp_total", "fieldtype": "Currency", "width": 180,
          "convertible": "rate", "options": "currency"},
         {"label": _("Bill amount"), "fieldname": "bill_amount", "fieldtype": "Currency", "width": 180,
