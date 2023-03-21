@@ -87,8 +87,13 @@ class CustomDeliveryNote(DeliveryNote):
                     },
                 ]
             )
-
+    def get_default_distribution_warehouse(self):
+        company_doc = frappe.get_doc('Company', {'name': self.company})
+        default_source_warehouse = company_doc.default_source_warehouse_for_distribution
+        default_target_warehouse = company_doc.default_target_warehouse_for_distribution
+        return default_source_warehouse, default_target_warehouse
     def get_item_list(self):
+        default_source_warehouse, default_target_warehouse = self.get_default_distribution_warehouse()
         il = []
         for d in self.get("items"):
             if d.qty is None:
@@ -122,7 +127,7 @@ class CustomDeliveryNote(DeliveryNote):
                             il.append(
                                 frappe._dict(
                                     {
-                                        "warehouse": 'Distribution - BBB',
+                                        "warehouse": default_target_warehouse,
                                         "item_code": p.item_code,
                                         "qty": flt(p.qty),
                                         "uom": p.uom,
@@ -166,7 +171,7 @@ class CustomDeliveryNote(DeliveryNote):
                     il.append(
                         frappe._dict(
                             {
-                                "warehouse": 'Distribution - BBB',
+                                "warehouse": default_target_warehouse,
                                 "item_code": d.item_code,
                                 "qty": d.stock_qty,
                                 "uom": d.uom,

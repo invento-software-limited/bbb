@@ -106,216 +106,171 @@ class CustomSalesInvoice(SalesInvoice):
                         elif item[args['target_ref_field']]:
                             self.check_overflow_with_allowance(item, args)
 
-    def get_item_list(self):
-        il = []
-        for d in self.get("items"):
-            if d.qty is None:
-                frappe.throw(_("Row {0}: Qty is mandatory").format(d.idx))
-
-            if self.has_product_bundle(d.item_code):
-                for p in self.get("packed_items"):
-                    if p.parent_detail_docname == d.name and p.parent_item == d.item_code:
-                        # the packing details table's qty is already multiplied with parent's qty
-                        il.append(
-                            frappe._dict(
-                                {
-                                    "warehouse": p.warehouse or d.warehouse,
-                                    "item_code": p.item_code,
-                                    "qty": flt(p.qty),
-                                    "uom": p.uom,
-                                    "batch_no": cstr(p.batch_no).strip(),
-                                    "serial_no": cstr(p.serial_no).strip(),
-                                    "name": d.name,
-                                    "target_warehouse": p.target_warehouse,
-                                    "company": self.company,
-                                    "voucher_type": self.doctype,
-                                    "allow_zero_valuation": d.allow_zero_valuation_rate,
-                                    "sales_invoice_item": d.get("sales_invoice_item"),
-                                    "dn_detail": d.get("dn_detail"),
-                                    "incoming_rate": p.get("incoming_rate"),
-                                }
-                            )
-                        )
-
-                        if self.sales_type == 'Distribution':
-                            il.append(
-                                frappe._dict(
-                                    {
-                                        "warehouse": 'Distribution - BBB',
-                                        "item_code": p.item_code,
-                                        "qty": flt(p.qty),
-                                        "uom": p.uom,
-                                        "batch_no": cstr(p.batch_no).strip(),
-                                        "serial_no": cstr(p.serial_no).strip(),
-                                        "name": d.name,
-                                        "target_warehouse": '',
-                                        "company": self.company,
-                                        "voucher_type": self.doctype,
-                                        "allow_zero_valuation": d.allow_zero_valuation_rate,
-                                        "sales_invoice_item": d.get("sales_invoice_item"),
-                                        "dn_detail": d.get("dn_detail"),
-                                        "incoming_rate": p.get("incoming_rate"),
-                                    }
-                                )
-                            )
-            else:
-                il.append(
-                    frappe._dict(
-                        {
-                            "warehouse": d.warehouse,
-                            "item_code": d.item_code,
-                            "qty": d.stock_qty,
-                            "uom": d.uom,
-                            "stock_uom": d.stock_uom,
-                            "conversion_factor": d.conversion_factor,
-                            "batch_no": cstr(d.get("batch_no")).strip(),
-                            "serial_no": cstr(d.get("serial_no")).strip(),
-                            "name": d.name,
-                            "target_warehouse": d.target_warehouse,
-                            "company": self.company,
-                            "voucher_type": self.doctype,
-                            "allow_zero_valuation": d.allow_zero_valuation_rate,
-                            "sales_invoice_item": d.get("sales_invoice_item"),
-                            "dn_detail": d.get("dn_detail"),
-                            "incoming_rate": d.get("incoming_rate"),
-                        }
-                    )
-                )
-
-                if self.sales_type == 'Distribution':
-                    il.append(
-                        frappe._dict(
-                            {
-                                "warehouse": 'Distribution - BBB',
-                                "item_code": d.item_code,
-                                "qty": d.stock_qty,
-                                "uom": d.uom,
-                                "stock_uom": d.stock_uom,
-                                "conversion_factor": d.conversion_factor,
-                                "batch_no": cstr(d.get("batch_no")).strip(),
-                                "serial_no": cstr(d.get("serial_no")).strip(),
-                                "name": d.name,
-                                "target_warehouse": '',
-                                "company": self.company,
-                                "voucher_type": self.doctype,
-                                "allow_zero_valuation": d.allow_zero_valuation_rate,
-                                "sales_invoice_item": d.get("sales_invoice_item"),
-                                "dn_detail": d.get("dn_detail"),
-                                "incoming_rate": d.get("incoming_rate"),
-                            }
-                        )
-                    )
-        return il
-
-    def update_stock_ledger(self):
-        self.update_reserved_qty()
-
-        sl_entries = []
-        # Loop over items and packed items table
-        for d in self.get_item_list():
-            if frappe.get_cached_value("Item", d.item_code, "is_stock_item") == 1 and flt(d.qty):
-                if flt(d.conversion_factor) == 0.0:
-                    d.conversion_factor = (
-                        get_conversion_factor(d.item_code, d.uom).get("conversion_factor") or 1.0
-                    )
-
-                # On cancellation or return entry submission, make stock ledger entry for
-                # target warehouse first, to update serial no values properly
-
-                if d.warehouse and (
-                    (not cint(self.is_return) and self.docstatus == 1)
-                    or (cint(self.is_return) and self.docstatus == 2)
-                ):
-                    sl_entries.append(self.get_sle_for_source_warehouse(d))
-                    print("Condition_1")
-                    print("Condition_1")
-                    print("Condition_1")
-                    print("Condition_1")
-                    print("Condition_1")
-                    print("Condition_1")
-                    print("Condition_1")
-                    print("Condition_1")
-                    print("Condition_1")
-                    print("Condition_1")
-                    print("Condition_1")
-                    print("Condition_1")
-                    print("Condition_1")
-                    print("Condition_1")
-                    print("Condition_1")
-                    print("Condition_1")
-                    print("Condition_1")
-
-                if d.target_warehouse:
-                    sl_entries.append(self.get_sle_for_target_warehouse(d))
-                    print("Condition_2")
-                    print("Condition_2")
-                    print("Condition_2")
-                    print("Condition_2")
-                    print("Condition_2")
-                    print("Condition_2")
-                    print("Condition_2")
-                    print("Condition_2")
-                    print("Condition_2")
-                    print("Condition_2")
-                    print("Condition_2")
-                    print("Condition_2")
-                    print("Condition_2")
-                    print("Condition_2")
-                    print("Condition_2")
-                    print("Condition_2")
-
-                if d.warehouse and (
-                    (not cint(self.is_return) and self.docstatus == 2)
-                    or (cint(self.is_return) and self.docstatus == 1)
-                ):
-                    sl_entries.append(self.get_sle_for_source_warehouse(d))
-                    print("Condition_3")
-                    print("Condition_3")
-                    print("Condition_3")
-                    print("Condition_3")
-                    print("Condition_3")
-                    print("Condition_3")
-                    print("Condition_3")
-                    print("Condition_3")
-                    print("Condition_3")
-                    print("Condition_3")
-                    print("Condition_3")
-                    print("Condition_3")
-                    print("Condition_3")
-                    print("Condition_3")
-                    print("Condition_3")
-                    print("Condition_3")
-                    print("Condition_3")
-                    print("Condition_3")
-                    print("Condition_3")
-
-        self.make_sl_entries(sl_entries)
-
-    def get_sle_for_source_warehouse(self, item_row):
-        sle = self.get_sl_entries(
-            item_row,
-            {
-                "actual_qty": -1 * flt(item_row.qty),
-                "incoming_rate": item_row.incoming_rate,
-                "recalculate_rate": cint(self.is_return),
-            },
-        )
-        if item_row.target_warehouse and not cint(self.is_return):
-            sle.dependant_sle_voucher_detail_no = item_row.name
-
-        return sle
-
-    def get_sle_for_target_warehouse(self, item_row):
-        sle = self.get_sl_entries(
-            item_row, {"actual_qty": flt(item_row.qty), "warehouse": item_row.target_warehouse}
-        )
-
-        if self.docstatus == 1:
-            if not cint(self.is_return):
-                sle.update({"incoming_rate": item_row.incoming_rate, "recalculate_rate": 1})
-            else:
-                sle.update({"outgoing_rate": item_row.incoming_rate})
-                if item_row.warehouse:
-                    sle.dependant_sle_voucher_detail_no = item_row.name
-
-        return sle
+    # def get_default_distribution_warehouse(self):
+    #     company_doc = frappe.get_doc('Company', {'name': self.company})
+    #     default_source_warehouse = company_doc.default_source_warehouse_for_distribution
+    #     default_target_warehouse = company_doc.default_target_warehouse_for_distribution
+    #     return default_source_warehouse, default_target_warehouse
+    #
+    # def get_item_list(self):
+    #     default_source_warehouse, default_target_warehouse = self.get_default_distribution_warehouse()
+    #     il = []
+    #     for d in self.get("items"):
+    #         if d.qty is None:
+    #             frappe.throw(_("Row {0}: Qty is mandatory").format(d.idx))
+    #
+    #         if self.has_product_bundle(d.item_code):
+    #             for p in self.get("packed_items"):
+    #                 if p.parent_detail_docname == d.name and p.parent_item == d.item_code:
+    #                     # the packing details table's qty is already multiplied with parent's qty
+    #                     il.append(
+    #                         frappe._dict(
+    #                             {
+    #                                 "warehouse": p.warehouse or d.warehouse,
+    #                                 "item_code": p.item_code,
+    #                                 "qty": flt(p.qty),
+    #                                 "uom": p.uom,
+    #                                 "batch_no": cstr(p.batch_no).strip(),
+    #                                 "serial_no": cstr(p.serial_no).strip(),
+    #                                 "name": d.name,
+    #                                 "target_warehouse": p.target_warehouse,
+    #                                 "company": self.company,
+    #                                 "voucher_type": self.doctype,
+    #                                 "allow_zero_valuation": d.allow_zero_valuation_rate,
+    #                                 "sales_invoice_item": d.get("sales_invoice_item"),
+    #                                 "dn_detail": d.get("dn_detail"),
+    #                                 "incoming_rate": p.get("incoming_rate"),
+    #                             }
+    #                         )
+    #                     )
+    #
+    #                     if self.sales_type == 'Distribution':
+    #                         il.append(
+    #                             frappe._dict(
+    #                                 {
+    #                                     "warehouse": default_target_warehouse,
+    #                                     "item_code": p.item_code,
+    #                                     "qty": flt(p.qty),
+    #                                     "uom": p.uom,
+    #                                     "batch_no": cstr(p.batch_no).strip(),
+    #                                     "serial_no": cstr(p.serial_no).strip(),
+    #                                     "name": d.name,
+    #                                     "target_warehouse": '',
+    #                                     "company": self.company,
+    #                                     "voucher_type": self.doctype,
+    #                                     "allow_zero_valuation": d.allow_zero_valuation_rate,
+    #                                     "sales_invoice_item": d.get("sales_invoice_item"),
+    #                                     "dn_detail": d.get("dn_detail"),
+    #                                     "incoming_rate": p.get("incoming_rate"),
+    #                                 }
+    #                             )
+    #                         )
+    #         else:
+    #             il.append(
+    #                 frappe._dict(
+    #                     {
+    #                         "warehouse": d.warehouse,
+    #                         "item_code": d.item_code,
+    #                         "qty": d.stock_qty,
+    #                         "uom": d.uom,
+    #                         "stock_uom": d.stock_uom,
+    #                         "conversion_factor": d.conversion_factor,
+    #                         "batch_no": cstr(d.get("batch_no")).strip(),
+    #                         "serial_no": cstr(d.get("serial_no")).strip(),
+    #                         "name": d.name,
+    #                         "target_warehouse": d.target_warehouse,
+    #                         "company": self.company,
+    #                         "voucher_type": self.doctype,
+    #                         "allow_zero_valuation": d.allow_zero_valuation_rate,
+    #                         "sales_invoice_item": d.get("sales_invoice_item"),
+    #                         "dn_detail": d.get("dn_detail"),
+    #                         "incoming_rate": d.get("incoming_rate"),
+    #                     }
+    #                 )
+    #             )
+    #
+    #             if self.sales_type == 'Distribution':
+    #                 il.append(
+    #                     frappe._dict(
+    #                         {
+    #                             "warehouse": default_target_warehouse,
+    #                             "item_code": d.item_code,
+    #                             "qty": d.stock_qty,
+    #                             "uom": d.uom,
+    #                             "stock_uom": d.stock_uom,
+    #                             "conversion_factor": d.conversion_factor,
+    #                             "batch_no": cstr(d.get("batch_no")).strip(),
+    #                             "serial_no": cstr(d.get("serial_no")).strip(),
+    #                             "name": d.name,
+    #                             "target_warehouse": '',
+    #                             "company": self.company,
+    #                             "voucher_type": self.doctype,
+    #                             "allow_zero_valuation": d.allow_zero_valuation_rate,
+    #                             "sales_invoice_item": d.get("sales_invoice_item"),
+    #                             "dn_detail": d.get("dn_detail"),
+    #                             "incoming_rate": d.get("incoming_rate"),
+    #                         }
+    #                     )
+    #                 )
+    #     return il
+    #
+    # def update_stock_ledger(self):
+    #     self.update_reserved_qty()
+    #
+    #     sl_entries = []
+    #     # Loop over items and packed items table
+    #     for d in self.get_item_list():
+    #         if frappe.get_cached_value("Item", d.item_code, "is_stock_item") == 1 and flt(d.qty):
+    #             if flt(d.conversion_factor) == 0.0:
+    #                 d.conversion_factor = (
+    #                     get_conversion_factor(d.item_code, d.uom).get("conversion_factor") or 1.0
+    #                 )
+    #
+    #             # On cancellation or return entry submission, make stock ledger entry for
+    #             # target warehouse first, to update serial no values properly
+    #
+    #             if d.warehouse and (
+    #                 (not cint(self.is_return) and self.docstatus == 1)
+    #                 or (cint(self.is_return) and self.docstatus == 2)
+    #             ):
+    #                 sl_entries.append(self.get_sle_for_source_warehouse(d))
+    #
+    #             if d.target_warehouse:
+    #                 sl_entries.append(self.get_sle_for_target_warehouse(d))
+    #
+    #             if d.warehouse and (
+    #                 (not cint(self.is_return) and self.docstatus == 2)
+    #                 or (cint(self.is_return) and self.docstatus == 1)
+    #             ):
+    #                 sl_entries.append(self.get_sle_for_source_warehouse(d))
+    #
+    #     self.make_sl_entries(sl_entries)
+    #
+    # def get_sle_for_source_warehouse(self, item_row):
+    #     sle = self.get_sl_entries(
+    #         item_row,
+    #         {
+    #             "actual_qty": -1 * flt(item_row.qty),
+    #             "incoming_rate": item_row.incoming_rate,
+    #             "recalculate_rate": cint(self.is_return),
+    #         },
+    #     )
+    #     if item_row.target_warehouse and not cint(self.is_return):
+    #         sle.dependant_sle_voucher_detail_no = item_row.name
+    #
+    #     return sle
+    #
+    # def get_sle_for_target_warehouse(self, item_row):
+    #     sle = self.get_sl_entries(
+    #         item_row, {"actual_qty": flt(item_row.qty), "warehouse": item_row.target_warehouse}
+    #     )
+    #
+    #     if self.docstatus == 1:
+    #         if not cint(self.is_return):
+    #             sle.update({"incoming_rate": item_row.incoming_rate, "recalculate_rate": 1})
+    #         else:
+    #             sle.update({"outgoing_rate": item_row.incoming_rate})
+    #             if item_row.warehouse:
+    #                 sle.dependant_sle_voucher_detail_no = item_row.name
+    #
+    #     return sle

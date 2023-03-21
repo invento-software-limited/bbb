@@ -56,7 +56,14 @@ class CustomSalesOrder(SalesOrder):
         super(CustomSalesOrder, self).on_cancel()
         self.update_stock_ledger()
 
+    def get_default_distribution_warehouse(self):
+        default_source_warehouse = frappe.db.get_value('Company', {'name': self.company}, 'default_source_warehouse_for_distribution')
+        default_target_warehouse = frappe.db.get_value('POS Profile', {'name': self.pos_profile}, 'warehouse')
+        return default_source_warehouse, default_target_warehouse
+
     def get_item_list(self):
+        default_source_warehouse, default_target_warehouse = self.get_default_distribution_warehouse()
+
         il = []
         for d in self.get("items"):
             if d.qty is None:
@@ -69,14 +76,34 @@ class CustomSalesOrder(SalesOrder):
                         il.append(
                             frappe._dict(
                                 {
-                                    "warehouse": 'Distribution - BBB',
+                                    "warehouse": default_source_warehouse,
                                     "item_code": p.item_code,
                                     "qty": flt(p.qty),
                                     "uom": p.uom,
                                     "batch_no": cstr(p.batch_no).strip(),
                                     "serial_no": cstr(p.serial_no).strip(),
                                     "name": d.name,
-                                    "target_warehouse": 'Distribution - BBB',
+                                    "target_warehouse": '',
+                                    "company": self.company,
+                                    "voucher_type": self.doctype,
+                                    "allow_zero_valuation": 0,
+                                    "sales_order_item": d.get("sales_order_item"),
+                                    "dn_detail": d.get("dn_detail"),
+                                    "incoming_rate": p.get("incoming_rate"),
+                                }
+                            )
+                        )
+                        il.append(
+                            frappe._dict(
+                                {
+                                    "warehouse": '',
+                                    "item_code": p.item_code,
+                                    "qty": flt(p.qty),
+                                    "uom": p.uom,
+                                    "batch_no": cstr(p.batch_no).strip(),
+                                    "serial_no": cstr(p.serial_no).strip(),
+                                    "name": d.name,
+                                    "target_warehouse": default_target_warehouse,
                                     "company": self.company,
                                     "voucher_type": self.doctype,
                                     "allow_zero_valuation": 0,
@@ -90,7 +117,7 @@ class CustomSalesOrder(SalesOrder):
                 il.append(
                     frappe._dict(
                         {
-                            "warehouse": 'Distribution - BBB',
+                            "warehouse": default_source_warehouse,
                             "item_code": d.item_code,
                             "qty": d.stock_qty,
                             "uom": d.uom,
@@ -99,7 +126,30 @@ class CustomSalesOrder(SalesOrder):
                             "batch_no": cstr(d.get("batch_no")).strip(),
                             "serial_no": cstr(d.get("serial_no")).strip(),
                             "name": d.name,
-                            "target_warehouse": 'Distribution - BBB',
+                            "target_warehouse": '',
+                            "company": self.company,
+                            "voucher_type": self.doctype,
+                            "allow_zero_valuation": 0,
+                            "sales_order_item": d.get("sales_order_item"),
+                            "dn_detail": d.get("dn_detail"),
+                            "incoming_rate": d.get("incoming_rate"),
+                        }
+                    )
+                )
+
+                il.append(
+                    frappe._dict(
+                        {
+                            "warehouse": '',
+                            "item_code": d.item_code,
+                            "qty": d.stock_qty,
+                            "uom": d.uom,
+                            "stock_uom": d.stock_uom,
+                            "conversion_factor": d.conversion_factor,
+                            "batch_no": cstr(d.get("batch_no")).strip(),
+                            "serial_no": cstr(d.get("serial_no")).strip(),
+                            "name": d.name,
+                            "target_warehouse": default_target_warehouse,
                             "company": self.company,
                             "voucher_type": self.doctype,
                             "allow_zero_valuation": 0,
@@ -125,77 +175,87 @@ class CustomSalesOrder(SalesOrder):
 
                 # On cancellation or return entry submission, make stock ledger entry for
                 # target warehouse first, to update serial no values properly
-
-                sl_entries.append(self.get_sle_for_source_warehouse(d))
+                if d.warehouse:
+                    sl_entries.append(self.get_sle_for_source_warehouse(d))
+                elif d.target_warehouse:
+                    sl_entries.append(self.get_sle_for_target_warehouse(d))
 
         self.make_sl_entries(sl_entries)
 
     def get_sle_for_source_warehouse(self, item_row):
-        if self.docstatus == 2:
-            self.is_return = 1
-
+        self.is_return = 1 if self.docstatus == 1 else 0
         sle = self.get_sl_entries(
             item_row,
             {
-                "actual_qty": 1 * flt(item_row.qty),
+                "actual_qty": -1 * flt(item_row.qty),
                 "incoming_rate": item_row.incoming_rate,
-                # "recalculate_rate": cint(self.is_return),
-                "recalculate_rate": 1 if self.docstatus == 2 else 0,
+                "recalculate_rate": cint(self.is_return),
             },
         )
         # if item_row.target_warehouse and not cint(self.is_return):
         #     sle.dependant_sle_voucher_detail_no = item_row.name
-        if item_row.target_warehouse and self.docstatus == 1:
-            sle.dependant_sle_voucher_detail_no = item_row.name
 
         return sle
 
-    # def update_stock_ledger(self):
-    # 	sl_entries = []
-    # 	finished_item_row = self.get_finished_item_row()
+    def get_sle_for_target_warehouse(self, item_row):
+        self.is_return = 1 if self.docstatus == 2 else 0
+        sle = self.get_sl_entries(
+            item_row, {"actual_qty": flt(item_row.qty), "warehouse": item_row.target_warehouse}
+        )
 
-    # 	# make sl entries for source warehouse first
-    # 	self.get_sle_for_source_warehouse(sl_entries, finished_item_row)
+        # if self.docstatus == 1:
+        #     if not cint(self.is_return):
+        #         sle.update({"incoming_rate": item_row.incoming_rate, "recalculate_rate": 1})
+        #     else:
+        #         sle.update({"outgoing_rate": item_row.incoming_rate})
+        #         if item_row.warehouse:
+        #             sle.dependant_sle_voucher_detail_no = item_row.name
 
-    # 	# SLE for target warehouse
-    # 	self.get_sle_for_target_warehouse(sl_entries, finished_item_row)
-
-    # 	# reverse sl entries if cancel
-    # 	if self.docstatus == 2:
-    # 		sl_entries.reverse()
-
-    # 	self.make_sl_entries(sl_entries)
+        return sle
 
     # def get_sle_for_source_warehouse(self, item_row):
-    # 	sle = self.get_sl_entries(
-    # 		item_row,
-    # 		{
-    # 			"actual_qty": -1 * flt(item_row.qty),
-    # 			"incoming_rate": item_row.incoming_rate,
-    # 			"recalculate_rate": cint(self.is_return),
-    # 		},
-    # 	)
-    # 	if item_row.target_warehouse and not cint(self.is_return):
-    # 		sle.dependant_sle_voucher_detail_no = item_row.name
-
-    # 	return sle
-
+    #     if self.docstatus == 2:
+    #         self.is_return = 1
+    #
+    #     sle = self.get_sl_entries(
+    #         item_row,
+    #         {
+    #             "actual_qty": -1 * flt(item_row.qty),
+    #             "incoming_rate": item_row.incoming_rate,
+    #             # "recalculate_rate": cint(self.is_return),
+    #             "recalculate_rate": 1 if self.docstatus == 2 else 0,
+    #         },
+    #     )
+    #     # if item_row.target_warehouse and not cint(self.is_return):
+    #     #     sle.dependant_sle_voucher_detail_no = item_row.name
+    #     if item_row.target_warehouse and self.docstatus == 1:
+    #         sle.dependant_sle_voucher_detail_no = item_row.name
+    #
+    #     return sle
+    #
     # def get_sle_for_target_warehouse(self, item_row):
-    # 	sle = self.get_sl_entries(
-    # 		item_row, {"actual_qty": flt(item_row.qty), "warehouse": item_row.target_warehouse}
-    # 	)
-
-    # 	if self.docstatus == 1:
-    # 		if not cint(self.is_return):
-    # 			sle.update({"incoming_rate": item_row.incoming_rate, "recalculate_rate": 1})
-    # 		else:
-    # 			sle.update({"outgoing_rate": item_row.incoming_rate})
-    # 			if item_row.warehouse:
-    # 				sle.dependant_sle_voucher_detail_no = item_row.name
-
-    # 	return sle
+    #     if self.docstatus == 2:
+    #         self.is_return = 1
+    #
+    #     sle = self.get_sl_entries(
+    #         item_row,
+    #         {
+    #             "actual_qty": 1 * flt(item_row.qty),
+    #             "incoming_rate": item_row.incoming_rate,
+    #             # "recalculate_rate": cint(self.is_return),
+    #             "recalculate_rate": 1 if self.docstatus == 2 else 0,
+    #         },
+    #     )
+    #     # if item_row.target_warehouse and not cint(self.is_return):
+    #     #     sle.dependant_sle_voucher_detail_no = item_row.name
+    #     if item_row.target_warehouse and self.docstatus == 1:
+    #         sle.dependant_sle_voucher_detail_no = item_row.name
+    #
+    #     return sle
 
     def get_sl_entries(self, d, args):
+        valuation_rate = frappe.db.get_value('Item', d.get('item_code'), 'valuation_rate')
+
         sl_dict = frappe._dict(
             {
                 "item_code": d.get("item_code", None),
@@ -212,7 +272,7 @@ class CustomSalesOrder(SalesOrder):
                     "Item", args.get("item_code") or d.get("item_code"), "stock_uom"
                 ),
                 "incoming_rate": 0,
-                "valuation_rate": d.get('valuation_rate'),
+                "valuation_rate": valuation_rate,
                 "company": self.company,
                 "batch_no": cstr(d.get("batch_no")).strip(),
                 "serial_no": d.get("serial_no"),
@@ -220,7 +280,5 @@ class CustomSalesOrder(SalesOrder):
                 "is_cancelled": 1 if self.docstatus == 2 else 0,
             }
         )
-
         sl_dict.update(args)
         return sl_dict
-
