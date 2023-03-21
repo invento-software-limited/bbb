@@ -45,6 +45,9 @@ doctype_js = {
     # ],
     "POS Closing Entry": [
         'public/js/pos_closing_entry.js'
+    ],
+    "Sales Order": [
+        'public/js/sales_order.js'
     ]
 }
 # doctype_list_js = {
