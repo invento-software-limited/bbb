@@ -45,6 +45,12 @@ doctype_js = {
     # ],
     "POS Closing Entry": [
         'public/js/pos_closing_entry.js'
+    ],
+    "Sales Order": [
+        'public/js/sales_order.js'
+    ],
+    "Sales Invoice": [
+        'public/js/sales_invoice.js'
     ]
 }
 # doctype_list_js = {
@@ -141,6 +147,8 @@ doc_events = {
 override_doctype_class = {
     "Sales Invoice": "bbb.bbb.controllers.sales_invoice.CustomSalesInvoice",
     "POS Invoice": "bbb.bbb.controllers.pos_invoice.CustomPOSInvoice",
+    "Sales Order": "bbb.bbb.controllers.sales_order.CustomSalesOrder",
+    # "Delivery Note": "bbb.bbb.controllers.delivery_note.CustomDeliveryNote",
 }
 
 jenv = {
