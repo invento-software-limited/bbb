@@ -737,12 +737,16 @@ frappe.ui.form.on('Sales Invoice', {
 	},
 
 	onload: function(frm, cdt, cdn) {
-    frappe.model.set_value(cdt, cdn, 'set_warehouse', '')
     let doc = locals[cdt][cdn]
 		frm.redemption_conversion_factor = null;
     if(doc.sales_type === "Distribution"){
+      frappe.model.set_value(cdt, cdn, 'set_warehouse', '')
+      // frappe.model.set_value(cdt, cdn, 'allocate_advances_automatically', 1);
+      // frappe.model.set_value(cdt, cdn, 'update_stock', 1);
       frappe.model.set_value(cdt, cdn, 'is_pos', 1);
       refresh_field("is_pos");
+      // refresh_field("allocate_advances_automatically");
+      // refresh_field("update_stock");
       // frappe.db.get_value('Company', {name: doc.company}, 'default_target_warehouse_for_distribution')
       //     .then(r => {
       //         let values = r.message;
