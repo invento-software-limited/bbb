@@ -90,24 +90,28 @@ frappe.ui.form.on("Sales Order", {
 	},
   sales_type: function(frm, cdt, cdn) {
 	    let doc = locals[cdt][cdn]
-	    if(doc.sales_type === 'Distribution'){
-          frappe.db.get_value('Company', {name: doc.company}, 'default_source_warehouse_for_distribution')
-              .then(r => {
-                  let values = r.message;
-              frappe.model.set_value(cdt, cdn, 'set_warehouse', values.default_source_warehouse_for_distribution)
-              });
-          // frappe.db.get_value('Company', {name: doc.company, 'profile_type': 'Distribution'}, 'name')
-          //     .then(r => {
-          //         let values = r.message;
-          //     frappe.model.set_value(cdt, cdn, 'pos_profile', values.name)
-          //     })
-          }
+      frappe.model.set_value(cdt, cdn, 'pos_profile', '')
+      frappe.model.set_value(cdt, cdn, 'set_warehouse', '')
       frm.set_query("pos_profile", function() {
             return {
                 "filters": {'profile_type' : ["=", doc.sales_type]},
             };
         });
-	    }
+      refresh_field("pos_profile");
+      refresh_field("set_warehouse");
+	    },
+
+    pos_profile: function(frm, cdt, cdn){
+        let doc = locals[cdt][cdn]
+        if(doc.sales_type === 'Distribution'){
+            frappe.db.get_value('POS Profile', {name: doc.pos_profile}, 'source_warehouse')
+                .then(r => {
+                    let values = r.message;
+                    frappe.model.set_value(cdt, cdn, 'set_warehouse', values.source_warehouse)
+                    refresh_field("set_warehouse");
+                });
+            }
+        }
 });
 
 frappe.ui.form.on("Sales Order Item", {

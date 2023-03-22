@@ -57,9 +57,8 @@ class CustomSalesOrder(SalesOrder):
         self.update_stock_ledger()
 
     def get_default_distribution_warehouse(self):
-        default_source_warehouse = frappe.db.get_value('Company', {'name': self.company}, 'default_source_warehouse_for_distribution')
-        default_target_warehouse = frappe.db.get_value('POS Profile', {'name': self.pos_profile}, 'warehouse')
-        return default_source_warehouse, default_target_warehouse
+        return frappe.db.get_value('POS Profile', {'name': self.pos_profile}, ['source_warehouse','warehouse'])
+
 
     def get_item_list(self):
         default_source_warehouse, default_target_warehouse = self.get_default_distribution_warehouse()
@@ -202,56 +201,7 @@ class CustomSalesOrder(SalesOrder):
         sle = self.get_sl_entries(
             item_row, {"actual_qty": flt(item_row.qty), "warehouse": item_row.target_warehouse}
         )
-
-        # if self.docstatus == 1:
-        #     if not cint(self.is_return):
-        #         sle.update({"incoming_rate": item_row.incoming_rate, "recalculate_rate": 1})
-        #     else:
-        #         sle.update({"outgoing_rate": item_row.incoming_rate})
-        #         if item_row.warehouse:
-        #             sle.dependant_sle_voucher_detail_no = item_row.name
-
         return sle
-
-    # def get_sle_for_source_warehouse(self, item_row):
-    #     if self.docstatus == 2:
-    #         self.is_return = 1
-    #
-    #     sle = self.get_sl_entries(
-    #         item_row,
-    #         {
-    #             "actual_qty": -1 * flt(item_row.qty),
-    #             "incoming_rate": item_row.incoming_rate,
-    #             # "recalculate_rate": cint(self.is_return),
-    #             "recalculate_rate": 1 if self.docstatus == 2 else 0,
-    #         },
-    #     )
-    #     # if item_row.target_warehouse and not cint(self.is_return):
-    #     #     sle.dependant_sle_voucher_detail_no = item_row.name
-    #     if item_row.target_warehouse and self.docstatus == 1:
-    #         sle.dependant_sle_voucher_detail_no = item_row.name
-    #
-    #     return sle
-    #
-    # def get_sle_for_target_warehouse(self, item_row):
-    #     if self.docstatus == 2:
-    #         self.is_return = 1
-    #
-    #     sle = self.get_sl_entries(
-    #         item_row,
-    #         {
-    #             "actual_qty": 1 * flt(item_row.qty),
-    #             "incoming_rate": item_row.incoming_rate,
-    #             # "recalculate_rate": cint(self.is_return),
-    #             "recalculate_rate": 1 if self.docstatus == 2 else 0,
-    #         },
-    #     )
-    #     # if item_row.target_warehouse and not cint(self.is_return):
-    #     #     sle.dependant_sle_voucher_detail_no = item_row.name
-    #     if item_row.target_warehouse and self.docstatus == 1:
-    #         sle.dependant_sle_voucher_detail_no = item_row.name
-    #
-    #     return sle
 
     def get_sl_entries(self, d, args):
         valuation_rate = frappe.db.get_value('Item', d.get('item_code'), 'valuation_rate')

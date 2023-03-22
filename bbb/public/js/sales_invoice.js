@@ -742,12 +742,13 @@ frappe.ui.form.on('Sales Invoice', {
 		frm.redemption_conversion_factor = null;
     if(doc.sales_type === "Distribution"){
       frappe.model.set_value(cdt, cdn, 'is_pos', 1);
-      frappe.db.get_value('Company', {name: doc.company}, 'default_target_warehouse_for_distribution')
-          .then(r => {
-              let values = r.message;
-            frappe.model.set_value(cdt, cdn, 'set_warehouse', values.default_target_warehouse_for_distribution)
-            console.log(values)
-          });
+      refresh_field("is_pos");
+      // frappe.db.get_value('Company', {name: doc.company}, 'default_target_warehouse_for_distribution')
+      //     .then(r => {
+      //         let values = r.message;
+      //       frappe.model.set_value(cdt, cdn, 'set_warehouse', values.default_target_warehouse_for_distribution)
+      //       console.log(values)
+      //     });
     }
 	},
 
