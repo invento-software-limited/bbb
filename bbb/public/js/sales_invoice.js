@@ -108,31 +108,31 @@ erpnext.accounts.SalesInvoiceController = erpnext.selling.SellingController.exte
 			}
 
 			if (doc.outstanding_amount>0) {
-				cur_frm.add_custom_button(__('Payment Request'), function() {
-					me.make_payment_request();
-				}, __('Create'));
+				// cur_frm.add_custom_button(__('Payment Request'), function() {
+				// 	me.make_payment_request();
+				// }, __('Create'));
 
-				cur_frm.add_custom_button(__('Invoice Discounting'), function() {
-					cur_frm.events.create_invoice_discounting(cur_frm);
-				}, __('Create'));
+				// cur_frm.add_custom_button(__('Invoice Discounting'), function() {
+				// 	cur_frm.events.create_invoice_discounting(cur_frm);
+				// }, __('Create'));
 
-				if (doc.due_date < frappe.datetime.get_today()) {
-					cur_frm.add_custom_button(__('Dunning'), function() {
-						cur_frm.events.create_dunning(cur_frm);
-					}, __('Create'));
-				}
+				// if (doc.due_date < frappe.datetime.get_today()) {
+				// 	cur_frm.add_custom_button(__('Dunning'), function() {
+				// 		cur_frm.events.create_dunning(cur_frm);
+				// 	}, __('Create'));
+				// }
 			}
 
 			if (doc.docstatus === 1) {
-				cur_frm.add_custom_button(__('Maintenance Schedule'), function () {
-					cur_frm.cscript.make_maintenance_schedule();
-				}, __('Create'));
+				// cur_frm.add_custom_button(__('Maintenance Schedule'), function () {
+				// 	cur_frm.cscript.make_maintenance_schedule();
+				// }, __('Create'));
 			}
 
 			if(!doc.auto_repeat) {
-				cur_frm.add_custom_button(__('Subscription'), function() {
-					erpnext.utils.make_subscription(doc.doctype, doc.name)
-				}, __('Create'))
+				// cur_frm.add_custom_button(__('Subscription'), function() {
+				// 	erpnext.utils.make_subscription(doc.doctype, doc.name)
+				// }, __('Create'))
 			}
 		}
 
