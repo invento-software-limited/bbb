@@ -108,31 +108,31 @@ erpnext.accounts.SalesInvoiceController = erpnext.selling.SellingController.exte
 			}
 
 			if (doc.outstanding_amount>0) {
-				cur_frm.add_custom_button(__('Payment Request'), function() {
-					me.make_payment_request();
-				}, __('Create'));
+				// cur_frm.add_custom_button(__('Payment Request'), function() {
+				// 	me.make_payment_request();
+				// }, __('Create'));
 
-				cur_frm.add_custom_button(__('Invoice Discounting'), function() {
-					cur_frm.events.create_invoice_discounting(cur_frm);
-				}, __('Create'));
+				// cur_frm.add_custom_button(__('Invoice Discounting'), function() {
+				// 	cur_frm.events.create_invoice_discounting(cur_frm);
+				// }, __('Create'));
 
-				if (doc.due_date < frappe.datetime.get_today()) {
-					cur_frm.add_custom_button(__('Dunning'), function() {
-						cur_frm.events.create_dunning(cur_frm);
-					}, __('Create'));
-				}
+				// if (doc.due_date < frappe.datetime.get_today()) {
+				// 	cur_frm.add_custom_button(__('Dunning'), function() {
+				// 		cur_frm.events.create_dunning(cur_frm);
+				// 	}, __('Create'));
+				// }
 			}
 
 			if (doc.docstatus === 1) {
-				cur_frm.add_custom_button(__('Maintenance Schedule'), function () {
-					cur_frm.cscript.make_maintenance_schedule();
-				}, __('Create'));
+				// cur_frm.add_custom_button(__('Maintenance Schedule'), function () {
+				// 	cur_frm.cscript.make_maintenance_schedule();
+				// }, __('Create'));
 			}
 
 			if(!doc.auto_repeat) {
-				cur_frm.add_custom_button(__('Subscription'), function() {
-					erpnext.utils.make_subscription(doc.doctype, doc.name)
-				}, __('Create'))
+				// cur_frm.add_custom_button(__('Subscription'), function() {
+				// 	erpnext.utils.make_subscription(doc.doctype, doc.name)
+				// }, __('Create'))
 			}
 		}
 
@@ -737,12 +737,16 @@ frappe.ui.form.on('Sales Invoice', {
 	},
 
 	onload: function(frm, cdt, cdn) {
-    frappe.model.set_value(cdt, cdn, 'set_warehouse', '')
     let doc = locals[cdt][cdn]
 		frm.redemption_conversion_factor = null;
     if(doc.sales_type === "Distribution"){
+      frappe.model.set_value(cdt, cdn, 'set_warehouse', '')
+      // frappe.model.set_value(cdt, cdn, 'allocate_advances_automatically', 1);
+      // frappe.model.set_value(cdt, cdn, 'update_stock', 1);
       frappe.model.set_value(cdt, cdn, 'is_pos', 1);
       refresh_field("is_pos");
+      // refresh_field("allocate_advances_automatically");
+      // refresh_field("update_stock");
       // frappe.db.get_value('Company', {name: doc.company}, 'default_target_warehouse_for_distribution')
       //     .then(r => {
       //         let values = r.message;
