@@ -191,10 +191,13 @@ def get_item_total_discount_amount(doctype, docname):
     invoice = frappe.get_doc(doctype, docname)
     items = invoice.items
     item_total_discount = 0
+    
     for item in items:
-        mrp_amount = float(item.qty) * float(item.price_list_rate)
-        total_amount = float(item.qty) * float(item.rate)
-        item_total_discount += (mrp_amount - total_amount)
+        qty = -1 * item.qty if item.qty < 0 else item.qty
+        mrp_amount = float(qty) * float(item.price_list_rate)
+        total_amount = float(qty) * float(item.rate)
+        discount = (mrp_amount - total_amount)
+        item_total_discount += (discount - item.total_damaged_cost)
     return item_total_discount
 
 
