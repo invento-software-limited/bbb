@@ -1114,6 +1114,9 @@ erpnext.PointOfSale.ItemCart = class {
             const item_row = this.get_item_from_frm(item);
 
             this.render_cart_item(item_row, $item);
+            if(item_row.qty < 0){
+              frappe.model.set_value(item_row.doctype, item_row.name, 'pricing_rules', '')
+            }
         }
 
         const no_of_cart_items = this.$cart_items_wrapper.find('.cart-item-wrapper').length;
