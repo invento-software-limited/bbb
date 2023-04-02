@@ -30,8 +30,15 @@ def get_conditions(filters):
 
     if filters.get("from_date"):
         conditions.append("invoice.posting_date >= '%s'" % filters.get("from_date"))
+
     if filters.get("to_date"):
         conditions.append("invoice.posting_date <= '%s'" % filters.get("to_date"))
+
+    if filters.get("sales_type"):
+        conditions.append("invoice.sales_type = '%s'" % filters.get("sales_type"))
+
+    if filters.get("company"):
+        conditions.append("invoice.company = '%s'" % filters.get("company"))
 
     if conditions:
         return " and " + " and ".join(conditions)
@@ -67,8 +74,8 @@ def get_invoice_data(filters):
                     from `tab%s` invoice where invoice.docstatus = 1 %s group by invoice.customer""" % (invoice_type, conditions)
 
     customer_sales_summary_query = """select total_invoice, total_amount, customer, customer.mobile_no,
-                                    (total_amount/total_invoice) as avg_basket_value, customer.customer_group, 
-                                    customer.customer_type from (%s) as invoice_group inner join `tabCustomer` customer 
+                                    (total_amount/total_invoice) as avg_basket_value, customer.customer_group,
+                                    customer.customer_type from (%s) as invoice_group inner join `tabCustomer` customer
                                     on customer.name = invoice_group.customer %s order by total_amount desc""" % (invoice_query, basket_value_conditions)
 
     query_result = frappe.db.sql(customer_sales_summary_query, as_dict=1)

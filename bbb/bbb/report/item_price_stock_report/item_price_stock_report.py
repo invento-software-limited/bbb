@@ -62,6 +62,8 @@ def get_item_price_qty_data(filters):
         condition_list.append("a.brand=%(brand)s")
     if filters.get("warehouse"):
         condition_list.append("b.warehouse=%(warehouse)s")
+    if filters.get("company"):
+        condition_list.append("item.company=%(company)s")
     if condition_list:
         conditions += "where "
         conditions = conditions + ' and '.join(condition_list)
@@ -70,7 +72,7 @@ def get_item_price_qty_data(filters):
         """select a.item_code, a.item_name, a.name as price_list_name,
         a.brand as brand, b.warehouse as warehouse, b.actual_qty as actual_qty
         from `tabItem Price` a left join `tabBin` b
-        ON a.item_code = b.item_code
+        ON a.item_code = b.item_code left join `tabItem` item  on item.item_code = a.item_code
         {conditions}""".format(
             conditions=conditions
         ),

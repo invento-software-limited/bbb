@@ -38,17 +38,21 @@ def get_conditions(filters):
     if filters.get("outlet"):
         conditions.append("sales_invoice.pos_profile = '%s'" % filters.get("outlet"))
 
+    if filters.get("company"):
+        conditions.append("sales_invoice.company = '%s'" % filters.get("company"))
+
     if conditions:
         conditions = " and ".join(conditions)
     return conditions
 
 
 def get_invoice_data(filters):
+
     conditions = get_conditions(filters)
-    invoice_type = filters.get('switch_invoice')
+    invoice_type = 'Sales Invoice' if filters.get('outlet', '') == 'Distribution' else 'POS Invoice'
     query_result = frappe.db.sql("""
     		select
-    			sales_invoice.grand_total, sales_invoice.served_by, sales_invoice.total_qty as unit_qty, sales_invoice.name, 
+    			sales_invoice.grand_total, sales_invoice.served_by, sales_invoice.total_qty as unit_qty, sales_invoice.name,
     			item.standard_rate as unit_price, sales_invoice_item.rate as selling_rate,
     			sales_invoice_item.qty as quantity, sales_invoice_item.brand,
     			(sales_invoice_item.qty * item.standard_rate) as mrp_total,
@@ -81,4 +85,3 @@ def get_invoice_data(filters):
             (invoice_data['total_amount'] / total_amount) * 100)
         pos_wise_list_data.append(invoice_data)
     return pos_wise_list_data
-

@@ -33,5 +33,21 @@ frappe.query_reports["Customer Frequency"] = {
 			"label": __("Max. Basket value"),
 			"fieldtype": "Currency",
 		},
+		{
+			"fieldname":"sales_type",
+			"label": __("Sales Type"),
+			"fieldtype": "Select",
+			"options": ["Outlet", "Distribution", "Online"],
+      "default": "Outlet"
+		},
+    {
+			"fieldname":"company",
+			"label": __("Company"),
+			"fieldtype": "Link",
+			"options": "Company",
+      "default": frappe.defaults.get_default('company'),
+			// "reqd": 1,
+			"width": "60px"
+		},
 	]
 };

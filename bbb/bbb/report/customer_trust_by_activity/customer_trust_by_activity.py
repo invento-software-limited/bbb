@@ -24,8 +24,11 @@ def get_conditions(filters):
 
     if filters.get("from_date"):
         conditions.append("invoice.posting_date >= '%s'" % filters.get("from_date"))
+
     if filters.get("to_date"):
         conditions.append("invoice.posting_date <= '%s'" % filters.get("to_date"))
+
+
 
     if conditions:
         return " and ".join(conditions)
@@ -34,6 +37,8 @@ def get_conditions(filters):
 
 def get_invoice_data(filters):
     conditions = get_conditions(filters)
+    sales_type = filters.get('sales_type', '')
+    company = filters.get('company', '')
     invoice_type = "Sales Invoice"
     has_purchased = False if filters.get("purchase_status") == "No Purchase" else True
     customer_filter = "in" if has_purchased else "not in"
@@ -42,23 +47,23 @@ def get_invoice_data(filters):
 
     if has_purchased and filters.get('only_consultancy'):
         consultancy_query = """select invoice.customer, invoice.posting_date from `tabSales Invoice Item` item join
-                        `tab%s` invoice on item.parent=invoice.name where item.item_group = 'Consultancy' and %s
-                        group by invoice.name""" % (invoice_type, conditions)
+                        `tab%s` invoice on item.parent=invoice.name where item.item_group = 'Consultancy' and invoice.sales_type='%s' invoice.company='%s' and %s
+                        group by invoice.name""" % (invoice_type, sales_type, company, conditions)
 
-        except_consultancy_query = """select invoice.customer, invoice.posting_date from `tabSales Invoice Item` item join 
-                        `tab%s` invoice on item.parent=invoice.name where item.item_group != 'Consultancy'
-                         and %s group by invoice.name""" % (invoice_type, conditions)
+        except_consultancy_query = """select invoice.customer, invoice.posting_date from `tabSales Invoice Item` item join
+                        `tab%s` invoice on item.parent=invoice.name where item.item_group != 'Consultancy' and invoice.sales_type='%s' and invoice.compnay='%S'
+                         and %s group by invoice.name""" % (invoice_type, sales_type, company, conditions)
 
         customer_query = """select tab.customer, tab.posting_date from (%s) as tab where tab.customer not in
                             (select customer from (%s) as tab2)""" % (consultancy_query, except_consultancy_query)
     else:
-        customer_query = """select invoice.name as invoice, invoice.customer, invoice.posting_date 
-                            from `tab%s` invoice where %s""" % (invoice_type, conditions)
+        customer_query = """select invoice.name as invoice, invoice.customer, invoice.posting_date
+                            from `tab%s` invoice where invoice.sales_type='%s' and invoice.company='%s' and %s""" % (invoice_type, sales_type, company, conditions)
 
     if has_purchased:
-        customer_info_query = """select max(invoice.posting_date) as last_invoice_date, customer.name as customer, 
+        customer_info_query = """select max(invoice.posting_date) as last_invoice_date, customer.name as customer,
                             customer.mobile_number, customer.customer_group, customer.customer_type from (%s) as invoice
-                            join `tabCustomer` customer on invoice.customer = customer.name where %s %s group by 
+                            join `tabCustomer` customer on invoice.customer = customer.name where %s %s group by
                             invoice.customer order by max(invoice.posting_date) desc """ % (customer_query, conditions, customer_group_filter)
     else:
         customer_info_query = """select customer.name as customer, customer.mobile_number,

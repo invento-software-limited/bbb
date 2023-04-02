@@ -31,6 +31,8 @@ def get_conditions(filters):
 		conditions.append("item.end_of_life >= '%s'" % filters.get("from_date"))
 	if filters.get("to_date"):
 		conditions.append("item.end_of_life <= '%s'" % filters.get("to_date"))
+	if filters.get("company"):
+		conditions.append("item.company = '%s'" % filters.get("company"))
 
 	if conditions:
 		conditions = " and ".join(conditions)
@@ -51,12 +53,12 @@ def get_invoice_data(filters):
 	query_filters = "where " + " and ".join(query_filters) if query_filters else ""
 	conditions = "where " + conditions if conditions else ""
 
-	stock_query = """select stock.item_code, sum(stock.actual_qty) as quantity, 
+	stock_query = """select stock.item_code, sum(stock.actual_qty) as quantity,
 					(case when '%s'= '' then "All Warehouse" else stock.warehouse end) as warehouse
 					 from `tabBin` stock %s group by stock.item_code""" % (warehouse, query_filters)
 
-	stock_query_with_item = """select item.item_code, item.item_name, quantity, stock.warehouse, 
-							item.end_of_life as expiry_date from (%s) as stock inner join `tabItem` item 
+	stock_query_with_item = """select item.item_code, item.item_name, quantity, stock.warehouse,
+							item.end_of_life as expiry_date from (%s) as stock inner join `tabItem` item
 							on item.name = stock.item_code %s order by item.end_of_life""" % (stock_query, conditions)
 
 	query_result = frappe.db.sql(stock_query_with_item, as_dict=1)

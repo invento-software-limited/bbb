@@ -65,6 +65,8 @@ def get_conditions(filters, columns):
         conditions.append("sales_invoice_item.item_group = '%s'" % filters.get("item_group"))
     if filters.get("served_by"):
         conditions.append("sales_invoice.served_by = '%s'" % filters.get("served_by"))
+    if filters.get("company"):
+        conditions.append("sales_invoice.company = '%s'" % filters.get("company"))
 
     if conditions:
         conditions = " and ".join(conditions)
