@@ -41,6 +41,9 @@ def get_conditions(filters):
     if filters.get("to_date"):
         conditions.append("sales_invoice.posting_date <= '%s'" % filters.get("to_date"))
 
+    if filters.get("company"):
+        conditions.append("sales_invoice.company = '%s'" % filters.get("company"))
+
     if filters.get("all_outlet"):
         pass
     elif filters.get('outlet'):
@@ -57,22 +60,25 @@ def get_conditions(filters):
 
 
 def get_invoice_data(filters):
+
+    if not filters.get('outlet') and not filters.get('all_outlet'):
+        return []
     conditions = get_conditions(filters)
     invoice_type = filters.get('switch_invoice', "POS Invoice")
     query_result = frappe.db.sql("""
     		select
-    			sales_invoice.grand_total, sales_invoice.served_by, served_by.served_by_id, sales_invoice.total_taxes_and_charges as vat, sales_invoice.name, 
+    			sales_invoice.grand_total, sales_invoice.served_by, served_by.served_by_id, sales_invoice.total_taxes_and_charges as vat, sales_invoice.name,
     			sales_invoice_item.price_list_rate as unit_price, sales_invoice_item.rate as selling_rate,
     			sales_invoice_item.qty as quantity,
     			(sales_invoice_item.qty * item.standard_rate) as mrp_total,
     			((sales_invoice_item.qty * sales_invoice_item.discount_amount)) as discount,
     			(sales_invoice.total - sales_invoice.net_total) as special_discount,
-    			 sales_invoice_item.net_amount, sales_invoice_item.amount as total_amount, sales_invoice.customer_name, 
+    			 sales_invoice_item.net_amount, sales_invoice_item.amount as total_amount, sales_invoice.customer_name,
     			 sales_invoice.total, sales_invoice.rounded_total, sales_invoice.total_taxes_and_charges, sales_invoice.net_total
     		from `tab%s` sales_invoice, `tab%s Item` sales_invoice_item, `tabItem` item, `tabServed By` served_by
     		where sales_invoice.name = sales_invoice_item.parent and item.item_code = sales_invoice_item.item_code and sales_invoice.served_by = served_by.name
-    			and sales_invoice.docstatus = 1 and %s 
-    		order by sales_invoice.name 
+    			and sales_invoice.docstatus = 1 and %s
+    		order by sales_invoice.name
     		""" % (invoice_type, invoice_type, conditions), as_dict=1)
 
     data = {}

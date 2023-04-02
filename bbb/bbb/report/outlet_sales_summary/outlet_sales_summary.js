@@ -27,17 +27,11 @@ frappe.query_reports["Outlet Sales Summary"] = {
 				var company = frappe.query_report.get_filter_value('company');
 				return {
 					filters: {
-						'company': company
+						'company': company,
+            'profile_type': 'Outlet'
 					}
 				};
 			},
-      "on_change": function () {
-        if(this.value === 'Distribution'){
-          frappe.query_report.set_filter_value('switch_invoice', "Sales Invoice");
-        }else{
-          frappe.query_report.set_filter_value('switch_invoice', "POS Invoice");
-        }
-      }
 		},
 		{
 			"fieldname":"switch_invoice",

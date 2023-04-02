@@ -27,12 +27,9 @@ def get_columns(filters):
     #          "width": 100}),
 
     columns = columns + [
-        {"label": _("Brand"), "fieldname": "brand", "fieldtype": "Link", "options": "Brand",
-         "width": 130},
-        {"label": _("Item Category"), "fieldname": "item_group", "fieldtype": "Link", "options": "Item Group",
-         "width": 130},
-        {"label": _("Product Code"), "fieldname": "item_code", "fieldtype": "Text", "options": "Item",
-         "width": 150},
+        {"label": _("Brand"), "fieldname": "brand", "fieldtype": "Text", "width": 130},
+        {"label": _("Item Category"), "fieldname": "item_group", "fieldtype": "Text", "width": 130},
+        {"label": _("Product Code"), "fieldname": "item_code", "fieldtype": "Text", "options": "Item", "width": 150},
             {"label": _("Product Name"), "fieldname": "item_name", "fieldtype": "Text", "options": "Item",
          "width": 800},
         {"label": _("Total Sell Qty"), "fieldname": "total_sale_qty", "fieldtype": "Int", "width": 80},
@@ -74,7 +71,7 @@ def get_conditions(filters, columns):
     if filters.get("all_outlet"):
         pos_profile_list = frappe.db.get_list('POS Profile', {'company': filters.get('company')}, 'name')
         for pos_profile in pos_profile_list:
-            columns.append({"label": _(pos_profile.name), "fieldname": pos_profile.name, "fieldtype": "Link", "width": 120, "options": "POS Profile"})
+            columns.append({"label": _(pos_profile.name), "fieldname": pos_profile.name, "fieldtype": "Text", "width": 120})
 
 
     elif filters.get('outlet'):
@@ -124,7 +121,6 @@ def get_invoice_data(filters, columns):
             index = next((index for (index, d) in enumerate(final_invoice_data) if d['item_code'] == query['item_code']), None)
             final_invoice_data[index]['total_sale_qty'] += query['sales_qty']
             final_invoice_data[index]['mrp_value'] = final_invoice_data[index]['mrp_value'] + (query['mrp_rate'] * query['sales_qty'])
-            final_invoice_data[index]['sell_value'] = final_invoice_data[index]['sell_value'] + (query['selling_rate'] * query['sales_qty'])
             final_invoice_data[index]['sell_value'] = final_invoice_data[index]['sell_value'] + (query['selling_rate'] * query['sales_qty'])
 
             pos_pofile = query['pos_profile']

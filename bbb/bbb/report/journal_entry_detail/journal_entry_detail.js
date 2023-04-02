@@ -27,5 +27,14 @@ frappe.query_reports["Journal Entry Detail"] = {
             "options": ['Journal Entry', 'Inter Company Journal Entry', 'Bank Entry', 'Cash Entry', 'Credit Card Entry', 'Debit Note', 'Credit Note', 'Contra Entry', 'Excise Entry', 'Write Off Entry', 'Opening Entry', 'Depreciation Entry', 'Exchange Rate Revaluation', 'Deferred Revenue', 'Deferred Expense'],
             "width": "60px"
         },
+      {
+        "fieldname":"company",
+        "label": __("Company"),
+        "fieldtype": "Link",
+        "options": "Company",
+        "default": frappe.defaults.get_default("Company"),
+        // "reqd": 1,
+        "width": "60px",
+      },
     ]
 };

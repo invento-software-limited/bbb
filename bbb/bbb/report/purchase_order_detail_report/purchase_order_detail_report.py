@@ -58,8 +58,12 @@ def get_conditions(filters):
 
     if filters.get("item_brand"):
         conditions.append("item.brand='%s'" % filters.get("item_brand"))
+
     if filters.get("supplier"):
         conditions.append("purchase_order.supplier='%s'" % filters.get("supplier"))
+
+    if filters.get("company"):
+        conditions.append("purchase_order.company='%s'" % filters.get("company"))
 
     if conditions:
         conditions = " and ".join(conditions)
@@ -72,9 +76,9 @@ def get_items(filters):
 
     query_result = frappe.db.sql(
         """select distinct date(purchase_order.transaction_date) as date, purchase_order.name as voucher, purchase_order.supplier, purchase_order.order_confirmation_no, item.item_code, item.item_name,
-        item.item_group, sum(item.qty) as qty, item.rate, item.uom, sum(item.amount) as amount, sum(tax.tax_amount) as tax_amount, sum(tax.total) as total, purchase_order.company, purchase_order.grand_total 
-        from `tabPurchase Order` purchase_order 
-        left join `tabPurchase Order Item` item on item.parent=purchase_order.name left join `tabPurchase Taxes and Charges` tax 
+        item.item_group, sum(item.qty) as qty, item.rate, item.uom, sum(item.amount) as amount, sum(tax.tax_amount) as tax_amount, sum(tax.total) as total, purchase_order.company, purchase_order.grand_total
+        from `tabPurchase Order` purchase_order
+        left join `tabPurchase Order Item` item on item.parent=purchase_order.name left join `tabPurchase Taxes and Charges` tax
          on purchase_order.name=tax.parent where purchase_order.docstatus = 1 and {} GROUP BY item_code, voucher, transaction_date ORDER BY purchase_order.transaction_date """.format(
             conditions), as_dict=True)
 
