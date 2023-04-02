@@ -78,6 +78,9 @@ def get_item_price_qty_data(filters):
     if filters.get("status"):
         condition_list.append("pos_opening_entry.status = '%s'" % filters.get("status"))
 
+    if filters.get("company"):
+        condition_list.append("pos_opening_entry.company = '%s'" % filters.get("company"))
+
     if condition_list:
         conditions = "where " + " and ".join(condition_list)
     else:

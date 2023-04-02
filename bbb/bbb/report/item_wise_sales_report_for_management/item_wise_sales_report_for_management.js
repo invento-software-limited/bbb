@@ -20,13 +20,13 @@ frappe.query_reports["Item Wise Sales Report For Management"] = {
 			"reqd": 1,
 			"width": "60px"
 		},
-		{
-			"fieldname":"store",
-			"label": __("Store"),
-			"fieldtype": "Link",
-			"options": "POS Profile",
-			"width": "60px"
-		},
+		// {
+		// 	"fieldname":"store",
+		// 	"label": __("Store"),
+		// 	"fieldtype": "Link",
+		// 	"options": "Warehouse",
+		// 	"width": "60px"
+		// },
 		{
 			"fieldname":"product_code",
 			"label": __("Product Code"),
@@ -63,8 +63,7 @@ frappe.query_reports["Item Wise Sales Report For Management"] = {
 		{
 			"fieldname":"switch_invoice",
 			"label": __("Switch Invoice"),
-			"fieldtype": "Select",
-			"options": ["POS Invoice"],
+			"fieldtype": "Data",
 			"default": "POS Invoice",
 			"reqd": 1,
 			"width": "60px"
@@ -74,17 +73,40 @@ frappe.query_reports["Item Wise Sales Report For Management"] = {
 			"label": __("Outlet"),
 			"fieldtype": "MultiSelectList",
 			"get_data": function(txt) {
-				return frappe.db.get_link_options('POS Profile', txt);
+				return frappe.db.get_link_options('POS Profile', txt, {
+					company: frappe.query_report.get_filter_value("company")
+				});
 			},
 			"width": "60px",
-			"default":"Baily Road"
+			"default":"Baily Road",
+      "on_change": function (){
+          const outlet_list = this.values;
+          if(outlet_list.length === 1){
+            if(outlet_list[0] === "Distribution") {
+              frappe.query_report.set_filter_value('switch_invoice', "Sales Invoice");
+              frappe.query_report.refresh();
+            }
+             frappe.query_report.refresh();
+          }else{
+            frappe.query_report.set_filter_value('switch_invoice', "POS Invoice");
+            frappe.query_report.refresh();
+          }
+      }
 		},
 		{
 			"fieldname":"all_outlet",
 			"label": __("All Outlet"),
 			"fieldtype": "Check",
 			"default": 0,
-			"width": "60px"
+			"width": "60px",
+      "on_change": function (){
+        console.log(this.value)
+        if(this.value === 1){
+          frappe.query_report.set_filter_value('outlet', "");
+          frappe.query_report.set_filter_value('switch_invoice', "POS Invoice");
+          frappe.query_report.refresh();
+        }
+      }
 		},
 		{
 			"fieldname":"company",
@@ -93,7 +115,11 @@ frappe.query_reports["Item Wise Sales Report For Management"] = {
 			"options": "Company",
 			"default": frappe.defaults.get_default("Company"),
 			"reqd": 1,
-			"width": "60px"
+			"width": "60px",
+      "on_change": function (){
+        frappe.query_report.set_filter_value('outlet', "");
+        frappe.query_report.refresh();
+      }
 		},
 	]
 };

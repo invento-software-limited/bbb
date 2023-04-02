@@ -65,6 +65,9 @@ def get_conditions(filters):
     if filters.get("to_date"):
         conditions.append("sales_invoice.posting_date <= '%s'" % filters.get("to_date"))
 
+    if filters.get("company"):
+        conditions.append("sales_invoice.company = '%s'" % filters.get("company"))
+
     if conditions:
         conditions = " and ".join(conditions)
     return conditions
@@ -114,14 +117,14 @@ def get_invoice_data(filters):
     invoice_type = filters.get('switch_invoice', "POS Invoice")
     query_result = frappe.db.sql("""
     		select
-    			sales_invoice.pos_profile, sales_invoice.total_taxes_and_charges as vat, sales_invoice.name, 
+    			sales_invoice.pos_profile, sales_invoice.total_taxes_and_charges as vat, sales_invoice.name,
     			sales_invoice_item.price_list_rate as unit_price, sales_invoice_item.rate as selling_rate,
-    			sales_invoice_item.qty as quantity, sales_invoice.rounding_adjustment, 
+    			sales_invoice_item.qty as quantity, sales_invoice.rounding_adjustment,
     			(sales_invoice_item.qty * item.standard_rate) as mrp_total,
     			(sales_invoice_item.qty * item.buying_rate) as buying_total,
     			((sales_invoice_item.qty * sales_invoice_item.discount_amount)) as discount,
     			(sales_invoice.total - sales_invoice.net_total) as special_discount,
-    			 sales_invoice_item.net_amount, sales_invoice_item.amount as total_amount, sales_invoice.customer_name, 
+    			 sales_invoice_item.net_amount, sales_invoice_item.amount as total_amount, sales_invoice.customer_name,
     			 sales_invoice.total, sales_invoice.rounded_total, sales_invoice.total_taxes_and_charges, sales_invoice.net_total, sales_invoice.rounding_adjustment
     		from `tab%s` sales_invoice, `tab%s Item` sales_invoice_item, `tabItem` item
     		where sales_invoice.name = sales_invoice_item.parent and item.item_code = sales_invoice_item.item_code
@@ -162,6 +165,9 @@ def get_invoice_data(filters):
 
     data = {}
     for result in query_result:
+        profile_type = frappe.db.get_value('POS Profile', result.get('pos_profile', ''), 'profile_type')
+        if profile_type != 'Outlet':
+            continue
         if data.get(result.get('pos_profile')):
             pos_data = data.get(result.get('pos_profile'))
             pos_data['mrp_total'] = pos_data['mrp_total'] + result['mrp_total']

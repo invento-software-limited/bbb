@@ -29,5 +29,14 @@ frappe.query_reports["ALL Outlet  Sale Summary Report"] = {
 			"reqd": 1,
 			"width": "60px"
 		},
+		{
+			"fieldname":"company",
+			"label": __("Company"),
+			"fieldtype": "Link",
+			"options": "Company",
+      "default": frappe.defaults.get_default('company'),
+			// "reqd": 1,
+			"width": "60px"
+		},
 	]
 };
