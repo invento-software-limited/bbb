@@ -56,7 +56,7 @@ frappe.query_reports["Profit-Loss Summary Report"] = {
 			"fieldtype": "Link",
 			"options": "Company",
       "default": frappe.defaults.get_default('company'),
-			"reqd": 1,
+			// "reqd": 1,
 			"width": "60px",
       "on_change": function (){
         frappe.query_report.set_filter_value('switch_invoice', "POS Invoice")
