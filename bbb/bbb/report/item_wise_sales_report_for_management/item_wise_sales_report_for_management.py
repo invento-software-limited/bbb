@@ -67,6 +67,8 @@ def get_conditions(filters, columns):
         conditions.append("sales_invoice_item.item_group = '%s'" % filters.get("item_group"))
     if filters.get("served_by"):
         conditions.append("sales_invoice.served_by = '%s'" % filters.get("served_by"))
+    if filters.get("company"):
+        conditions.append("sales_invoice.company = '%s'" % filters.get("company"))
 
     if conditions:
         conditions = " and ".join(conditions)
@@ -100,7 +102,7 @@ def get_invoice_data(filters, columns):
     		select
     			sales_invoice.pos_profile, item.item_code, item.item_name, item.brand, item.item_group, item.buying_rate,
     			sales_invoice_item.qty as sales_qty, sales_invoice_item.price_list_rate as mrp_rate, sales_invoice_item.rate as selling_rate,
-    			sales_invoice_item.net_amount, sales_invoice_item.amount as sell_value, sales_invoice.set_warehouse as warehouse
+    			sales_invoice_item.net_amount, sales_invoice_item.net_amount as sell_value, sales_invoice.set_warehouse as warehouse
     		from `tab%s` sales_invoice, `tab%s Item` sales_invoice_item, `tabItem` item
     		where sales_invoice.name = sales_invoice_item.parent and item.item_code = sales_invoice_item.item_code
     			and sales_invoice.docstatus = 1 and %s
@@ -110,7 +112,7 @@ def get_invoice_data(filters, columns):
 
     outlet_list = []
     if filters.get("all_outlet"):
-        pos_profile_list = frappe.db.get_list('POS Profile', {'company': filters.get('company')}, 'name')
+        pos_profile_list = frappe.db.get_list('POS Profile', {'company': filters.get('company'), 'profile_type': 'outlet'}, 'name')
         for pos_profile in pos_profile_list:
             outlet_list.append(pos_profile.name)
     elif filters.get('outlet'):
@@ -126,7 +128,6 @@ def get_invoice_data(filters, columns):
             final_invoice_data[index]['mrp_value'] = final_invoice_data[index]['mrp_value'] + (query['mrp_rate'] * query['sales_qty'])
             final_invoice_data[index]['sell_value'] = final_invoice_data[index]['sell_value'] + (query['selling_rate'] * query['sales_qty'])
             final_invoice_data[index]['profit_loss'] = final_invoice_data[index]['profit_loss'] + ((query['selling_rate'] * query['sales_qty']) - (query['buying_rate'] * query['sales_qty']))
-            final_invoice_data[index]['sell_value'] = final_invoice_data[index]['sell_value'] + (query['selling_rate'] * query['sales_qty'])
 
             pos_pofile = query['pos_profile']
             pos_qty = int(final_invoice_data[index][pos_pofile]) + int(query['sales_qty'])

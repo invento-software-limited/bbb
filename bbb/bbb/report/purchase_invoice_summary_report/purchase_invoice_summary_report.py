@@ -56,6 +56,9 @@ def get_conditions(filters):
     if filters.get("supplier"):
         conditions.append("invoice.supplier='%s'" % filters.get("supplier"))
 
+    if filters.get("company"):
+        conditions.append("invoice.company='%s'" % filters.get("company"))
+
     if conditions:
         conditions = " and ".join(conditions)
     return conditions
@@ -66,15 +69,15 @@ def get_items(filters):
     conditions = get_conditions(filters)
 
     query_result = frappe.db.sql(
-        """select date(invoice.posting_date) as date, invoice.name as voucher, invoice.supplier, invoice.total_qty as qty, tax.tax_amount as tax_amount, 
+        """select date(invoice.posting_date) as date, invoice.name as voucher, invoice.supplier, invoice.total_qty as qty, tax.tax_amount as tax_amount,
         tax.total, invoice.company, invoice.grand_total, invoice.rounded_total, invoice.net_total as amount, sum(invoice.grand_total - invoice.outstanding_amount) as paid_amount,
-         invoice.outstanding_amount as due_amount from `tabPurchase Invoice` invoice left join `tabPurchase Taxes and Charges` tax 
+         invoice.outstanding_amount as due_amount from `tabPurchase Invoice` invoice left join `tabPurchase Taxes and Charges` tax
          on invoice.name=tax.parent where invoice.docstatus = 1 and {} GROUP BY voucher, posting_date ORDER BY invoice.posting_date """.format(
             conditions), as_dict=True)
 
     shipping_charges = frappe.db.sql(
-        """select invoice.name, tax.tax_amount, tax.total, invoice.company from `tabPurchase Invoice` invoice join `tabPurchase Invoice Item` item on 
-        item.parent=invoice.name join `tabPurchase Taxes and Charges` tax 
+        """select invoice.name, tax.tax_amount, tax.total, invoice.company from `tabPurchase Invoice` invoice join `tabPurchase Invoice Item` item on
+        item.parent=invoice.name join `tabPurchase Taxes and Charges` tax
          on invoice.name=tax.parent where invoice.docstatus = 1 and tax.charge_type='Actual' and {} ORDER BY invoice.posting_date""".format(
             conditions), as_dict=True)
 

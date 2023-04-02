@@ -35,6 +35,10 @@ def get_conditions(filters):
         conditions.append(("invoice.pos_profile = '%s'" % filters.get("pos_profile")))
     if filters.get('customer'):
         conditions.append(("invoice.customer = '%s'" % filters.get("customer")))
+    if filters.get('company'):
+        conditions.append(("invoice.company = '%s'" % filters.get("company")))
+
+    conditions.append("invoice.docstatus = 1")
 
     if conditions:
         conditions = " and ".join(conditions)
@@ -54,7 +58,7 @@ def get_invoice_data(filters):
         invoice_query += """ where %s group by invoice.customer""" % conditions
 
     customer_sales_summary_query = """select total_invoice, total_amount, customer, customer.mobile_number, invoice_group.pos_profile,
-                                    customer.customer_group, customer.customer_type from (%s) as invoice_group inner join `tabCustomer` customer 
+                                    customer.customer_group, customer.customer_type from (%s) as invoice_group inner join `tabCustomer` customer
                                     on customer.name = invoice_group.customer order by total_amount desc""" % invoice_query
 
     query_result = frappe.db.sql(customer_sales_summary_query, as_dict=1)

@@ -64,6 +64,8 @@ def get_conditions(filters):
         conditions.append("pos_invoice.party_name='%s'" % filters.get("customer"))
     if filters.get("served_by"):
         conditions.append("pos_invoice.served_by='%s'" % filters.get("served_by"))
+    if filters.get("company"):
+        conditions.append("pos_invoice.company='%s'" % filters.get("company"))
 
     if conditions:
         conditions = " and ".join(conditions)
@@ -74,9 +76,9 @@ def get_items(filters):
     "Get items based on item code or item group or brand."
     conditions = get_conditions(filters)
     query_result = frappe.db.sql(
-        """select distinct date(pos_invoice.posting_date) as date, pos_invoice.name as voucher, pos_invoice.po_no, pos_invoice.po_date, pos_invoice.customer_name, 
-        item.item_code, item.item_name, item.brand, item.item_group, item.qty, item.rate, item.uom, item.amount, tax.tax_amount, tax.total, 
-        pos_invoice.served_by, pos_invoice.company from `tabPOS Invoice Item` item left join `tabPOS Invoice` pos_invoice on item.parent=pos_invoice.name 
+        """select distinct date(pos_invoice.posting_date) as date, pos_invoice.name as voucher, pos_invoice.po_no, pos_invoice.po_date, pos_invoice.customer_name,
+        item.item_code, item.item_name, item.brand, item.item_group, item.qty, item.rate, item.uom, item.amount, tax.tax_amount, tax.total,
+        pos_invoice.served_by, pos_invoice.company from `tabPOS Invoice Item` item left join `tabPOS Invoice` pos_invoice on item.parent=pos_invoice.name
         left join `tabSales Taxes and Charges` tax on pos_invoice.name=tax.parent where pos_invoice.docstatus = 1 and {} ORDER BY pos_invoice.posting_date""".format(
             conditions),
         as_dict=True)

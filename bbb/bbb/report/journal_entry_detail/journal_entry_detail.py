@@ -40,6 +40,9 @@ def get_conditions(filters):
     if filters.get("voucher_type"):
         conditions.append("voucher.voucher_type = '%s'" % filters.get("voucher_type"))
 
+    if filters.get("company"):
+        conditions.append("voucher.company = '%s'" % filters.get("company"))
+
     if conditions:
         conditions = " and ".join(conditions)
     return conditions

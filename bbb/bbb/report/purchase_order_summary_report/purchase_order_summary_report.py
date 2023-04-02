@@ -43,6 +43,8 @@ def get_conditions(filters):
         conditions.append("purchase_order.brand='%s'" % filters.get("item_brand"))
     if filters.get("supplier"):
         conditions.append("purchase_order.supplier='%s'" % filters.get("supplier"))
+    if filters.get("company"):
+        conditions.append("purchase_order.company='%s'" % filters.get("company"))
     if conditions:
         conditions = " and ".join(conditions)
     return conditions
@@ -53,13 +55,13 @@ def get_items(filters):
     brand = filters.get("item_brand", '')
     if brand:
         items = frappe.db.sql(
-            """select date(purchase_order.transaction_date) as date, purchase_order.supplier, sum(purchase_order.total_qty) as qty, sum(purchase_order.total) as amount, purchase_order.company, 
+            """select date(purchase_order.transaction_date) as date, purchase_order.supplier, sum(purchase_order.total_qty) as qty, sum(purchase_order.total) as amount, purchase_order.company,
             sum(purchase_order.total_taxes_and_charges) as tax_amount , sum(purchase_order.grand_total) as grand_total from `tabPurchase Order` purchase_order where {} group by purchase_order.transaction_date, purchase_order.supplier order by purchase_order.transaction_date ASC """.format(
                 conditions),
             as_dict=True)
     else:
         items = frappe.db.sql(
-            """select date(purchase_order.transaction_date) as date, purchase_order.supplier, sum(purchase_order.total_qty) as qty, sum(purchase_order.total) as amount, purchase_order.company, 
+            """select date(purchase_order.transaction_date) as date, purchase_order.supplier, sum(purchase_order.total_qty) as qty, sum(purchase_order.total) as amount, purchase_order.company,
             sum(purchase_order.total_taxes_and_charges) as tax_amount , sum(purchase_order.grand_total) as grand_total from `tabPurchase Order` purchase_order where {} group by purchase_order.transaction_date, purchase_order.supplier order by purchase_order.transaction_date ASC """.format(
                 conditions),
             as_dict=True)

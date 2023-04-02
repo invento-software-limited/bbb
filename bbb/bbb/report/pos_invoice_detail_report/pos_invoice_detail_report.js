@@ -65,6 +65,7 @@ frappe.query_reports["POS Invoice Detail Report"] = {
 			"label": __("Company"),
 			"fieldtype": "Link",
 			"width": "80",
+      "reqd" : 1,
 			"options": "Company",
 			"default": frappe.defaults.get_default("company")
 		},

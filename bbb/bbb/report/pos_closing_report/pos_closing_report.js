@@ -25,7 +25,15 @@ frappe.query_reports["POS Closing Report"] = {
 			"label": __("POS Profile"),
 			"fieldtype": "Link",
 			"options": "POS Profile",
-			"width": "60px"
+			"width": "60px",
+      "get_query": () => {
+				var company = frappe.query_report.get_filter_value('company');
+				return {
+					filters: {
+						'company': company
+					}
+				};
+			},
 		},
 		{
 			"fieldname":"status",
@@ -33,6 +41,19 @@ frappe.query_reports["POS Closing Report"] = {
 			"fieldtype": "Select",
 			"options": ["Open", "Closed"],
 			"width": "60px"
+		},
+    {
+			"fieldname":"company",
+			"label": __("Company"),
+			"fieldtype": "Link",
+			"options": "Company",
+      "default": frappe.defaults.get_default('company'),
+			// "reqd": 1,
+			"width": "60px",
+      "on_change": function (){
+          frappe.query_report.set_filter_value('pos_profile', "");
+        frappe.query_report.refresh();
+      }
 		},
 	]
 };

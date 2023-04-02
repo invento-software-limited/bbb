@@ -46,7 +46,7 @@ def get_all_product_group(filters):
     query_string = """SELECT item.item_code as item_code, item.item_name as item_name, %s,
         			SUM(item.net_amount) as amount, item.item_group as item_group, invoice.pos_profile as pos_profile
         			FROM `tabSales Invoice Item` item
-        			LEFT JOIN  `tabSales Invoice` invoice ON (item.parent = invoice.name) 
+        			LEFT JOIN  `tabSales Invoice` invoice ON (item.parent = invoice.name)
         			WHERE invoice.docstatus = 1 %s GROUP BY item.item_name %s
         		    """ % (quantity_sub_query, conditions, sort_by)
 
@@ -70,6 +70,9 @@ def get_product_conditions(filters):
 
     if filters.get("pos_profile"):
         conditions += " and invoice.pos_profile = '%s'" % filters.get("pos_profile")
+
+    if filters.get("company"):
+        conditions += " and invoice.company = '%s'" % filters.get("company")
 
     # order_by = filters.get('order_by').lower()
     sort_by = "" if filters.get('sort_by') == "Ascending" else "DESC"

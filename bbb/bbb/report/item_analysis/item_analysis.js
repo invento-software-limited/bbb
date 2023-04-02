@@ -57,6 +57,15 @@ frappe.query_reports["Item Analysis"] = {
 			"width": "100",
 			"options": [10, 20, 50, 100, 200, 500, 1000, "All"],
 			"default": 20
-		}
+		},
+    {
+			"fieldname":"company",
+			"label": __("Company"),
+			"fieldtype": "Link",
+			"options": "Company",
+      "default": frappe.defaults.get_default('company'),
+			// "reqd": 1,
+			"width": "60px"
+		},
 	]
 };
