@@ -4,6 +4,7 @@ import datetime
 from frappe.utils import money_in_words, flt, cint
 from frappe import _
 
+from erpnext.accounts.doctype.pricing_rule.utils import filter_pricing_rules_for_qty_amount
 
 class CustomerValidationError(frappe.ValidationError): pass
 
@@ -379,7 +380,6 @@ def calculate_discount_amount(doc, pricing_rule):
 # Transaction base discount
 @frappe.whitelist()
 def apply_pricing_rule_on_tag(doc):
-    from erpnext.accounts.doctype.pricing_rule.utils import filter_pricing_rules_for_qty_amount
     values = {}
     conditions = get_tag_conditions(values)
     doc = json.loads(doc)
@@ -402,8 +402,13 @@ def apply_pricing_rule_on_tag(doc):
             if not item.get('price_rule_tag', None):
                 continue
             if item.get('price_rule_tag') == pricing_rules[0].get('tag', None):
-                total_amount += cint(item.get('rate')) * cint(item.get('qty'))
-                total_qty += cint(item.get('qty'))
+                if item.get('qty') < 0:
+                    qty = (-1) * item.get('qty')
+                else:
+                    qty = item.get('qty')
+
+                total_amount += cint(item.get('rate')) * cint(qty)
+                total_qty += cint(qty)
 
         pricing_rules = filter_pricing_rules_for_qty_amount(total_qty, total_amount, pricing_rules)
         rules_name_list = []
@@ -455,3 +460,41 @@ def apply_pricing_rule_on_tag(doc):
         # 	apply_pricing_rule_for_free_items(doc, item_details.free_item_data)
         # 	doc.set_missing_values()
         # 	doc.calculate_taxes_and_totals()
+
+
+@frappe.whitelist()
+def apply_pricing_rule_on_tag_return(doc):
+    values = {}
+    conditions = get_tag_conditions(values)
+    doc = json.loads(doc)
+    pricing_rules = frappe.db.sql(
+        """ Select `tabPricing Rule`.* from `tabPricing Rule`
+        where  {conditions} and `tabPricing Rule`.disable = 0 order by `tabPricing Rule`.priority desc
+    """.format(
+            conditions=conditions
+        ),
+        values,
+        as_dict=1,
+    )
+    if pricing_rules:
+        total_amount = 0
+        total_qty = 0
+        discount_amount = 0
+
+        items = doc.get('items', [])
+        for item in items:
+            if not item.get('price_rule_tag', None):
+                continue
+            if item.get('price_rule_tag') == pricing_rules[0].get('tag', None):
+                total_amount += cint(item.get('rate')) * cint(item.get('qty'))
+                total_qty += cint(item.get('qty'))
+
+        pricing_rules = filter_pricing_rules_for_qty_amount(total_qty, total_amount, pricing_rules)
+        rules_name_list = []
+        tag_name_list = []
+        for d in pricing_rules:
+            if d.price_or_product_discount == "Price":
+                discount_amount += calculate_discount_amount(doc, d)
+                rules_name_list.append(d.title)
+                tag_name_list.append(d.tag)
+        return {'discount_amount': discount_amount, 'rules_name_list': rules_name_list, 'tag_name_list': tag_name_list}
