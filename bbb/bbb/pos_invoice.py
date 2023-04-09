@@ -402,10 +402,10 @@ def apply_pricing_rule_on_tag(doc):
             if not item.get('price_rule_tag', None):
                 continue
             if item.get('price_rule_tag') == pricing_rules[0].get('tag', None):
-                if item.get('qty') < 0:
-                    qty = (-1) * item.get('qty')
+                if cint(item.get('qty')) < 0:
+                    qty = (-1) * cint(item.get('qty'))
                 else:
-                    qty = item.get('qty')
+                    qty = cint(item.get('qty'))
 
                 total_amount += cint(item.get('rate')) * cint(qty)
                 total_qty += cint(qty)
