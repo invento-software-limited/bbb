@@ -60,26 +60,6 @@ frappe.query_reports["Item Wise Sales Report For Retail Ops"] = {
             "width": "80",
             "options": "Brand",
         },
-{
-			"fieldname":"sales_type",
-			"label": __("Sales Type"),
-			"fieldtype": "Select",
-			"options": ["Outlet", "Distribution", "Online"],
-      "default": "Outlet",
-      "on_change": function (){
-          const sales_type = this.value;
-          if(sales_type === "Distribution") {
-            frappe.query_report.set_filter_value('switch_invoice', "Sales Invoice");
-            frappe.query_report.set_filter_value('outlet', []);
-            frappe.query_report.set_filter_value('all_outlet', 0);
-            frappe.query_report.refresh();
-          }else{
-            frappe.query_report.set_filter_value('switch_invoice', "POS Invoice");
-            frappe.query_report.set_filter_value('outlet', []);
-            frappe.query_report.refresh();
-          }
-      }
-		},
 		{
 			"fieldname":"outlet",
 			"label": __("Outlet"),
@@ -87,7 +67,7 @@ frappe.query_reports["Item Wise Sales Report For Retail Ops"] = {
 			"get_data": function(txt) {
 				return frappe.db.get_link_options('POS Profile', txt, {
 					company: frappe.query_report.get_filter_value("company"),
-          profile_type: frappe.query_report.get_filter_value('sales_type')
+          profile_type: 'Outlet'
 				});
 			},
 			"width": "60px",
@@ -102,7 +82,6 @@ frappe.query_reports["Item Wise Sales Report For Retail Ops"] = {
       "on_change": function (){
         frappe.query_report.set_filter_value('switch_invoice', "POS Invoice");
         frappe.query_report.set_filter_value('outlet', []);
-        frappe.query_report.set_filter_value('sales_type', 'Outlet');
         frappe.query_report.refresh();
       }
 		},

@@ -69,9 +69,9 @@ def get_conditions(filters, columns):
         conditions = " and ".join(conditions)
 
     if filters.get("all_outlet"):
-        pos_profile_list = frappe.db.get_list('POS Profile', {'company': filters.get('company')}, 'name')
+        pos_profile_list = frappe.db.get_list('POS Profile', {'company': filters.get('company'), 'profile_type': 'outlet'}, 'name')
         for pos_profile in pos_profile_list:
-            columns.append({"label": _(pos_profile.name), "fieldname": pos_profile.name, "fieldtype": "Text", "width": 120})
+            columns.append({"label": _(pos_profile.name), "fieldname": pos_profile.name, "fieldtype": "Int", "width": 120})
 
 
     elif filters.get('outlet'):
@@ -105,9 +105,10 @@ def get_invoice_data(filters, columns):
 
 
 
-    outlet_list = []
+
     if filters.get("all_outlet"):
-        pos_profile_list = frappe.db.get_list('POS Profile', {'company': filters.get('company')}, 'name')
+        outlet_list = []
+        pos_profile_list = frappe.db.get_list('POS Profile', {'company': filters.get('company'), 'profile_type': 'outlet'}, 'name')
         for pos_profile in pos_profile_list:
             outlet_list.append(pos_profile.name)
     elif filters.get('outlet'):

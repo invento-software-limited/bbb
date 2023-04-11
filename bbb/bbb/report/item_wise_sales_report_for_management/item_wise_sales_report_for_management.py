@@ -74,9 +74,9 @@ def get_conditions(filters, columns):
         conditions = " and ".join(conditions)
 
     if filters.get("all_outlet"):
-        pos_profile_list = frappe.db.get_list('POS Profile', {'company': filters.get('company')}, 'name')
+        pos_profile_list = frappe.db.get_list('POS Profile', {'company': filters.get('company'), 'profile_type': 'outlet'}, 'name')
         for pos_profile in pos_profile_list:
-            columns.append({"label": _(pos_profile.name), "fieldname": pos_profile.name, "fieldtype": "Link", "width": 120, "options": "POS Profile"})
+            columns.append({"label": _(pos_profile.name), "fieldname": pos_profile.name, "fieldtype": "Int", "width": 120, "options": "POS Profile"})
 
 
     elif filters.get('outlet'):

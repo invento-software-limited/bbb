@@ -191,7 +191,7 @@ def get_item_total_discount_amount(doctype, docname):
     invoice = frappe.get_doc(doctype, docname)
     items = invoice.items
     item_total_discount = 0
-    
+
     for item in items:
         qty = -1 * item.qty if item.qty < 0 else item.qty
         mrp_amount = float(qty) * float(item.price_list_rate)
@@ -361,3 +361,69 @@ def get_item_rate_discount(return_against, item_code):
 #         return False
 #     else:
 #         return True
+
+
+@frappe.whitelist()
+def resolved_accounts_receivable():
+    sales_invoices = get_accounts_receivable_invoices()
+    invoice_list = []
+    i = 0
+    for invoice in sales_invoices:
+        if i == 63:
+            continue
+
+        i += 1
+
+        sales_invoice = frappe.get_doc('Sales Invoice', invoice.get('name'))
+        payments = sales_invoice.payments
+        invoice_list.append(sales_invoice.name)
+        if sales_invoice.rounded_total > 0 and sales_invoice.paid_amount > sales_invoice.rounded_total and len(payments) == 1:
+            outstanding_amount = sales_invoice.outstanding_amount
+            if outstanding_amount < 0:
+                debtors_gl = frappe.get_doc('GL Entry', {'voucher_no': invoice.get('name'), 'account': 'Debtors - BBB',
+                                                         'credit': sales_invoice.paid_amount})
+                against_ac = debtors_gl.against
+                paid_gl = frappe.get_doc('GL Entry', {'voucher_no': invoice.get('name'), 'account': against_ac})
+
+                frappe.db.sql(
+                    """UPDATE `tabGL Entry` SET credit = '%s', credit_in_account_currency = '%s' WHERE name='%s'""" % (sales_invoice.rounded_total,
+                    sales_invoice.rounded_total, debtors_gl.name))
+
+                frappe.db.sql(
+                    """UPDATE `tabGL Entry` SET debit = '%s', debit_in_account_currency = '%s' WHERE name='%s'""" % (sales_invoice.rounded_total,
+                    sales_invoice.rounded_total, paid_gl.name))
+
+                frappe.db.sql(
+                    """UPDATE `tabSales Invoice` SET paid_amount = '%s', outstanding_amount = '0' WHERE name='%s'""" % (sales_invoice.rounded_total, sales_invoice.name))
+
+
+
+                payment = payments[0]
+                frappe.db.sql(
+                    """UPDATE `tabSales Invoice Payment` SET amount = '%s' WHERE name='%s'""" % (sales_invoice.rounded_total, payment.name))
+
+
+                frappe.db.commit()
+
+                # print(gl_list)
+                # elif outstanding_amount > 0:
+                #     print(sales_invoice)
+                #     print(outstanding_amount)
+    # print(invoice_list)
+    # print(len(sales_invoices))
+
+
+from erpnext.accounts.report.accounts_receivable.accounts_receivable import ReceivablePayableReport
+
+
+def get_accounts_receivable_invoices():
+    # args = {
+    #     "party_type": "Customer",
+    #     "naming_by": ["Selling Settings", "cust_master_name"],
+    # }
+    # filters = {'company': 'BD Budget Beauty', 'report_date': '2023-04-05', 'ageing_based_on': 'Due Date', 'range1': 30,
+    #  'range2': 60, 'range3': 90, 'range4': 120}
+    # return ReceivablePayableReport(filters).run(args)
+
+    sales_invoices = frappe.db.get_list('Sales Invoice', {'docstatus': 1, 'outstanding_amount': ["!=", 0]}, 'name')
+    return sales_invoices
