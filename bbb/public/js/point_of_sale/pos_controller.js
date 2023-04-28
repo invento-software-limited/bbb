@@ -935,8 +935,8 @@ erpnext.PointOfSale.Controller = class {
         const me = this
         let res= me.apply_pricing_rule_on_tag(this.frm.doc)
         let additional_discount = (parseFloat(res.discount_amount)).toFixed(2)
-        let tag_name_list = res.tag_name_list
-        let rules_name_list = res.rules_name_list
+        let tag_name_list = res.tag_name_list || []
+        let rules_name_list = res.rules_name_list || []
         if(additional_discount !== undefined){
             let tag_name = tag_name_list.join(',');
             let rules_name = rules_name_list.join(',');
