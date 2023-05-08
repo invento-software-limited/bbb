@@ -1,0 +1,200 @@
+{
+ "actions": [],
+ "allow_rename": 1,
+ "autoname": "CF-.YYYY.MM.DD.#.",
+ "creation": "2023-04-15 11:24:50.513429",
+ "doctype": "DocType",
+ "editable_grid": 1,
+ "engine": "InnoDB",
+ "field_order": [
+  "voucher_no",
+  "status",
+  "customer",
+  "overall_rating",
+  "column_break_3",
+  "company",
+  "customer_feedback_taken_user",
+  "product_feedback_taken_user",
+  "posting_date",
+  "posting_time",
+  "item_section",
+  "items",
+  "customer_feedback_section",
+  "how_helpful_service_team",
+  "how_easy_to_find",
+  "service_comments",
+  "overall_customer_feedback_rating",
+  "product_feedback_section",
+  "product_quality",
+  "recommended_product",
+  "product_comments",
+  "overall_product_feedback_rating",
+  "amended_from"
+ ],
+ "fields": [
+  {
+   "fieldname": "voucher_no",
+   "fieldtype": "Link",
+   "label": "Voucher No",
+   "options": "POS Invoice",
+   "read_only": 1
+  },
+  {
+   "fetch_from": "voucher_no.customer",
+   "fieldname": "customer",
+   "fieldtype": "Link",
+   "in_list_view": 1,
+   "label": "Customer",
+   "options": "Customer",
+   "read_only": 1,
+   "reqd": 1
+  },
+  {
+   "fieldname": "column_break_3",
+   "fieldtype": "Column Break"
+  },
+  {
+   "fieldname": "posting_date",
+   "fieldtype": "Date",
+   "label": "Posting Date",
+   "read_only": 1,
+   "set_only_once": 1
+  },
+  {
+   "fieldname": "posting_time",
+   "fieldtype": "Time",
+   "label": "Posting Time",
+   "read_only": 1,
+   "set_only_once": 1
+  },
+  {
+   "fieldname": "amended_from",
+   "fieldtype": "Link",
+   "label": "Amended From",
+   "no_copy": 1,
+   "options": "Customer Feedback",
+   "print_hide": 1,
+   "read_only": 1
+  },
+  {
+   "default": "1.2",
+   "fieldname": "overall_rating",
+   "fieldtype": "Rating",
+   "label": "Overall Rating"
+  },
+  {
+   "allow_on_submit": 1,
+   "fieldname": "status",
+   "fieldtype": "Select",
+   "in_list_view": 1,
+   "label": "Status",
+   "options": "Open\nPurchased Customer Feedback\nFollow-up Customer Feedback\nCustomer Feedback Collected\nProduct Feedback Collected\nIncomplete\nCompleted",
+   "read_only": 1
+  },
+  {
+   "allow_on_submit": 1,
+   "fieldname": "product_feedback_section",
+   "fieldtype": "Section Break",
+   "label": "Product Feedback"
+  },
+  {
+   "allow_on_submit": 1,
+   "fieldname": "customer_feedback_section",
+   "fieldtype": "Section Break",
+   "label": "Customer Feedback"
+  },
+  {
+   "fieldname": "how_helpful_service_team",
+   "fieldtype": "Rating",
+   "label": "How helpful was our customer service team?  (1-5 scale)"
+  },
+  {
+   "fieldname": "how_easy_to_find",
+   "fieldtype": "Rating",
+   "label": "How easy was it to find what you were looking for on our website?  (1-5 scale)"
+  },
+  {
+   "fieldname": "product_quality",
+   "fieldtype": "Rating",
+   "label": "How satisfied were you with the quality of our products? (1-5 scale)"
+  },
+  {
+   "fieldname": "recommended_product",
+   "fieldtype": "Rating",
+   "label": "How likely are you to recommend our products/services to a friend or colleague? (1-5 scale)"
+  },
+  {
+   "fieldname": "product_comments",
+   "fieldtype": "Text",
+   "label": "Is there anything else you would like to share with us?"
+  },
+  {
+   "fieldname": "service_comments",
+   "fieldtype": "Text",
+   "label": "Is there anything else you would like to share with us?"
+  },
+  {
+   "fieldname": "overall_customer_feedback_rating",
+   "fieldtype": "Rating",
+   "label": "Overall Customer Feedback Rating  (1-5 scale)"
+  },
+  {
+   "fieldname": "overall_product_feedback_rating",
+   "fieldtype": "Rating",
+   "label": "Overall Product Feedback Rating  (1-5 scale)",
+   "set_only_once": 1
+  },
+  {
+   "fieldname": "company",
+   "fieldtype": "Link",
+   "label": "Company",
+   "options": "Company",
+   "read_only": 1
+  },
+  {
+   "fieldname": "item_section",
+   "fieldtype": "Section Break",
+   "label": "Purchased Items"
+  },
+  {
+   "fieldname": "items",
+   "fieldtype": "Table",
+   "options": "Customer Feedback Item",
+   "read_only": 1
+  },
+  {
+   "fieldname": "customer_feedback_taken_user",
+   "fieldtype": "Link",
+   "options": "User"
+  },
+  {
+   "fieldname": "product_feedback_taken_user",
+   "fieldtype": "Link",
+   "options": "User"
+  }
+ ],
+ "index_web_pages_for_search": 1,
+ "links": [],
+ "modified": "2023-05-02 21:59:52.103275",
+ "modified_by": "Administrator",
+ "module": "Bbb",
+ "name": "Customer Feedback",
+ "owner": "Administrator",
+ "permissions": [
+  {
+   "create": 1,
+   "delete": 1,
+   "email": 1,
+   "export": 1,
+   "print": 1,
+   "read": 1,
+   "report": 1,
+   "role": "System Manager",
+   "share": 1,
+   "write": 1
+  }
+ ],
+ "sort_field": "modified",
+ "sort_order": "DESC",
+ "track_changes": 1
+}

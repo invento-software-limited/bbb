@@ -934,9 +934,9 @@ erpnext.PointOfSale.Controller = class {
     update_additional_discount_on_tag(item_row=undefined){
         const me = this
         let res= me.apply_pricing_rule_on_tag(this.frm.doc)
-        let additional_discount = (parseFloat(res.discount_amount)).toFixed(2)
-        let tag_name_list = res.tag_name_list
-        let rules_name_list = res.rules_name_list
+        let additional_discount = (parseFloat(res.discount_amount)).toFixed(2) || 0.00
+        let tag_name_list = res.tag_name_list || []
+        let rules_name_list = res.rules_name_list || []
         if(additional_discount !== undefined){
             let tag_name = tag_name_list.join(',');
             let rules_name = rules_name_list.join(',');
@@ -1329,9 +1329,13 @@ erpnext.PointOfSale.Controller = class {
                 },
                 callback: function(r) {
                     let res = r.message
-                    discount_amount = res.discount_amount
-                    tag_name_list = res.tag_name_list
-                    rules_name_list = res.rules_name_list
+                  console.log(r.message)
+                    if(res){
+                      discount_amount = res.discount_amount
+                      tag_name_list = res.tag_name_list
+                      rules_name_list = res.rules_name_list
+                    }
+
 
                 }
             });
