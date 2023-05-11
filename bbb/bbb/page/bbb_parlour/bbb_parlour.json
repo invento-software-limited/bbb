@@ -1,0 +1,27 @@
+{
+ "content": null,
+ "creation": "2023-05-08 11:45:13.890574",
+ "docstatus": 0,
+ "doctype": "Page",
+ "idx": 0,
+ "modified": "2023-05-08 11:45:13.890574",
+ "modified_by": "Administrator",
+ "module": "Bbb",
+ "name": "bbb-parlour",
+ "owner": "Administrator",
+ "page_name": "bbb-parlour",
+ "restrict_to_domain": "",
+ "roles": [
+  {
+   "role": "System Manager"
+  },
+  {
+   "role": "BBB Admin"
+  }
+ ],
+ "script": null,
+ "standard": "Yes",
+ "style": null,
+ "system_page": 0,
+ "title": "BBB Parlour"
+}

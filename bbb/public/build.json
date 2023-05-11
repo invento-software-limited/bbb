@@ -12,6 +12,16 @@
 		"public/js/point_of_sale/pos_past_order_summary.js",
 		"public/js/point_of_sale/pos_controller.js"
 	],
+  "js/parlour.min.js": [
+		"public/js/parlour/pos_item_selector.js",
+		"public/js/parlour/pos_item_cart.js",
+		"public/js/parlour/pos_item_details.js",
+		"public/js/parlour/pos_number_pad.js",
+		"public/js/parlour/pos_payment.js",
+		"public/js/parlour/pos_past_order_list.js",
+		"public/js/parlour/pos_past_order_summary.js",
+		"public/js/parlour/pos_controller.js"
+	],
 	"js/custom-app-include-js.js": [
 		"public/js/customer_quick_entry.js"
 	]
