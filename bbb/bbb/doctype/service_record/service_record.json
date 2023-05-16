@@ -99,10 +99,10 @@
   {
    "fieldname": "service_consumable_items_section",
    "fieldtype": "Section Break",
-   "hidden": 1,
    "label": "Service Consumable Items"
   },
   {
+   "fetch_from": "service_code.consumable_items",
    "fieldname": "service_consumable_items",
    "fieldtype": "Table",
    "options": "Service Consumable Items"
@@ -207,7 +207,7 @@
  "index_web_pages_for_search": 1,
  "is_submittable": 1,
  "links": [],
- "modified": "2023-05-11 15:38:27.307248",
+ "modified": "2023-05-15 10:57:51.272214",
  "modified_by": "Administrator",
  "module": "Bbb",
  "name": "Service Record",

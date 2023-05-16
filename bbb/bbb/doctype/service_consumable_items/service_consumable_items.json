@@ -10,7 +10,11 @@
   "item_name",
   "brand",
   "uom",
-  "qty"
+  "column_break_5",
+  "qty",
+  "batch_no",
+  "serial_no",
+  "valuation_rate"
  ],
  "fields": [
   {
@@ -57,12 +61,33 @@
    "in_list_view": 1,
    "label": "Qty",
    "reqd": 1
+  },
+  {
+   "fetch_from": "item_code.batch_number_series",
+   "fieldname": "batch_no",
+   "fieldtype": "Data",
+   "label": "Batch No"
+  },
+  {
+   "fetch_from": "item_code.serial_no_series",
+   "fieldname": "serial_no",
+   "fieldtype": "Data",
+   "label": "Serial No"
+  },
+  {
+   "fieldname": "valuation_rate",
+   "fieldtype": "Currency",
+   "label": "Valuation Rate"
+  },
+  {
+   "fieldname": "column_break_5",
+   "fieldtype": "Column Break"
   }
  ],
  "index_web_pages_for_search": 1,
  "istable": 1,
  "links": [],
- "modified": "2023-05-11 15:57:49.043568",
+ "modified": "2023-05-16 11:50:17.085341",
  "modified_by": "Administrator",
  "module": "Bbb",
  "name": "Service Consumable Items",
