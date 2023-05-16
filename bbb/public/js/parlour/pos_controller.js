@@ -610,6 +610,7 @@ erpnext.PointOfSale.Controller = class {
   }
 
   create_service_record(result) {
+    console.log("printed")
     var res = undefined
     frappe.call({
       method: 'bbb.bbb.parlour.create_service_record',
