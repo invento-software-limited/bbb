@@ -42,18 +42,32 @@ function convertSecondsToTime(seconds) {
   if (seconds < 60) {
     return `${seconds}sec`;
   }
-  var hours = Math.floor(seconds / 3600); // Extract hours from minutes
-  var remaining = seconds % 3600; // Calculate remaining seconds
-  var minutes = Math.floor(remaining / 60); // Extract minutes from seconds
-  var remainingSeconds = minutes % 60; // Calculate remaining seconds
-  if (hours > 0) {
-    return `${hours}h ${minutes}min ${remainingSeconds}sec`;
-  } else {
-    return `${minutes}min ${remainingSeconds}sec`;
-  }
+  seconds = Number(seconds);
+  var h = Math.floor(seconds / 3600);
+  var m = Math.floor(seconds % 3600 / 60);
+  var s = Math.floor(seconds % 3600 % 60);
+
+  var hDisplay = h > 0 ? (h + "h ") : "";
+  var mDisplay = m > 0 ? (m + "min ") : "";
+  var sDisplay = s > 0 ? (s + "sec") : "";
+  return hDisplay + mDisplay + sDisplay
+
+  // if (seconds < 60) {
+  //   return `${seconds}sec`;
+  // }
+  // var hours = Math.floor(seconds / 3600); // Extract hours from minutes
+  // var remaining = seconds % 3600; // Calculate remaining seconds
+  // var minutes = Math.floor(remaining / 60); // Extract minutes from seconds
+  // var remainingSeconds = minutes % 60; // Calculate remaining seconds
+  // if (hours > 0) {
+  //   return `${hours}h ${minutes}min ${remainingSeconds}sec`;
+  // } else {
+  //   return `${minutes}min ${remainingSeconds}sec`;
+  // }
 }
 
 erpnext.timesheet.control_timer = function (frm, dialog, row, timestamp = 0) {
+
   var $btn_start = dialog.$wrapper.find(".playpause .btn-start");
   var $btn_pause = dialog.$wrapper.find(".playpause .btn-pause");
   var $btn_resume = dialog.$wrapper.find(".playpause .btn-resume");
@@ -110,6 +124,8 @@ erpnext.timesheet.control_timer = function (frm, dialog, row, timestamp = 0) {
 
     let service_time = moment(frappe.datetime.now_datetime()).diff(moment(frm.doc.service_start_time), "seconds");
     let total_service_time = service_time - frm.doc.pause_time
+    // let total_service_time_format = convertSecondsToTime(service_timer_service_time)
+    // frappe.model.set_value(frm.doc.doctype, frm.doc.name, 'total_service_time', total_service_time_format)
     frappe.model.set_value(frm.doc.doctype, frm.doc.name, 'service_time', total_service_time)
     frappe.model.set_value(frm.doc.doctype, frm.doc.name, 'pause_start_time', frappe.datetime.now_datetime())
     frappe.model.set_value(frm.doc.doctype, frm.doc.name, 'status', 'Paused')
@@ -122,6 +138,8 @@ erpnext.timesheet.control_timer = function (frm, dialog, row, timestamp = 0) {
     frappe.model.set_value(last_child.doctype, last_child.name, 'service_to', frappe.datetime.now_datetime())
     frappe.model.set_value(last_child.doctype, last_child.name, 'pause_from', frappe.datetime.now_datetime())
     frm.save();
+    clearInterval(interval);
+
   });
 
 
@@ -158,6 +176,8 @@ erpnext.timesheet.control_timer = function (frm, dialog, row, timestamp = 0) {
       let total_pause_time = pause_time + frm.doc.pause_time
       let service_time = moment(frappe.datetime.now_datetime()).diff(moment(frm.doc.service_start_time), "seconds");
       let total_service_time = service_time - total_pause_time
+      let total_service_time_format = convertSecondsToTime(total_service_time)
+      frappe.model.set_value(frm.doc.doctype, frm.doc.name, 'total_service_time', total_service_time_format)
       frappe.model.set_value(frm.doc.doctype, frm.doc.name, 'pause_time', total_pause_time)
       frappe.model.set_value(frm.doc.doctype, frm.doc.name, 'service_time', total_service_time)
 
@@ -180,8 +200,6 @@ erpnext.timesheet.control_timer = function (frm, dialog, row, timestamp = 0) {
       frappe.model.set_value(last_child.doctype, last_child.name, 'service_to', frappe.datetime.now_datetime())
       frappe.model.set_value(last_child.doctype, last_child.name, 'total_pause_time', service_time_format)
     }
-
-
     reset();
     frm.savesubmit()
       .then((r) => {

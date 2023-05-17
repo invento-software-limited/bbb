@@ -37,28 +37,6 @@ class ServiceRecord(Document):
                 il.append(
                     frappe._dict(
                         {
-                            "warehouse": default_target_warehouse,
-                            "item_code": d.item_code,
-                            "qty": d.qty,
-                            "uom": d.uom,
-                            "stock_uom": d.uom,
-                            "conversion_factor": 1,
-                            "batch_no": cstr(d.get("batch_no")).strip(),
-                            "serial_no": cstr(d.get("serial_no")).strip(),
-                            "name": d.name,
-                            "target_warehouse": '',
-                            "company": self.company,
-                            "voucher_type": self.doctype,
-                            "allow_zero_valuation": 0,
-                            "consumable_item": d.item_code,
-                            "incoming_rate": 0,
-                        }
-                    )
-                )
-
-                il.append(
-                    frappe._dict(
-                        {
                             "warehouse": '',
                             "item_code": d.item_code,
                             "qty": d.qty,
