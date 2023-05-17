@@ -17,6 +17,12 @@
   "status",
   "service_date",
   "actual_service_date",
+  "service_start_time",
+  "service_end_time",
+  "total_service_time",
+  "pause_time",
+  "service_time",
+  "pause_start_time",
   "service_person_section",
   "service_person_1",
   "service_person_column_break_1",
@@ -26,14 +32,10 @@
   "service_person_column_break_3",
   "service_person_4",
   "service_timer_section",
+  "service_timer_log",
   "service_consumable_items_section",
   "service_consumable_items",
   "timer_section",
-  "service_start_time",
-  "service_end_time",
-  "pause_time",
-  "service_time",
-  "pause_start_time",
   "amended_from"
  ],
  "fields": [
@@ -42,13 +44,15 @@
    "fieldtype": "Link",
    "label": "Service Code",
    "options": "Item",
+   "read_only": 1,
    "reqd": 1
   },
   {
    "fetch_from": "service_code.name",
    "fieldname": "service_name",
    "fieldtype": "Data",
-   "label": "Service Name"
+   "label": "Service Name",
+   "read_only": 1
   },
   {
    "fieldname": "customer",
@@ -56,6 +60,7 @@
    "in_list_view": 1,
    "label": "Customer",
    "options": "Customer",
+   "read_only": 1,
    "reqd": 1
   },
   {
@@ -64,6 +69,7 @@
    "in_list_view": 1,
    "label": "Invoice No",
    "options": "POS Invoice",
+   "read_only": 1,
    "reqd": 1
   },
   {
@@ -73,6 +79,7 @@
    "in_list_view": 1,
    "label": "Company",
    "options": "Company",
+   "read_only": 1,
    "reqd": 1
   },
   {
@@ -80,12 +87,14 @@
    "fieldtype": "Link",
    "label": "Location",
    "options": "POS Profile",
+   "read_only": 1,
    "reqd": 1
   },
   {
    "fieldname": "service_timer_section",
    "fieldtype": "Section Break",
-   "label": "Service Timer"
+   "label": "Service Timer",
+   "read_only": 1
   },
   {
    "fieldname": "amended_from",
@@ -99,13 +108,15 @@
   {
    "fieldname": "service_consumable_items_section",
    "fieldtype": "Section Break",
-   "label": "Service Consumable Items"
+   "label": "Service Consumable Items",
+   "read_only": 1
   },
   {
    "fetch_from": "service_code.consumable_items",
    "fieldname": "service_consumable_items",
    "fieldtype": "Table",
-   "options": "Service Consumable Items"
+   "options": "Service Consumable Items",
+   "read_only": 1
   },
   {
    "fieldname": "column_break_6",
@@ -163,23 +174,27 @@
    "default": "0",
    "fieldname": "pause_time",
    "fieldtype": "Int",
-   "label": "Total Pause Time"
+   "hidden": 1,
+   "label": "Total Pause Time In Sec"
   },
   {
    "default": "0",
    "fieldname": "service_time",
    "fieldtype": "Int",
-   "label": "Total Service Time"
+   "hidden": 1,
+   "label": "Total Service Time in Sec"
   },
   {
    "fieldname": "service_start_time",
    "fieldtype": "Datetime",
-   "label": "Service Start Time"
+   "label": "Service Start Time",
+   "read_only": 1
   },
   {
    "fieldname": "service_end_time",
    "fieldtype": "Datetime",
-   "label": "Service End Time"
+   "label": "Service End Time",
+   "read_only": 1
   },
   {
    "fieldname": "status",
@@ -202,12 +217,24 @@
    "fieldname": "actual_service_date",
    "fieldtype": "Date",
    "label": "Actual Service Date"
+  },
+  {
+   "fieldname": "service_timer_log",
+   "fieldtype": "Table",
+   "options": "Service Timer Log",
+   "read_only": 1
+  },
+  {
+   "fieldname": "total_service_time",
+   "fieldtype": "Data",
+   "label": "Total Service Time",
+   "read_only": 1
   }
  ],
  "index_web_pages_for_search": 1,
  "is_submittable": 1,
  "links": [],
- "modified": "2023-05-15 10:57:51.272214",
+ "modified": "2023-05-17 07:31:10.109442",
  "modified_by": "Administrator",
  "module": "Bbb",
  "name": "Service Record",
