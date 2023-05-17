@@ -64,7 +64,6 @@ def search_by_term(search_term, warehouse, price_list):
 
 @frappe.whitelist()
 def get_items(start, page_length, price_list, item_group, pos_profile, search_term=""):
-    item_group = "Service"
     warehouse, hide_unavailable_items = frappe.db.get_value(
         "POS Profile", pos_profile, ["warehouse", "hide_unavailable_items"]
     )
@@ -108,6 +107,7 @@ def get_items(start, page_length, price_list, item_group, pos_profile, search_te
             `tabItem` item {bin_join_selection}
         WHERE
             item.disabled = 0
+            AND (item.company = 'Orkas Glam Bar And Revive Spa' OR item.company IS NULL OR item.company = '')
             AND item.has_variants = 0
             AND item.is_sales_item = 1
             AND item.is_fixed_asset = 0
@@ -235,7 +235,7 @@ def item_group_query(doctype, txt, searchfield, start, page_len, filters):
 
     return frappe.db.sql(
         """ select distinct name from `tabItem Group`
-            where {condition} and (name like %(txt)s) limit {start}, {page_len}""".format(
+            where {condition} and (company = 'Orkas Glam Bar And Revive Spa' OR company IS NULL OR company = '') and (name like %(txt)s) limit {start}, {page_len}""".format(
             condition=cond, start=start, page_len=page_len
         ),
         {"txt": "%%%s%%" % txt},

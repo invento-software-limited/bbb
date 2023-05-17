@@ -177,11 +177,12 @@ erpnext.PointOfSale.ItemSelector = class {
 				onchange: function() {
 					me.item_group = this.value;
 					!me.item_group && (me.item_group = me.parent_item_group);
+          console.log(me.item_group)
 					me.filter_items();
 				},
 				get_query: function () {
 					return {
-						query: 'erpnext.selling.page.point_of_sale.point_of_sale.item_group_query',
+						query: 'bbb.bbb.parlour.item_group_query',
 						filters: {
 							pos_profile: doc ? doc.pos_profile : ''
 						}
