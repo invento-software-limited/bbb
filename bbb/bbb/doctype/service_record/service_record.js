@@ -286,8 +286,9 @@ frappe.ui.form.on('Service Record', {
     }
   },
   before_submit: (frm) => {
+    let last_child = frm.doc.service_timer_log[frm.doc.service_timer_log.length - 1]
     frappe.model.set_value(frm.doc.doctype, frm.doc.name, 'status', 'Submitted')
-    frappe.model.set_value(frm.doc.doctype, frm.doc.name, 'service_end_time', frappe.datetime.now_datetime())
+    frappe.model.set_value(frm.doc.doctype, frm.doc.name, 'service_end_time', last_child.service_to)
   },
   after_cancel: () => {
     frappe.model.set_value(frm.doc.doctype, frm.doc.name, 'status', 'Pending For Service')

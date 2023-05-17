@@ -1,7 +1,7 @@
 {
  "actions": [],
  "allow_rename": 1,
- "autoname": "SP-.###",
+ "autoname": "field:service_person_name",
  "creation": "2023-05-08 16:25:20.642908",
  "doctype": "DocType",
  "editable_grid": 1,
@@ -23,7 +23,8 @@
    "fieldname": "service_person_name",
    "fieldtype": "Data",
    "in_list_view": 1,
-   "label": "Service Person Name"
+   "label": "Service Person Name",
+   "unique": 1
   },
   {
    "allow_in_quick_entry": 1,
@@ -36,7 +37,7 @@
  ],
  "index_web_pages_for_search": 1,
  "links": [],
- "modified": "2023-05-08 16:31:10.407914",
+ "modified": "2023-05-17 20:38:33.604641",
  "modified_by": "Administrator",
  "module": "Bbb",
  "name": "Service Person",
