@@ -33,6 +33,7 @@ page_js = {
     # "pos" : "public/js/pos_controller.js",
     # "point-of-sale": "public/js/pos_controller.js",
     "point-of-sale": "public/js/point_of_sale.js",
+    # "parlour": "public/js/parlour.js",
 
 }
 

@@ -496,7 +496,7 @@
    "doctype_or_field": "DocField",
    "field_name": "naming_series",
    "idx": 0,
-   "modified": "2023-01-26 11:49:50.620666",
+   "modified": "2023-03-28 11:30:58.969829",
    "modified_by": "munim@invento.com.bd",
    "name": "POS Invoice-naming_series-default",
    "owner": "munim@invento.com.bd",
@@ -520,7 +520,7 @@
    "doctype_or_field": "DocField",
    "field_name": "naming_series",
    "idx": 0,
-   "modified": "2023-01-26 11:49:50.549913",
+   "modified": "2023-03-28 11:30:58.898022",
    "modified_by": "munim@invento.com.bd",
    "name": "POS Invoice-naming_series-options",
    "owner": "munim@invento.com.bd",
@@ -530,7 +530,7 @@
    "property": "options",
    "property_type": "Text",
    "row_name": null,
-   "value": "ACC-PSINV-.YYYY.MM.DD.#.\nMR-.YYYY.MM.DD.#.\nBR-.YYYY.MM.DD.#.\nUTT-.YYYY.MM.DD.#.\nDH-.YYYY.MM.DD.#.\nJM-.YYYY.MM.DD.#.\nCU-.YYYY.MM.DD.#.\nSY-.YYYY.MM.DD.#.\nCT-.YYYY.MM.DD.#.\nBS-.YYYY.MM.DD.#.\nNAR-.YYYY.MM.DD.#.\nNM-.YYYY.MM.DD.#.\nSV-.YYYY.MM.DD.#.\nPP-.YYYY.MM.DD.#.\nGZ-.YYYY.MM.DD.#.\nKG-.YYYY.MM.DD.#.\nWR-.YYYY.MM.DD.#.\nRJ-.YYYY.MM.DD.#.\nUTT2-.YYYY.MM.DD.#.\nKR-.YYYY.MM.DD.#.\nTEST-.YYYY.MM.DD.#."
+   "value": "ACC-PSINV-.YYYY.MM.DD.#.\nMR-.YYYY.MM.DD.#.\nBR-.YYYY.MM.DD.#.\nUTT-.YYYY.MM.DD.#.\nDH-.YYYY.MM.DD.#.\nJM-.YYYY.MM.DD.#.\nCU-.YYYY.MM.DD.#.\nSY-.YYYY.MM.DD.#.\nCT-.YYYY.MM.DD.#.\nBS-.YYYY.MM.DD.#.\nNAR-.YYYY.MM.DD.#.\nNM-.YYYY.MM.DD.#.\nSV-.YYYY.MM.DD.#.\nPP-.YYYY.MM.DD.#.\nGZ-.YYYY.MM.DD.#.\nKG-.YYYY.MM.DD.#.\nWR-.YYYY.MM.DD.#.\nRJ-.YYYY.MM.DD.#.\nUTT2-.YYYY.MM.DD.#.\nKR-.YYYY.MM.DD.#.\nTEST-.YYYY.MM.DD.#.\nKL-.YYYY.MM.DD.#.\nBAS-.YYYY.MM.DD.#."
   },
   {
    "_assign": null,

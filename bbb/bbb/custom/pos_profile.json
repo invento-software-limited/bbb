@@ -41,7 +41,7 @@
    "name": "POS Profile-_naming_series",
    "no_copy": 0,
    "non_negative": 0,
-   "options": "ACC-PSINV-.YYYY.MM.DD.#.\nMR-.YYYY.MM.DD.#.\nBR-.YYYY.MM.DD.#.\nUTT-.YYYY.MM.DD.#.\nDH-.YYYY.MM.DD.#.\nJM-.YYYY.MM.DD.#.\nCU-.YYYY.MM.DD.#.\nSY-.YYYY.MM.DD.#.\nCT-.YYYY.MM.DD.#.\nBS-.YYYY.MM.DD.#.\nNAR-.YYYY.MM.DD.#.\nNM-.YYYY.MM.DD.#.\nSV-.YYYY.MM.DD.#.\nPP-.YYYY.MM.DD.#.\nGZ-.YYYY.MM.DD.#.\nKG-.YYYY.MM.DD.#.\nWR-.YYYY.MM.DD.#.\nRJ-.YYYY.MM.DD.#.\nUTT2-.YYYY.MM.DD.#.\nKR-.YYYY.MM.DD.#.\nTEST-.YYYY.MM.DD.#.",
+   "options": "ACC-PSINV-.YYYY.MM.DD.#.\nMR-.YYYY.MM.DD.#.\nBR-.YYYY.MM.DD.#.\nUTT-.YYYY.MM.DD.#.\nDH-.YYYY.MM.DD.#.\nJM-.YYYY.MM.DD.#.\nCU-.YYYY.MM.DD.#.\nSY-.YYYY.MM.DD.#.\nCT-.YYYY.MM.DD.#.\nBS-.YYYY.MM.DD.#.\nNAR-.YYYY.MM.DD.#.\nNM-.YYYY.MM.DD.#.\nSV-.YYYY.MM.DD.#.\nPP-.YYYY.MM.DD.#.\nGZ-.YYYY.MM.DD.#.\nKG-.YYYY.MM.DD.#.\nWR-.YYYY.MM.DD.#.\nRJ-.YYYY.MM.DD.#.\nUTT2-.YYYY.MM.DD.#.\nKR-.YYYY.MM.DD.#.\nTEST-.YYYY.MM.DD.#.\nKL-.YYYY.MM.DD.#.\nBAS-.YYYY.MM.DD.#.",
    "owner": "munim@invento.com.bd",
    "parent": null,
    "parentfield": null,
@@ -209,5 +209,5 @@
    "value": "Target Warehouse"
   }
  ],
- "sync_on_migrate": 1
+ "sync_on_migrate": 0
 }
