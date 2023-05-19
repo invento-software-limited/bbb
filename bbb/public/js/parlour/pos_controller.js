@@ -1418,7 +1418,6 @@ erpnext.PointOfSale.Controller = class {
 
     });
     frm.refresh_field('items');
-    console.log(frm)
 
   }
 };

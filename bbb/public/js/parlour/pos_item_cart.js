@@ -5,7 +5,7 @@ erpnext.PointOfSale.ItemCart = class {
         this.customer_info = undefined;
         this.served_by_info = undefined;
         this.ignore_discount = undefined;
-        this.ignore_pricing_rule = "No";
+        this.ignore_pricing_rule = settings.allow_rate_change ? "Yes" : "No"
         this.hide_images = settings.hide_images;
         this.allowed_customer_groups = settings.customer_groups;
         this.allow_rate_change = settings.allow_rate_change;
@@ -498,6 +498,7 @@ erpnext.PointOfSale.ItemCart = class {
                         frappe.model.set_value(frm.doc.doctype, frm.doc.name, 'customer', this.value);
                         frm.script_manager.trigger('customer', frm.doc.doctype, frm.doc.name).then(() => {
                             frappe.run_serially([
+                                () => frm.doc.ignore_pricing_rule = (me.ignore_pricing_rule == "Yes") ? 1 : 0,
                                 () => me.fetch_customer_details(this.value),
                                 () => me.events.customer_details_updated(me.customer_info),
                                 () => me.update_customer_section(),
@@ -605,6 +606,7 @@ erpnext.PointOfSale.ItemCart = class {
         $('#ignore_pricing_rule').on('change', function (){
             frappe.run_serially([
                 // () => me.ignore_pricing_rule = this.value,
+                () => me.ignore_pricing_rule = this.value,
                 () => me.update_pricing_rule_discount_section(this.value),
                 // () => me.events.set_cache_data({'pos_ignore_pricing_rule': this.value}),
                 () => me.ignore_pricing_discount(me, this.value),
@@ -706,6 +708,8 @@ erpnext.PointOfSale.ItemCart = class {
     }
 
     fetch_discount_details(ignore_pricing_rule) {
+        // let frm = this.events.get_frm()
+        ignore_pricing_rule = this.allow_rate_change ? 1 : 0
         return new Promise((resolve) => {
             if(ignore_pricing_rule === 1){
                 this.ignore_pricing_rule = "Yes"
@@ -929,7 +933,7 @@ erpnext.PointOfSale.ItemCart = class {
     update_pricing_rule_discount_section(ignore_pricing_rule=undefined) {
         const me = this;
         if(ignore_pricing_rule == undefined){
-            ignore_pricing_rule = this.ignore_pricing_rule;
+            ignore_pricing_rule = this.allow_rate_change ? "Yes" : "No";
         }
         this.$pricing_rule_discount_section.html(
             `<div class="pricing-discount-details">
@@ -1219,13 +1223,23 @@ erpnext.PointOfSale.ItemCart = class {
             // 	.then(r => {
             // 		// item_mrp = r.message.standard_rate;
             // 	})
+            let mrp_1 = `<div class="item-row-mrp"><span>${item_data.price_list_rate || 0}</span></div>`
+            let mrp_2 = `<div class="item-row-mrp">
+              <input class="form-control price-list-rate" type="text" data-item-code="${item_data.item_code}"
+                     data-index="${item_data.idx}" data-rate="${item_data.rate || 0}" data-damaged-rate=""
+                     data-discount="" value="${item_data.price_list_rate || 0}"
+                     item_mrp_rate="${item_data.price_list_rate}" docname="${item_data.name}"
+                     discount_amount="${item_data.discount_amount}" style="width: 80px;text-align: center;"
+                     item_qty="${item_data.price_list_rate || 'undefined'}">
+            </div>`
 
             let is_return = (frm.doc.is_return ? 'enabled' : 'disabled');
+            let allow_change_price = me.allow_rate_change ? mrp_2 : mrp_1;
             let discount_amount = (item_data.discount_amount) || 0
             let damaged_cost = (item_data.damaged_cost) || 0
             let actual_discount_amount = discount_amount - damaged_cost // after adding damaged cost
             return `
-					<div class="item-row-mrp"><span>${item_data.price_list_rate || 0}</span></div>
+               ${allow_change_price}
 					<div class="item-row-disc"><span>${actual_discount_amount || 0}</span></div>
 					<div class="item-row-damaged"><!--<span>${item_data.qty || 0}</span>-->
 					<input class="form-control item-row-damaged damaged_cost" type="text" ${is_return} data-item-code="${item_data.item_code}" data-index="${item_data.idx}" data-rate="${item_data.rate || 0}" data-damaged-rate="" data-discount="" value="${item_data.total_damaged_cost || 0}" item_mrp_rate="${item_data.price_list_rate}" docname="${item_data.name}" discount_amount="${item_data.discount_amount}" style="width: 50px;text-align: center;" item_qty="${item_data.qty || 'undefined'}">
@@ -1326,7 +1340,6 @@ erpnext.PointOfSale.ItemCart = class {
                                     // frappe.model.set_value("POS Invoice Item", docname, 'discount_percentage', r.message.discount_percentage)
 
                                 }
-                                console.log(me.events.get_frm())
                             // }
                         // })
                     }
@@ -1400,6 +1413,19 @@ erpnext.PointOfSale.ItemCart = class {
                 () => me.events.update_additional_discount_on_tag(),
                 () => frappe.dom.unfreeze()
             ])
+        });
+        $('.price-list-rate').on('change', function (){
+            var mrp_rate =  parseInt($(this).val());
+            if(isNaN(mrp_rate)){
+                $(this).val(0)
+                return;
+            }else {
+                let docname = $(this).attr('docname');
+                frappe.model.set_value('POS Invoice Item', docname, 'price_list_rate', mrp_rate)
+                me.events.update_additional_discount_on_tag();
+                $(this).val(mrp_rate);
+                me.update_item_cart_total_section(frm)
+            }
         });
     }
     toggle_ignore_pricing_rule_button(){
