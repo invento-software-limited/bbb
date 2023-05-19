@@ -7,6 +7,7 @@
  "editable_grid": 1,
  "engine": "InnoDB",
  "field_order": [
+  "service_info_section",
   "service_code",
   "service_name",
   "customer",
@@ -229,12 +230,18 @@
    "fieldtype": "Data",
    "label": "Total Service Time",
    "read_only": 1
+  },
+  {
+   "collapsible": 1,
+   "fieldname": "service_info_section",
+   "fieldtype": "Section Break",
+   "label": "Service Info"
   }
  ],
  "index_web_pages_for_search": 1,
  "is_submittable": 1,
  "links": [],
- "modified": "2023-05-17 07:31:10.109442",
+ "modified": "2023-05-18 14:59:15.231776",
  "modified_by": "Administrator",
  "module": "Bbb",
  "name": "Service Record",
