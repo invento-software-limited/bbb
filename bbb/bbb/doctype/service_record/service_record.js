@@ -198,7 +198,7 @@ erpnext.timesheet.control_timer = function (frm, dialog, row, timestamp = 0) {
       let service_timer_service_time = moment(frappe.datetime.now_datetime()).diff(moment(last_child.service_from), "seconds");
       let service_time_format = convertSecondsToTime(service_timer_service_time)
       frappe.model.set_value(last_child.doctype, last_child.name, 'service_to', frappe.datetime.now_datetime())
-      frappe.model.set_value(last_child.doctype, last_child.name, 'total_pause_time', service_time_format)
+      frappe.model.set_value(last_child.doctype, last_child.name, 'total_service_time', service_time_format)
     }
     reset();
     frm.savesubmit()

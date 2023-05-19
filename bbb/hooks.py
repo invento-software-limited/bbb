@@ -123,6 +123,7 @@ doc_events = {
     "Item": {
         "after_insert": "bbb.bbb.item.after_insert",
         "on_update": "bbb.bbb.item.on_update",
+        "validate": "bbb.bbb.item.validate",
     },
     "Item Price": {
         "after_insert": "bbb.bbb.item_price_list.after_insert_or_on_update",
@@ -142,6 +143,9 @@ doc_events = {
     # }
     "POS Closing Entry":{
         "validate": "bbb.bbb.pos_closing_entry.validate"
+    },
+    "User":{
+        "validate": "bbb.bbb.user.validate"
     }
 
 }

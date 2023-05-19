@@ -1,4 +1,32 @@
 import frappe
+from frappe import _
+
+
+def validate(doc, method):
+    if doc.is_service:
+        total_weight = 0.0
+        try:
+            total_weight += float(doc.service_person_1) if doc.service_person_1 else 0.0
+        except:
+            frappe.throw(_("Service person 1 weight should be a number"))
+
+        try:
+            total_weight += float(doc.service_person_2) if doc.service_person_2 else 0.0
+        except:
+            frappe.throw(_("Service person 2 weight should be a number"))
+
+        try:
+            total_weight += float(doc.service_person_3) if doc.service_person_3 else 0.0
+        except:
+            frappe.throw(_("Service person 3 weight should be a number"))
+
+        try:
+            total_weight += float(doc.service_person_4) if doc.service_person_4 else 0.0
+        except:
+            frappe.throw(_("Service person 4 weight should be a number"))
+
+        if total_weight != 1.0:
+            frappe.throw(_("Service person total weight should be 1"))
 
 
 def after_insert(doc, method):
