@@ -37,6 +37,14 @@
   "service_consumable_items_section",
   "service_consumable_items",
   "timer_section",
+  "service_person_weight_section_section",
+  "service_person_1_weight",
+  "column_break_33",
+  "service_person_2_weight",
+  "column_break_35",
+  "service_person_3_weight",
+  "column_break_37",
+  "service_person_4_weight",
   "amended_from"
  ],
  "fields": [
@@ -236,12 +244,53 @@
    "fieldname": "service_info_section",
    "fieldtype": "Section Break",
    "label": "Service Info"
+  },
+  {
+   "fieldname": "service_person_weight_section_section",
+   "fieldtype": "Section Break",
+   "label": "Service Person Weight"
+  },
+  {
+   "fetch_from": "service_code.service_person_1",
+   "fieldname": "service_person_1_weight",
+   "fieldtype": "Data",
+   "label": "Service Person 1 weight"
+  },
+  {
+   "fieldname": "column_break_33",
+   "fieldtype": "Column Break"
+  },
+  {
+   "fetch_from": "service_code.service_person_2",
+   "fieldname": "service_person_2_weight",
+   "fieldtype": "Data",
+   "label": "Service Person 2 weight"
+  },
+  {
+   "fieldname": "column_break_35",
+   "fieldtype": "Column Break"
+  },
+  {
+   "fetch_from": "service_code.service_person_3",
+   "fieldname": "service_person_3_weight",
+   "fieldtype": "Data",
+   "label": "Service Person 3 weight"
+  },
+  {
+   "fieldname": "column_break_37",
+   "fieldtype": "Column Break"
+  },
+  {
+   "fetch_from": "service_code.service_person_4",
+   "fieldname": "service_person_4_weight",
+   "fieldtype": "Data",
+   "label": "Service Person 4 weight"
   }
  ],
  "index_web_pages_for_search": 1,
  "is_submittable": 1,
  "links": [],
- "modified": "2023-05-18 14:59:15.231776",
+ "modified": "2023-05-20 22:24:57.304814",
  "modified_by": "Administrator",
  "module": "Bbb",
  "name": "Service Record",
