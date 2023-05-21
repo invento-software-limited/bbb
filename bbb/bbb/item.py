@@ -25,8 +25,8 @@ def validate(doc, method):
         except:
             frappe.throw(_("Service person 4 weight should be a number"))
 
-        if total_weight != 1.0:
-            frappe.throw(_("Service person total weight should be 1"))
+        if total_weight != 100:
+            frappe.throw(_("Service person total weight should be 100"))
 
 
 def after_insert(doc, method):
