@@ -1,6 +1,7 @@
 # Copyright (c) 2015, Frappe Technologies Pvt. Ltd. and Contributors
 # License: GNU General Public License v3. See license.txt
 
+from operator import itemgetter
 
 import frappe
 from frappe import _
@@ -58,10 +59,12 @@ def execute(filters=None):
             conversion_factors.append(item_detail.conversion_factor)
 
     update_included_uom_in_report(columns, data, include_uom, conversion_factors)
+
+    sorted_data = sorted(data, key=itemgetter('item_code'))
     item_code_list = []
     warehouse_list = []
     final_data = []
-    for item_data in data:
+    for item_data in sorted_data:
         item_code = item_data['item_code']
         warehouse = item_data['warehouse']
         if item_code in item_code_list:
@@ -69,11 +72,9 @@ def execute(filters=None):
                 final_data.append(item_data)
                 warehouse_list.append(warehouse)
             else:
-                index = item_code.index(item_code) + warehouse_list.index(warehouse)
+                index = item_code_list.index(item_code) + warehouse_list.index(warehouse)
                 final_data[index]['in_qty'] = final_data[index]['in_qty']  +  item_data['in_qty']
                 final_data[index]['out_qty'] = final_data[index]['out_qty']  +  item_data['out_qty']
-                final_data[index]['qty_after_transaction'] = final_data[index]['qty_after_transaction']  +  item_data['qty_after_transaction']
-                final_data[index]['stock_value'] = final_data[index]['stock_value']  +  item_data['stock_value']
         else:
             warehouse_list = []
             final_data.append(item_data)
@@ -106,7 +107,7 @@ def update_available_serial_nos(available_serial_nos, sle):
 
 def get_columns():
     columns = [
-        {"label": _("Date"), "fieldname": "date", "fieldtype": "Datetime", "width": 150},
+        # {"label": _("Date"), "fieldname": "date", "fieldtype": "Datetime", "width": 150},
         {
             "label": _("Item"),
             "fieldname": "item_code",
