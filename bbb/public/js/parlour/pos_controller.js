@@ -993,7 +993,7 @@ erpnext.PointOfSale.Controller = class {
     let additional_discount = (parseFloat(res.discount_amount)).toFixed(2)
     let tag_name_list = res.tag_name_list || []
     let rules_name_list = res.rules_name_list || []
-    if (additional_discount !== undefined) {
+    if (additional_discount !== undefined && additional_discount > 0) {
       let tag_name = tag_name_list.join(',');
       let rules_name = rules_name_list.join(',');
       frappe.model.set_value('POS Invoice', me.frm.docname, 'additional_discount_tag_name', tag_name)
