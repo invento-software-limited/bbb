@@ -13,6 +13,7 @@
   "served_by_id",
   "mobile_number",
   "location",
+  "company",
   "amended_from"
  ],
  "fields": [
@@ -62,11 +63,17 @@
    "fieldname": "disabled",
    "fieldtype": "Check",
    "label": "Disabled"
+  },
+  {
+   "fieldname": "company",
+   "fieldtype": "Link",
+   "label": "Company",
+   "options": "Company"
   }
  ],
  "index_web_pages_for_search": 1,
  "links": [],
- "modified": "2023-01-19 14:04:50.754781",
+ "modified": "2023-05-23 12:00:30.114344",
  "modified_by": "Administrator",
  "module": "Bbb",
  "name": "Served By",

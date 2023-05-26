@@ -785,12 +785,12 @@ def get_fields(doctype, fields=None):
 def served_by_query(doctype, txt, searchfield, start, page_len, filters):
     conditions = []
     fields = get_fields("Served By", ["name", "served_by_name", "location", "served_by_id"])
-
+    company = frappe.defaults.get_user_default("Company")
     searchfields = ['served_by_name', 'location', 'served_by_id']
     searchfields = " or ".join(field + " like %(txt)s" for field in searchfields)
 
     return frappe.db.sql("""select {fields} from `tabServed By`
-		where disabled=0
+		where disabled=0 and (company='{company}' or company is null)
 			and ({scond})
 			{fcond} {mcond}
 		order by
@@ -800,6 +800,7 @@ def served_by_query(doctype, txt, searchfield, start, page_len, filters):
 			name, served_by_name
 		limit %(start)s, %(page_len)s""".format(**{
         "fields": ", ".join(fields),
+        "company": company,
         "scond": searchfields,
         "mcond": get_match_cond(doctype),
         "fcond": get_filters_cond(doctype, filters, conditions).replace('%', '%%'),
