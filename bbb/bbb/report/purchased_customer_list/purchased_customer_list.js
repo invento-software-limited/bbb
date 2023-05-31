@@ -74,34 +74,32 @@ frappe.query_reports["Purchased Customer List"] = {
     return value;
   },
   "make_new_doc": (value) => {
-    // window.open('/', '_blank')
-    // setTimeout(function (){
-    //   frappe.new_doc("Customer Feedback", {
-    //     'voucher_no': value,
-    //     'status' : 'Yesterday Purchased'
-    //   },'_blank')
-    // }, 1000)
     let report_type = frappe.query_report.get_filter_value('type');
-    // if (report_type === 'Follow-Up 1 Month') {
-    //   frappe.db.get_list('Customer Feedback', {
-    //     fields: ['name'],
-    //     filters: {
-    //       voucher_no: value
-    //     }
-    //   }).then(records => {
-    //     if (records) {
-    //       // frappe.model.set_value('Customer Feedback', records[0]['name'], 'customer_feedback_section', 1)
-    //       // frappe.model.set_value('Customer Feedback', records[0]['name'], 'product_feedback_section', 0)
-    //       frappe.db.set_value('Customer Feedback', records[0]['name'], 'status', 'Follow-up Customer Feedback')
-    //         .then(r => {
-    //           let doc = r.message;
-    //           var url = frappe.urllib.get_full_url('/desk/customer-feedback/' + doc.name);
-    //           window.open(url, '_blank')
-    //         })
-    //     }
-    //
-    //   })
-    // } else {
+    if (report_type === 'Follow-Up 1 Month') {
+      frappe.db.get_list('Customer Feedback', {
+        fields: ['name'],
+        filters: {
+          voucher_no: value
+        }
+      }).then(records => {
+        console.log("v")
+        if (records.length > 0) {
+          frappe.db.set_value('Customer Feedback', records[0]['name'], 'status', 'Follow-up Customer Feedback')
+            .then(r => {
+              let doc = r.message;
+              var url = frappe.urllib.get_full_url('/desk/customer-feedback/' + doc.name);
+              window.open(url, '_blank')
+            })
+        } else {
+          frappe.msgprint({
+            title: __('Warning'),
+            indicator: 'red',
+            message: __('Customer feedback has not been created yet')
+          });
+        }
+
+      })
+    } else {
       frappe.db.insert({
         doctype: 'Customer Feedback',
         voucher_no: value,
@@ -110,7 +108,7 @@ frappe.query_reports["Purchased Customer List"] = {
         var url = frappe.urllib.get_full_url('/desk/customer-feedback/' + doc.name);
         window.open(url, '_blank')
       })
-    // }
+    }
     // frappe.route_options = {
     //     'voucher_no': value,
     //     'status' : 'Yesterday Purchased'

@@ -7,10 +7,9 @@ frappe.ui.form.on('Customer Feedback', {
 
   // }
   onload: (frm) => {
-    console.log(frm.doc.status)
     // const frm = this
     let item_array = frm.doc.items
-    if (item_array === undefined || item_array.length == 0){
+    if (item_array === undefined || item_array.length == 0) {
       frappe.db.get_doc('POS Invoice', frm.doc.voucher_no)
         .then(doc => {
           $.each(doc.items, function (i, d) {
@@ -50,8 +49,12 @@ frappe.ui.form.on('Customer Feedback', {
 
       frm.set_df_property('customer_feedback_section', 'hidden', 0);
       frm.set_df_property('product_feedback_section', 'hidden', 0);
-
-		  frm.refresh_fields();
+      frm.refresh_fields();
+    }
+    if (frm.doc.status === 'Completed' || frm.doc.status === 'Submitted') {
+      frm.set_df_property('customer_feedback_section', 'hidden', 0);
+      frm.set_df_property('product_feedback_section', 'hidden', 0);
+      frm.refresh_fields();
     }
   },
 
@@ -69,11 +72,12 @@ frappe.ui.form.on('Customer Feedback', {
   after_save: (frm) => {
     if (frm.doc.status === 'Purchased Customer Feedback') {
       frappe.db.set_value('Customer Feedback', frm.doc.name, 'status', 'Customer Feedback Collected')
-      frm.refresh_fields();
+      frappe.db.set_value('Customer Feedback', frm.doc.name, 'customer_feedback_taken_user', frappe.session.user)
+      window.location.reload();
     } else if (frm.doc.status === 'Follow-up Customer Feedback') {
       frappe.db.set_value('Customer Feedback', frm.doc.name, 'status', 'Completed')
-      frm.refresh_fields();
-
+      frappe.db.set_value('Customer Feedback', frm.doc.name, 'product_feedback_taken_user', frappe.session.user)
+      window.location.reload();
     }
   }
 });
