@@ -1329,22 +1329,11 @@ erpnext.PointOfSale.Controller = class {
                 },
                 callback: function(r) {
                     let res = r.message
-<<<<<<< HEAD
                     if(res){
                         discount_amount = res.discount_amount
                         tag_name_list = res.tag_name_list
                         rules_name_list = res.rules_name_list
                     }
-=======
-                  console.log(r.message)
-                    if(res){
-                      discount_amount = res.discount_amount
-                      tag_name_list = res.tag_name_list
-                      rules_name_list = res.rules_name_list
-                    }
-
-
->>>>>>> crm
                 }
             });
         return {discount_amount, tag_name_list, rules_name_list}
