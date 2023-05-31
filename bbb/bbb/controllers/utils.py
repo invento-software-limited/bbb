@@ -427,3 +427,16 @@ def get_accounts_receivable_invoices():
 
     sales_invoices = frappe.db.get_list('Sales Invoice', {'docstatus': 1, 'outstanding_amount': ["!=", 0]}, 'name')
     return sales_invoices
+
+
+@frappe.whitelist()
+def update_customers_dob():
+    customer_list = frappe.db.get_list('Customer', ['name', 'birth_day', 'birth_month', 'birth_year', 'dob'])
+    for customer in customer_list[0:1000]:
+        if not customer.get('dob'):
+            birth_year = 1997 if customer.get('birth_year') == 0 else customer.get('birth_year')
+            birth_month = 4 if customer.get('birth_month') == 0 else customer.get('birth_month')
+            birth_day = 13 if customer.get('birth_day') == 0 else customer.get('birth_day')
+            birthday_str = str(birth_year) + '-' + str(birth_month) + '-' + str(birth_day)
+            date_format = getdate(birthday_str)
+            frappe.db.set_value('Customer', customer.get('name'), 'dob', date_format)
