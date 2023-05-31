@@ -7,7 +7,7 @@ from frappe.utils import nowdate, add_days, getdate
 
 
 def execute(filters=None):
-    columns, data = get_columns(), get_invoice_data(filters)
+    columns, data = get_columns(), get_data(filters)
     return columns, data
 
 
@@ -19,6 +19,7 @@ def get_columns():
         {"label": _("Customer Group"), "fieldname": "customer_group", "fieldtype": "Link", "options": "Customer Group",
          "width": 190},
         {"label": _("Source"), "fieldname": "total_invoice", "fieldtype": "Int", "width": 190},
+        {"label": _("Day"), "fieldname": "day", "fieldtype": "Text", "width": 190},
         {"label": _("Mobile No."), "fieldname": "mobile_number", "fieldtype": "Data", "width": 190},
     ]
     return columns
@@ -30,18 +31,13 @@ def get_conditions(filters):
     if filters.get("customer_group"):
         conditions.append("customer.customer_group = '%s'" % filters.get("customer_group"))
 
+    if filters.get("customer"):
+        conditions.append("customer.name = '%s'" % filters.get("customer"))
+
     if filters.get("company"):
         conditions.append("customer.company = '%s'" % filters.get("company"))
 
     conditions.append("customer.disabled = 0")
-    if conditions:
-        return " and ".join(conditions)
-
-    return ""
-
-
-def get_invoice_data(filters):
-    conditions = get_conditions(filters)
     today = getdate(nowdate())
     next_day = today
     type = filters.get('type')
@@ -49,18 +45,49 @@ def get_invoice_data(filters):
         next_day = getdate(add_days(today, 6))
     elif type == "Next 30 Days":
         next_day = getdate(add_days(today, 29))
+    month = -1
+    if filters.get("month"):
+        month = [
+                    "Jan",
+                    "Feb",
+                    "Mar",
+                    "Apr",
+                    "May",
+                    "Jun",
+                    "Jul",
+                    "Aug",
+                    "Sep",
+                    "Oct",
+                    "Nov",
+                    "Dec",
+                ].index(filters["month"]) + 1
+
+    if today.month == next_day.month:
+        conditions.append("customer.birth_day >= {}".format(today.day))
+        conditions.append("customer.birth_day <= {}".format(next_day.day))
+    if today.month < next_day.month:
+        conditions.append(
+            "((customer.birth_day >= {} and customer.birth_month = {}) or (customer.birth_day <= {} and customer.birth_month = {}))".format(
+                today.day, next_day.month, today.day, next_day.month))
+    if conditions:
+        return " and ".join(conditions)
+
+    return ""
 
 
-    # customer_query = """select customer_name, mobile_number, customer_group, source, CONCAT(birth_day,'-',birth_month,'-', birth_year) as birthday
-    # from `tabCustomer` customer where birth_year != 0 and birth_month != 0 and birth_day != 0 and %s""" % conditions
-    customer_query = """select customer_name, mobile_number, customer_group, source, CONCAT(birth_day,'-',birth_month,'-', birth_year) as birthday
-    from `tabCustomer` customer limit 10"""
+def get_data(filters):
+    conditions = get_conditions(filters)
+
+    customer_query = """select customer_name, mobile_number, customer_group, source, birth_day, birth_month, birth_year
+    from `tabCustomer` customer where %s""" % conditions
+    # customer_query = """select customer_name, mobile_number, customer_group, source, birth_day, birth_month, birth_year,
+    #  CONCAT(birth_day,'-',birth_month,'-', birth_year) as day_month_year, CONCAT(birth_day,'-',birth_month) as day_month
+    # from `tabCustomer` customer limit 10"""
     query_result = frappe.db.sql(customer_query, as_dict=1)
+    print(query_result)
+    for result in query_result:
+        print(type(result), result)
+        if result.get('birth_day', None) and result.get('birth_month', None):
 
-    # customer_birthday_data = []
-    # for customer in query_result:
-    #     customer_birthday = getdate(customer.get('birthday'))
-    #     if customer_birthday <= next_day:
-    #         customer_birthday_data.append(customer)
-
+            result['day'] = (getdate('1900-' + str(result['birth_month']) + '-' + str(result['birth_day']))).strftime("%-dth %B")
     return query_result

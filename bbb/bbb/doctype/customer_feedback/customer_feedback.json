@@ -80,6 +80,7 @@
    "default": "1.2",
    "fieldname": "overall_rating",
    "fieldtype": "Rating",
+   "hidden": 1,
    "label": "Overall Rating"
   },
   {
@@ -175,7 +176,7 @@
  ],
  "index_web_pages_for_search": 1,
  "links": [],
- "modified": "2023-05-02 21:59:52.103275",
+ "modified": "2023-05-31 05:45:11.716590",
  "modified_by": "Administrator",
  "module": "Bbb",
  "name": "Customer Feedback",
