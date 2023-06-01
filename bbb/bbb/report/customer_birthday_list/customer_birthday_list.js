@@ -51,8 +51,19 @@ frappe.query_reports["Customer Birthday List"] = {
   formatter: (value, row, column, data, default_formatter) => {
     value = default_formatter(value, row, column, data);
     if (column.fieldname === "mobile_number") {
-      value = `<div class="disabled" style="cursor: copy;" onclick="(()=> frappe.utils.copy_to_clipboard(${value}))()">${value}</div>`;
+      value = `<div class="disabled" style="cursor: copy;" onclick="(()=> (frappe.query_reports['Customer Birthday List']).copyToClipboard('` + value + `'))()">${value}</div>`;
     }
     return value;
   },
+  copyToClipboard: (value) => {
+    var $temp = $("<input>");
+    $("body").append($temp);
+    $temp.val(value).select();
+    document.execCommand("copy");
+    $temp.remove();
+    frappe.show_alert({
+      message: __('Copied'),
+      indicator: 'green'
+    }, 3);
+  }
 }
