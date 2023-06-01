@@ -57,7 +57,7 @@ frappe.query_reports["Purchased Customer List"] = {
   "formatter": (value, row, column, data, default_formatter) => {
     value = default_formatter(value, row, column, data);
     if (column.fieldname === "customer_mobile_number") {
-      value = `<div class="disabled" style="cursor: copy;" onclick="(()=> frappe.utils.copy_to_clipboard(${value}))()">${value.bold()}</div>`;
+      value = `<div class="disabled" style="cursor: copy;" onclick="(()=> (frappe.query_reports['Purchased Customer List']).copyToClipboard('` + value + `'))()">${value.bold()}</div>`;
     }
 
     // console.log(frappe)
@@ -109,11 +109,16 @@ frappe.query_reports["Purchased Customer List"] = {
         window.open(url, '_blank')
       })
     }
-    // frappe.route_options = {
-    //     'voucher_no': value,
-    //     'status' : 'Yesterday Purchased'
-    //   };
-    // frappe.set_route('Form', 'Customer Feedback', 'new','_blank');
-    // window.open('/app/customer-feedback/new-customer-feedback', '_blank')
   },
+  copyToClipboard: (value) => {
+    var $temp = $("<input>");
+    $("body").append($temp);
+    $temp.val(value).select();
+    document.execCommand("copy");
+    $temp.remove();
+    frappe.show_alert({
+      message: __('Copied'),
+      indicator: 'green'
+    }, 3);
+  }
 };
