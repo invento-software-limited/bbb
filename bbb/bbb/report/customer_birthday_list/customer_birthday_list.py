@@ -4,6 +4,7 @@
 import frappe
 from frappe import _
 from frappe.utils import nowdate, add_days, getdate
+import datetime
 
 
 def execute(filters=None):
@@ -38,6 +39,7 @@ def get_conditions(filters):
         conditions.append("customer.company = '%s'" % filters.get("company"))
 
     conditions.append("customer.disabled = 0")
+
     today = getdate(nowdate())
     next_day = today
     type = filters.get('type')
@@ -45,30 +47,10 @@ def get_conditions(filters):
         next_day = getdate(add_days(today, 6))
     elif type == "Next 30 Days":
         next_day = getdate(add_days(today, 29))
-    month = -1
-    if filters.get("month"):
-        month = [
-                    "Jan",
-                    "Feb",
-                    "Mar",
-                    "Apr",
-                    "May",
-                    "Jun",
-                    "Jul",
-                    "Aug",
-                    "Sep",
-                    "Oct",
-                    "Nov",
-                    "Dec",
-                ].index(filters["month"]) + 1
 
-    if today.month == next_day.month:
-        conditions.append("customer.birth_day >= {}".format(today.day))
-        conditions.append("customer.birth_day <= {}".format(next_day.day))
-    if today.month < next_day.month:
-        conditions.append(
-            "((customer.birth_day >= {} and customer.birth_month = {}) or (customer.birth_day <= {} and customer.birth_month = {}))".format(
-                today.day, next_day.month, today.day, next_day.month))
+
+    conditions.append("customer.birth_month = {}".format(today.month))
+    conditions.append("customer.birth_month = {}".format(next_day.month))
     if conditions:
         return " and ".join(conditions)
 
@@ -77,23 +59,43 @@ def get_conditions(filters):
 
 def get_data(filters):
     conditions = get_conditions(filters)
-
     customer_query = """select customer_name, mobile_number, customer_group, source, birth_day, birth_month, birth_year
-    from `tabCustomer` customer where %s""" % conditions
-    # customer_query = """select customer_name, mobile_number, customer_group, source, birth_day, birth_month, birth_year,
-    #  CONCAT(birth_day,'-',birth_month,'-', birth_year) as day_month_year, CONCAT(birth_day,'-',birth_month) as day_month
-    # from `tabCustomer` customer limit 10"""
+    from `tabCustomer` customer where birth_day > 0 and birth_month > 0 and (%s)""" % conditions
+
     query_result = frappe.db.sql(customer_query, as_dict=1)
-    print(query_result)
+
+    customer_birthday_list = []
     for result in query_result:
-        print(type(result), result)
-        if result.get('birth_day', None) and result.get('birth_month', None):
+        today = getdate(nowdate())
+        type = filters.get('type')
+        if type == "Next 7 Days":
+            next_date = getdate(add_days(getdate(add_days(today, 1)), 7))
+        elif type == "Next 30 Days":
+            next_date = getdate(add_days(getdate(add_days(today, 1)), 30))
+        else:
+            next_date = getdate(nowdate())
+
+        new_day = result.get('birth_day', 0)
+        new_month = result.get('birth_month', 0)
+        if new_day > 0 and new_month > 0 and new_month == today.month:
+            customer_birth_date = getdate(str(today.year) + '-' + str(new_month) + '-' + str(new_day))
+        elif new_day > 0 and new_month > 0 and new_month == next_date.month:
+            customer_birth_date = getdate(str(next_date.year) + '-' + str(new_month) + '-' + str(new_day))
+        else:
+            continue
+
+        if customer_birth_date <= next_date:
             if result['birth_day'] == 1:
-                result['day'] = (getdate('1900-' + str(result['birth_month']) + '-' + str(result['birth_day']))).strftime("%-dst %B")
+                result['day'] = (
+                    getdate('1900-' + str(result['birth_month']) + '-' + str(result['birth_day']))).strftime("%-dst %B")
             elif result['birth_day'] == 2:
-                result['day'] = (getdate('1900-' + str(result['birth_month']) + '-' + str(result['birth_day']))).strftime("%-dnd %B")
+                result['day'] = (
+                    getdate('1900-' + str(result['birth_month']) + '-' + str(result['birth_day']))).strftime("%-dnd %B")
             elif result['birth_day'] == 3:
-                result['day'] = (getdate('1900-' + str(result['birth_month']) + '-' + str(result['birth_day']))).strftime("%-drd %B")
+                result['day'] = (
+                    getdate('1900-' + str(result['birth_month']) + '-' + str(result['birth_day']))).strftime("%-drd %B")
             else:
-                result['day'] = (getdate('1900-' + str(result['birth_month']) + '-' + str(result['birth_day']))).strftime("%-dth %B")
-    return query_result
+                result['day'] = (
+                    getdate('1900-' + str(result['birth_month']) + '-' + str(result['birth_day']))).strftime("%-dth %B")
+            customer_birthday_list.append(result)
+    return customer_birthday_list
