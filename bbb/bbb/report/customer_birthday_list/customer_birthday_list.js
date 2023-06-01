@@ -45,7 +45,6 @@ frappe.query_reports["Customer Birthday List"] = {
       "label": __("Company"),
       "fieldtype": "Link",
       "options": "Company",
-      "default": frappe.defaults.get_default('company'),
       "width": "60px"
     },
   ],

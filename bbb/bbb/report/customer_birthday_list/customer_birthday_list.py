@@ -18,7 +18,7 @@ def get_columns():
          "width": 250},
         {"label": _("Customer Group"), "fieldname": "customer_group", "fieldtype": "Link", "options": "Customer Group",
          "width": 190},
-        {"label": _("Source"), "fieldname": "total_invoice", "fieldtype": "Int", "width": 190},
+        {"label": _("Source"), "fieldname": "source", "fieldtype": "link", "options": "Lead Source", "width": 190},
         {"label": _("Day"), "fieldname": "day", "fieldtype": "Text", "width": 190},
         {"label": _("Mobile No."), "fieldname": "mobile_number", "fieldtype": "Data", "width": 190},
     ]
@@ -88,6 +88,12 @@ def get_data(filters):
     for result in query_result:
         print(type(result), result)
         if result.get('birth_day', None) and result.get('birth_month', None):
-
-            result['day'] = (getdate('1900-' + str(result['birth_month']) + '-' + str(result['birth_day']))).strftime("%-dth %B")
+            if result['birth_day'] == 1:
+                result['day'] = (getdate('1900-' + str(result['birth_month']) + '-' + str(result['birth_day']))).strftime("%-dst %B")
+            elif result['birth_day'] == 2:
+                result['day'] = (getdate('1900-' + str(result['birth_month']) + '-' + str(result['birth_day']))).strftime("%-dnd %B")
+            elif result['birth_day'] == 3:
+                result['day'] = (getdate('1900-' + str(result['birth_month']) + '-' + str(result['birth_day']))).strftime("%-drd %B")
+            else:
+                result['day'] = (getdate('1900-' + str(result['birth_month']) + '-' + str(result['birth_day']))).strftime("%-dth %B")
     return query_result
