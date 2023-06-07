@@ -6,22 +6,8 @@ frappe.ui.form.on('POS Closing Entry', {
     pos_opening_entry:function(frm) {
 		if (frm.doc.pos_opening_entry && frm.doc.period_start_date && frm.doc.period_end_date && frm.doc.user) {
 			reset_values(frm);
-			frm.trigger("set_opening_amounts");
 			frm.trigger("get_pos_invoices_");
 		}
-	},
-
-	set_opening_amounts(frm) {
-		frappe.db.get_doc("POS Opening Entry", frm.doc.pos_opening_entry)
-			.then(({ balance_details }) => {
-				balance_details.forEach(detail => {
-					frm.add_child("payment_reconciliation", {
-						mode_of_payment: detail.mode_of_payment,
-						opening_amount: detail.opening_amount,
-						expected_amount: detail.opening_amount
-					});
-				})
-			});
 	},
 
 	get_pos_invoices_(frm) {
