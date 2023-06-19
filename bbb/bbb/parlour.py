@@ -10,7 +10,7 @@ from frappe.utils.nestedset import get_root_of
 from erpnext.accounts.doctype.pos_invoice.pos_invoice import get_stock_availability
 from erpnext.accounts.doctype.pos_profile.pos_profile import get_child_nodes, get_item_groups
 from frappe.www.printview import get_html_and_style
-from frappe.utils import now_datetime, nowdate
+from frappe.utils import now_datetime, nowdate, get_datetime
 
 
 def search_by_term(search_term, warehouse, price_list):
@@ -380,3 +380,17 @@ def get_all(doctype, name, print_format, no_letterhead, letterhead, settings, la
     res = get_html_and_style(doc=doctype, name=name, print_format=print_format, no_letterhead=no_letterhead,
                              letterhead=letterhead, settings=settings)
     return res
+
+
+@frappe.whitelist()
+def get_advance_booking(pos_profile, customer=None, name=None):
+    if customer and name:
+        advance_booking_list = frappe.get_all('Advance Booking', {'pos_profile': pos_profile, 'owner': frappe.session.user, 'name': name, 'customer': customer}, ['name', 'customer', 'actual_service_date'])
+    elif customer:
+        advance_booking_list = frappe.get_all('Advance Booking', {'pos_profile': pos_profile, 'owner': frappe.session.user, 'customer': customer}, ['name', 'customer', 'actual_service_date'])
+    elif name:
+        advance_booking_list = frappe.get_all('Advance Booking', {'pos_profile': pos_profile, 'owner': frappe.session.user, 'name': name}, ['name', 'customer', 'actual_service_date'])
+    else:
+        advance_booking_list = frappe.get_all('Advance Booking', {'pos_profile': pos_profile}, ['name', 'customer', 'actual_service_date'])
+       
+    return advance_booking_list

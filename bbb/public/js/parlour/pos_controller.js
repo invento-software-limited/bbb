@@ -13,7 +13,7 @@ erpnext.PointOfSale.Controller = class {
   }
 
   fetch_opening_entry() {
-    return frappe.call("erpnext.selling.page.point_of_sale.point_of_sale.check_opening_entry", {"user": frappe.session.user});
+    return frappe.call("erpnext.selling.page.point_of_sale.point_of_sale.check_opening_entry", { "user": frappe.session.user });
   }
 
   check_opening_entry() {
@@ -53,11 +53,11 @@ erpnext.PointOfSale.Controller = class {
     const fetch_pos_payment_methods = () => {
       const pos_profile = dialog.fields_dict.pos_profile.get_value();
       if (!pos_profile) return;
-      frappe.db.get_doc("POS Profile", pos_profile).then(({payments}) => {
+      frappe.db.get_doc("POS Profile", pos_profile).then(({ payments }) => {
         dialog.fields_dict.balance_details.df.data = [];
         payments.forEach(pay => {
-          const {mode_of_payment} = pay;
-          dialog.fields_dict.balance_details.df.data.push({mode_of_payment, opening_amount: '0'});
+          const { mode_of_payment } = pay;
+          dialog.fields_dict.balance_details.df.data.push({ mode_of_payment, opening_amount: '0' });
         });
         dialog.fields_dict.balance_details.grid.refresh();
       });
@@ -87,7 +87,7 @@ erpnext.PointOfSale.Controller = class {
           fields: table_fields
         }
       ],
-      primary_action: async function ({company, pos_profile, balance_details}) {
+      primary_action: async function ({ company, pos_profile, balance_details }) {
         if (!balance_details.length) {
           frappe.show_alert({
             message: __("Please add Mode of payments and opening balance details."),
@@ -100,7 +100,7 @@ erpnext.PointOfSale.Controller = class {
         balance_details = balance_details.filter(d => d.mode_of_payment);
 
         const method = "erpnext.selling.page.point_of_sale.point_of_sale.create_opening_voucher";
-        const res = await frappe.call({method, args: {pos_profile, company, balance_details}, freeze: true});
+        const res = await frappe.call({ method, args: { pos_profile, company, balance_details }, freeze: true });
         !res.exc && me.prepare_app_defaults(res.message);
         dialog.hide();
       },
@@ -109,7 +109,7 @@ erpnext.PointOfSale.Controller = class {
     dialog.show();
     const pos_profile_query = {
       query: 'erpnext.accounts.doctype.pos_profile.pos_profile.pos_profile_query',
-      filters: {company: dialog.fields_dict.company.get_value()}
+      filters: { company: dialog.fields_dict.company.get_value() }
     };
   }
 
@@ -121,7 +121,7 @@ erpnext.PointOfSale.Controller = class {
     this.item_stock_map = {};
     this.settings = {};
 
-    frappe.db.get_value('Stock Settings', undefined, 'allow_negative_stock').then(({message}) => {
+    frappe.db.get_value('Stock Settings', undefined, 'allow_negative_stock').then(({ message }) => {
       this.allow_negative_stock = flt(message.allow_negative_stock) || false;
     });
 
@@ -176,13 +176,18 @@ erpnext.PointOfSale.Controller = class {
       e.preventDefault();
       me.check_item_stock();
     });
+
+    $('#advance_booking_list').bind('click', function (e) {
+      e.preventDefault();
+      me.advance_booking_list();
+    });
     $('#add_damaged_product').bind('click', function (e) {
       e.preventDefault();
       if (me.frm.doc.is_return) {
         me.add_damaged_product();
       } else {
         const message = __("You can add damaged product in return");
-        frappe.show_alert({message, indicator: "red"});
+        frappe.show_alert({ message, indicator: "red" });
       }
 
     });
@@ -269,7 +274,7 @@ erpnext.PointOfSale.Controller = class {
                     {% endif %}
                 </div>`;
 
-      var table_data = frappe.render_template(html, {data: data});
+      var table_data = frappe.render_template(html, { data: data });
       d.fields_dict.items.$wrapper.html(table_data);
     }
 
@@ -323,6 +328,151 @@ erpnext.PointOfSale.Controller = class {
     d.$wrapper.find('.modal-dialog').css("max-width", "800px");
   }
 
+
+  advance_booking_list() {
+    const me = this;
+    function get_items_template(dialog, data, me) {
+      var html = `<div class="card mb-4">
+                {% if data %}
+                    <div class="dashboard-list-item" style="padding: 12px 15px;">
+                        <div class="row col-md-12">
+                            <div class="col-sm-5 text-muted" style="margin-top: 8px;">
+                                Booking Invoice
+                            </div>
+                            <div class="col-sm-3 text-muted" style="margin-top: 8px;">
+                                Customer
+                            </div>
+                            <div class="col-sm-2 text-muted" style="margin-top: 8px;">
+                                Service Date
+                            </div>
+                            <div class="col-sm-2 text-muted text-right" style="margin-top: 8px;">
+                                
+                            </div>
+                        </div>
+                    </div>
+                    {% for d in data %}
+                        <div class="dashboard-list-item" style="padding: 7px 15px;">
+                            <div class="row col-md-12">
+                                    <div class="col-sm-5" style="margin-top: 8px;">
+                                      <a data-type="Name" data-name="{{ d.name }}">
+                                        {{ d.name }}</a>
+                                    </div>
+                                    <div class="col-sm-3" style="margin-top: 8px; ">
+                                        <a data-type="item" data-name="{{ d.customer }}">
+                                            {{ d.customer }}</a>
+                                        </div>
+                                    <div class="col-sm-2" style="margin-top: 8px; ">
+                                        <a data-type="item" data-name="{{ d.actual_service_date }}">
+                                            {{ d.actual_service_date }}</a>
+                                        </div>
+                                    <div class="col-sm-2 text-center" style="margin-top: 8px;">
+                                        <button class="btn btn-primary add_to_cart" value="{{ d.name }}">Add to cart</button>
+                                    </div>
+                                </div>
+                            </div>
+                        {% endfor %}
+                    {% else %}
+                        <div class="mt-2 mb-2 text-center">
+                            <span class="text-md-center">Item Not Found!</span>
+                        </div>
+                    {% endif %}
+                </div>`;
+
+      var table_data = frappe.render_template(html, { data: data });
+      d.fields_dict.items.$wrapper.html(table_data);
+
+      $('.add_to_cart').on('click', function (e) {
+        e.preventDefault;
+        frappe.db.get_doc('Advance Booking', this.value)
+          .then(doc => {
+              frappe.run_serially([
+                () => me.make_new_invoice(),
+                () => me.cart.update_served_by_for_advance_booking(doc),
+                () => me.cart.update_customer_for_advance_booking(doc),
+                // () => frappe.model.set_value("POS Invoice", me.frm.doc.name, "total_advance", doc.tota_advance)
+                () => me.cart.render_rounded_total(doc),
+                () => dialog.hide()
+              ]);
+            // me.cart.update_served_by_for_advance_booking(doc)
+            // me.cart.update_customer_for_advance_booking(doc)
+          })
+
+      })
+
+    }
+
+    function get_advance_booking(d, me) {
+      let args = {
+        'pos_profile': me.pos_profile,
+        'customer': d.get_value("customer"),
+        'custonamemer': d.get_value("customer"),
+      }
+      frappe.call({
+        method: 'bbb.bbb.parlour.get_advance_booking',
+        args: {
+          ...args
+        },
+        callback: function (r) {
+          if (!r.exc) {
+            // code snippet
+            console.log(r);
+            if (r.message.length !== 0) {
+              // console.log("=====>>>", r.message)
+              get_items_template(d, r.message, me)
+            } else {
+              get_items_template(d, null)
+            }
+          }
+        }
+      });
+    }
+
+    var d = new frappe.ui.Dialog({
+      title: "Item Stock Status",
+      fields: [
+        {
+          fieldtype: "Link",
+          fieldname: "name",
+          label: __("Voucher No"),
+          options: "Advance Booking",
+          onchange: function (e) {
+            // cur_dialog.fields_dict.item_code.value
+            get_advance_booking(d, me)
+          }
+        },
+        {
+          fieldtype: "Column Break"
+        },
+
+        {
+          fieldtype: "Link",
+          fieldname: "customer",
+          label: __("Customer"),
+          options: "Customer",
+          onchange: function (e) {
+            // cur_dialog.fields_dict.item_code.value
+            get_advance_booking(d, me)
+          }
+        },
+        {
+          fieldtype: "Column Break"
+        },
+        {
+          fieldtype: "Section Break"
+        },
+        {
+          'fieldname': 'items',
+          'fieldtype': 'HTML'
+        },
+      ],
+    });
+    d.show();
+    d.$wrapper.find('.modal-dialog').css("max-width", "800px");
+  };
+  add_to_cart(name) {
+    console.log(name)
+  }
+
   add_damaged_product() {
     const me = this;
     let d = new frappe.ui.Dialog({
@@ -346,7 +496,7 @@ erpnext.PointOfSale.Controller = class {
       primary_action_label: 'Add',
       primary_action(values) {
 
-        const new_item = {'item_code': 'damaged_product', 'qty': 1};
+        const new_item = { 'item_code': 'damaged_product', 'qty': 1 };
         const item_row = me.frm.add_child('items', new_item);
         me.trigger_new_item_events(item_row);
         setTimeout(function () {
@@ -511,7 +661,7 @@ erpnext.PointOfSale.Controller = class {
           // for each unique batch new item row is added in the form & cart
           Object.keys(batch_serial_map).forEach(batch => {
             const item_to_clone = this.frm.doc.items.find(i => i.name == item.name);
-            const new_row = this.frm.add_child("items", {...item_to_clone});
+            const new_row = this.frm.add_child("items", { ...item_to_clone });
             // update new serialno and batch
             new_row.batch_no = batch;
             new_row.serial_no = batch_serial_map[batch].join(`\n`);
@@ -627,25 +777,25 @@ erpnext.PointOfSale.Controller = class {
   get_print_html(doctype, docname, print_format, letterhead, lang_code) {
     var res = undefined
     frappe.call({
-			method: 'frappe.www.printview.get_html_and_style',
-      async:false,
-			args: {
-				doc: doctype,
-				name: docname,
-				print_format: print_format,
-				no_letterhead: 1,
-				letterhead: "No Letterhead",
-				settings: {},
-				_lang: lang_code,
-			},
-			callback: function(r) {
+      method: 'frappe.www.printview.get_html_and_style',
+      async: false,
+      args: {
+        doc: doctype,
+        name: docname,
+        print_format: print_format,
+        no_letterhead: 1,
+        letterhead: "No Letterhead",
+        settings: {},
+        _lang: lang_code,
+      },
+      callback: function (r) {
         if (!r.exc) {
           res = r.message
         }
       }
-		});
+    });
     return res
-	}
+  }
 
   get_naming_series(me) {
 
@@ -654,7 +804,7 @@ erpnext.PointOfSale.Controller = class {
         method: 'frappe.client.get_value',
         args: {
           'doctype': 'POS Profile',
-          'filters': {'name': this.pos_profile},
+          'filters': { 'name': this.pos_profile },
           'fieldname': [
             '_naming_series',
           ]
@@ -884,7 +1034,7 @@ erpnext.PointOfSale.Controller = class {
     let item_row = undefined;
     try {
       // let { field, value, item } = args;
-      let {field, value, item, item_quantity} = args;
+      let { field, value, item, item_quantity } = args;
       const {
         item_code,
         batch_no,
@@ -899,6 +1049,7 @@ erpnext.PointOfSale.Controller = class {
         tag,
         update_rules
       } = item;
+      console.log("new_item", item)
       item_row = this.get_item_from_frm(item);
 
       const item_row_exists = !$.isEmptyObject(item_row);
@@ -939,7 +1090,7 @@ erpnext.PointOfSale.Controller = class {
           return;
 
         // const new_item = { item_code, batch_no, rate, [field]: value };
-        const new_item = {item_code, batch_no, rate, tag, [field]: 1};
+        const new_item = { item_code, batch_no, rate, tag, [field]: 1 };
 
         if (serial_no) {
           await this.check_serial_no_availablilty(item_code, this.frm.doc.set_warehouse, serial_no);
@@ -998,7 +1149,7 @@ erpnext.PointOfSale.Controller = class {
       let rules_name = rules_name_list.join(',');
       frappe.model.set_value('POS Invoice', me.frm.docname, 'additional_discount_tag_name', tag_name)
       frappe.model.set_value('POS Invoice', me.frm.docname, 'additional_discount_pricing_rule_name', rules_name)
-      me.cart.update_additional_discount(me.cart, {value: flt(additional_discount)}, me.frm, 'discount_amount');
+      me.cart.update_additional_discount(me.cart, { value: flt(additional_discount) }, me.frm, 'discount_amount');
       me.cart.update_totals_section(me.frm);
     }
   }
@@ -1017,7 +1168,7 @@ erpnext.PointOfSale.Controller = class {
   apply_pricing_rule_in_return(item) {
     frappe.call({
       method: "bbb.bbb.controllers.utils.get_pricing_rule_discount",
-      args: {"name": item.pricing_rules},
+      args: { "name": item.pricing_rules },
       callback: (r) => {
         frappe.model.set_value(item.doctype, item.name, 'discount_percentage', r.message.discount_percentage)
       }
@@ -1062,7 +1213,7 @@ erpnext.PointOfSale.Controller = class {
     frappe.utils.play_sound("error");
   }
 
-  get_item_from_frm({name, item_code, batch_no, uom, rate, mrp, title, update_rules}) {
+  get_item_from_frm({ name, item_code, batch_no, uom, rate, mrp, title, update_rules }) {
 
     let item_row = null;
     if (name) {
@@ -1145,8 +1296,8 @@ erpnext.PointOfSale.Controller = class {
 
   async check_serial_no_availablilty(item_code, warehouse, serial_no) {
     const method = "erpnext.stock.doctype.serial_no.serial_no.get_pos_reserved_serial_nos";
-    const args = {filters: {item_code, warehouse}}
-    const res = await frappe.call({method, args});
+    const args = { filters: { item_code, warehouse } }
+    const res = await frappe.call({ method, args });
 
     if (res.message.includes(serial_no)) {
       frappe.throw({
@@ -1187,7 +1338,7 @@ erpnext.PointOfSale.Controller = class {
 
   remove_item_from_cart() {
     frappe.dom.freeze();
-    const {doctype, name, current_item} = this.item_details;
+    const { doctype, name, current_item } = this.item_details;
 
     frappe.model.set_value(doctype, name, 'qty', 0)
       .then(() => {
@@ -1358,7 +1509,7 @@ erpnext.PointOfSale.Controller = class {
     let free_qty = 0
     items.forEach(function (item, index) {
       if (item.free_item_rules) {
-        free_items.push({'docname': item.name, 'mrp': item.price_list_rate})
+        free_items.push({ 'docname': item.name, 'mrp': item.price_list_rate })
         min_qty = item.min_qty;
         free_qty += item.free_qty;
       }
@@ -1386,7 +1537,7 @@ erpnext.PointOfSale.Controller = class {
       },
       callback: function (r) {
         let res = r.message
-        if(res){
+        if (res) {
           discount_amount = res.discount_amount || 0
           tag_name_list = res.tag_name_list || []
           rules_name_list = res.rules_name_list || []
@@ -1394,7 +1545,7 @@ erpnext.PointOfSale.Controller = class {
 
       }
     });
-    return {discount_amount, tag_name_list, rules_name_list}
+    return { discount_amount, tag_name_list, rules_name_list }
   }
 
   reload_item_cart(frm) {
@@ -1419,5 +1570,21 @@ erpnext.PointOfSale.Controller = class {
     });
     frm.refresh_field('items');
 
+  }
+
+  // unused_fucntion
+  async update_advance_booking_cart(item) {
+    const {
+      item_code,
+      batch_no,
+      serial_no,
+      rate,
+      tag
+    } = item;
+    let item_row = this.get_item_from_frm(item);
+    const new_item = { item_code, batch_no, rate, tag, 'qty': item['qty'] };
+    item_row = this.frm.add_child('items', new_item);
+    await this.trigger_new_item_events(item_row);
+    this.update_cart_html(item_row);
   }
 };
