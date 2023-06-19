@@ -1,0 +1,82 @@
+{
+ "actions": [],
+ "allow_rename": 1,
+ "creation": "2023-06-15 14:57:00.623061",
+ "doctype": "DocType",
+ "editable_grid": 1,
+ "engine": "InnoDB",
+ "field_order": [
+  "advance_booking",
+  "posting_date",
+  "column_break_3",
+  "customer",
+  "grand_total",
+  "rounded_total",
+  "total_advance",
+  "outstanding_amount"
+ ],
+ "fields": [
+  {
+   "fieldname": "advance_booking",
+   "fieldtype": "Link",
+   "in_list_view": 1,
+   "label": "Advance Booking",
+   "options": "Advance Booking"
+  },
+  {
+   "fetch_from": "advance_booking.posting_date",
+   "fieldname": "posting_date",
+   "fieldtype": "Date",
+   "in_list_view": 1,
+   "label": "Posting Date"
+  },
+  {
+   "fieldname": "column_break_3",
+   "fieldtype": "Column Break"
+  },
+  {
+   "fetch_from": "advance_booking.customer",
+   "fieldname": "customer",
+   "fieldtype": "Link",
+   "label": "Customer",
+   "options": "Customer"
+  },
+  {
+   "fetch_from": "advance_booking.rounded_total",
+   "fieldname": "rounded_total",
+   "fieldtype": "Currency",
+   "label": "Rounded Total"
+  },
+  {
+   "fetch_from": "advance_booking.total_advance",
+   "fieldname": "total_advance",
+   "fieldtype": "Currency",
+   "in_list_view": 1,
+   "label": "Total Advance"
+  },
+  {
+   "fetch_from": "advance_booking.grand_total",
+   "fieldname": "grand_total",
+   "fieldtype": "Currency",
+   "in_list_view": 1,
+   "label": "Amount"
+  },
+  {
+   "fetch_from": "advance_booking.outstanding_amount",
+   "fieldname": "outstanding_amount",
+   "fieldtype": "Data",
+   "label": "Outstanding Amount"
+  }
+ ],
+ "index_web_pages_for_search": 1,
+ "istable": 1,
+ "links": [],
+ "modified": "2023-06-15 16:50:47.427322",
+ "modified_by": "Administrator",
+ "module": "Bbb",
+ "name": "Advance Booking Reference",
+ "owner": "Administrator",
+ "permissions": [],
+ "sort_field": "modified",
+ "sort_order": "DESC"
+}
