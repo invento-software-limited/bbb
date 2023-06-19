@@ -373,7 +373,7 @@ erpnext.PointOfSale.Controller = class {
                         {% endfor %}
                     {% else %}
                         <div class="mt-2 mb-2 text-center">
-                            <span class="text-md-center">Item Not Found!</span>
+                            <span class="text-md-center">Advance Booking Not Found!</span>
                         </div>
                     {% endif %}
                 </div>`;
@@ -428,7 +428,7 @@ erpnext.PointOfSale.Controller = class {
     }
 
     var d = new frappe.ui.Dialog({
-      title: "Item Stock Status",
+      title: "Advance Booking",
       fields: [
         {
           fieldtype: "Link",

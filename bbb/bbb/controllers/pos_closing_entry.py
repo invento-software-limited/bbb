@@ -26,13 +26,13 @@ class CustomPOSClosingEntry(POSClosingEntry):
 
     def on_submit(self):
         consolidate_pos_invoices(closing_entry=self)
+        self.create_gl_entries(self)
 
     def on_cancel(self):
         unconsolidate_pos_invoices(closing_entry=self)
 
     def validate(self):
         super(CustomPOSClosingEntry, self).validate()
-        self.create_gl_entries(self)
 
     def create_gl_entries(self, cancel=False):
         advance_booking_reference = self.advance_booking_reference
