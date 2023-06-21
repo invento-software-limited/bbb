@@ -380,6 +380,7 @@ erpnext.PointOfSale.Controller = class {
 
       var table_data = frappe.render_template(html, { data: data });
       d.fields_dict.items.$wrapper.html(table_data);
+      $('.add_to_cart').focus();
 
       $('.add_to_cart').on('click', function (e) {
         e.preventDefault;
@@ -405,7 +406,7 @@ erpnext.PointOfSale.Controller = class {
       let args = {
         'pos_profile': me.pos_profile,
         'customer': d.get_value("customer"),
-        'custonamemer': d.get_value("customer"),
+        'name': d.get_value("name"),
       }
       frappe.call({
         method: 'bbb.bbb.parlour.get_advance_booking',
@@ -1049,7 +1050,6 @@ erpnext.PointOfSale.Controller = class {
         tag,
         update_rules
       } = item;
-      console.log("new_item", item)
       item_row = this.get_item_from_frm(item);
 
       const item_row_exists = !$.isEmptyObject(item_row);
@@ -1089,8 +1089,8 @@ erpnext.PointOfSale.Controller = class {
         if (!item_code)
           return;
 
-        // const new_item = { item_code, batch_no, rate, [field]: value };
-        const new_item = { item_code, batch_no, rate, tag, [field]: 1 };
+        const new_item = { item_code, batch_no, rate, [field]: value };
+        // const new_item = { item_code, batch_no, rate, tag, [field]: 1 };
 
         if (serial_no) {
           await this.check_serial_no_availablilty(item_code, this.frm.doc.set_warehouse, serial_no);

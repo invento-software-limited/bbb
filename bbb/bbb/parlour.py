@@ -391,6 +391,7 @@ def get_advance_booking(pos_profile, customer=None, name=None):
     elif name:
         advance_booking_list = frappe.get_all('Advance Booking', {'pos_profile': pos_profile, 'owner': frappe.session.user, 'name': name}, ['name', 'customer', 'actual_service_date'])
     else:
-        advance_booking_list = frappe.get_all('Advance Booking', {'pos_profile': pos_profile}, ['name', 'customer', 'actual_service_date'])
+        advance_booking_list = []
+        # advance_booking_list = frappe.get_all('Advance Booking', {'pos_profile': pos_profile}, ['name', 'customer', 'actual_service_date'])
        
     return advance_booking_list

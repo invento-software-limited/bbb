@@ -669,7 +669,20 @@ class AdvanceBooking(SalesInvoice):
 
         self.total_advance = total_advance
         self.outstanding_amount = self.rounded_total - total_advance
+        
+    def calculate_taxes_and_totals(self):
+        from bbb.bbb.controllers.taxes_and_totals import calculate_taxes_and_totals
 
+        calculate_taxes_and_totals(self)
+
+        if self.doctype in (
+            "Sales Order",
+            "Delivery Note",
+            "Sales Invoice",
+            "POS Invoice",
+        ):
+            self.calculate_commission()
+            self.calculate_contribution()
 
 @frappe.whitelist()
 def get_stock_availability(item_code, warehouse):
