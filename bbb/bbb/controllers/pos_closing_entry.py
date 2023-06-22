@@ -8,17 +8,18 @@ from frappe.core.page.background_jobs.background_jobs import get_info
 from frappe.utils.background_jobs import enqueue
 from frappe.utils.scheduler import is_scheduler_inactive
 from frappe.utils import (
-	flt,
-	formatdate,
-	getdate,
+    flt,
+    formatdate,
+    getdate,
 )
 
 from erpnext.accounts.doctype.pos_closing_entry.pos_closing_entry import POSClosingEntry
-from erpnext.accounts.general_ledger import make_gl_entries
+from erpnext.accounts.general_ledger import make_gl_entries, process_gl_map
 from erpnext.accounts.utils import get_account_currency, get_fiscal_years, validate_fiscal_year
 from erpnext.accounts.doctype.accounting_dimension.accounting_dimension import (
-	get_accounting_dimensions,
+    get_accounting_dimensions,
 )
+
 
 class CustomPOSClosingEntry(POSClosingEntry):
     def __init__(self, *args, **kwargs):
@@ -26,170 +27,132 @@ class CustomPOSClosingEntry(POSClosingEntry):
 
     def on_submit(self):
         consolidate_pos_invoices(closing_entry=self)
-        self.create_gl_entries(self)
+        self.create_gl_entries()
 
     def on_cancel(self):
         unconsolidate_pos_invoices(closing_entry=self)
+        self.cancel_gl_entry()
 
     def validate(self):
         super(CustomPOSClosingEntry, self).validate()
+        fiscal_years = get_fiscal_years(
+            self.posting_date, company=self.company)
+        if len(fiscal_years) > 1:
+            frappe.throw(
+                _("Multiple fiscal years exist for the date {0}. Please set company in Fiscal Year").format(
+                    formatdate(self.posting_date)
+                )
+            )
+        else:
+            fiscal_year = fiscal_years[0][0]
 
     def create_gl_entries(self, cancel=False):
+        # dict_1 = frappe._dict({'company': 'Orkas Glam Bar And Revive Spa', 'posting_date': '2023-06-21', 'fiscal_year': '2023', 'voucher_type': 'Payment Entry', 'voucher_no': 'ACC-PAY-2023-00003', 'remarks': 'Amount BDT 1000 received from tamanna - 250\nTransaction reference no 132666 dated 2023-06-21', 'debit': 1000.0,
+        #                       'credit': 0, 'debit_in_account_currency': 1000, 'credit_in_account_currency': 0, 'is_opening': 'No', 'party_type': None, 'party': None, 'project': None, 'post_net_value': None, 'account': 'City Bank Ltd - SPA', 'account_currency': 'BDT', 'against': 'tamanna - 250', 'cost_center': 'Mirpur Parlour - SPA'})
+        # dict_2 = frappe._dict({'company': 'Orkas Glam Bar And Revive Spa', 'posting_date': '2023-06-21', 'fiscal_year': '2023', 'voucher_type': 'Payment Entry', 'voucher_no': 'ACC-PAY-2023-00003', 'remarks': 'Amount BDT 1000 received from tamanna - 250\nTransaction reference no 132666 dated 2023-06-21', 'debit': 0, 'credit': 1000.0,
+        #                       'debit_in_account_currency': 0, 'credit_in_account_currency': 1000.0, 'is_opening': 'No', 'party_type': 'Customer', 'party': 'tamanna - 250', 'project': None, 'post_net_value': None, 'account': 'Debtors - SPA', 'against': 'City Bank Ltd - SPA', 'account_currency': 'BDT', 'cost_center': 'Mirpur Parlour - SPA'})
+        # data = [dict_2, dict_1]
+
         advance_booking_reference = self.advance_booking_reference
         for advance_booking in advance_booking_reference:
             advance_booking_doc = frappe.get_doc(
                 'Advance Booking', advance_booking.advance_booking)
             payments = advance_booking_doc.payments
             for payment in payments:
+                gl_entries = []
                 if payment.amount > 0:
-                    gl_entries = self.get_gl_entries(
-                        advance_booking_doc, payment)
-                    make_gl_entries(gl_entries, cancel)
+                    self.add_party_gl_entries(
+                        gl_entries, advance_booking_doc, payment)
+                    gl_entries = process_gl_map(gl_entries)
+                    make_gl_entries(gl_entries)
 
-    def get_gl_entries(self, advance_booking_doc, payment):
-        gl_entry = []
-        # payable entry
-        if payment.amount:
-            gl_entry.append(
-                self.get_gl_dict(
-                    {
-                        "account": payment.account,
-                        "credit": payment.amount,
-                        "credit_in_account_currency": payment.amount,
-                        "against": payment.account,
-                        "party_type": "Customer",
-                        "party": advance_booking_doc.customer,
-                        "against_voucher_type": 'Advance Boooking',
-                        "against_voucher": advance_booking_doc.name,
-                        "cost_center": payment.account,
-                    },
-                    voucher_type = "Advance Boooking",
-                    voucher_no = advance_booking_doc.name
-                )
-            )
+    def cancel_gl_entry(self):
+        advance_booking_reference = self.advance_booking_reference
+        for advance_booking in advance_booking_reference:
+            advance_booking_doc = frappe.get_doc(
+                'Advance Booking', advance_booking.advance_booking)
+            gl_entry_doc = frappe.get_list(
+                'GL Entry', {'voucher_no': advance_booking_doc.name})
+            for gle in gl_entry_doc:
+                frappe.db.set_value('GL Entry', gle.name, 'is_cancelled', 1)
+            payments = advance_booking_doc.payments
+            for payment in payments:
+                gl_entries = []
+                if payment.amount > 0:
+                    self.add_party_gl_entries(
+                        gl_entries, advance_booking_doc, payment)
+                    gl_entries = process_gl_map(gl_entries)
+                    make_gl_entries(gl_entries, True)
 
-            # expense entries
-            gl_entry.append(
-                self.get_gl_dict(
-                    {
-                        "account": payment.account,
-                        "debit": payment.amount,
-                        "debit_in_account_currency": payment.amount,
-                        "against": payment.account,
-                        "cost_center": payment.account,
-                    },
-                    voucher_type = "Advance Boooking",
-                    voucher_no = advance_booking_doc.name
-                )
-            )
-
-        return gl_entry
-
-    def get_gl_dict(self, args, voucher_type=None, voucher_no=None, account_currency=None, item=None):
-        """this method populates the common properties of a gl entry record"""
-
-        posting_date = args.get("posting_date") or self.get("posting_date")
-        fiscal_years = get_fiscal_years(posting_date, company=self.company)
+    def add_party_gl_entries(self, gl_entries, advance_booking_doc, payment):
+        fiscal_years = get_fiscal_years(
+            advance_booking_doc.posting_date, company=self.company)
         if len(fiscal_years) > 1:
             frappe.throw(
                 _("Multiple fiscal years exist for the date {0}. Please set company in Fiscal Year").format(
-                    formatdate(posting_date)
+                    formatdate(advance_booking_doc.posting_date)
                 )
             )
         else:
             fiscal_year = fiscal_years[0][0]
-
-        gl_dict = frappe._dict(
+        dict_1 = frappe._dict(
             {
-                "company": self.company,
-                "posting_date": posting_date,
-                "fiscal_year": fiscal_year,
-                "voucher_type": voucher_type,
-                "voucher_no": voucher_no,
-                "remarks": '',
-                "debit": 0,
-                "credit": 0,
-                "debit_in_account_currency": 0,
-                "credit_in_account_currency": 0,
-                "is_opening": "No",
-                "party_type": None,
-                "party": None,
-                "project": None,
-                "post_net_value": args.get("post_net_value"),
+                'company': self.company,
+                'posting_date': advance_booking_doc.posting_date,
+                'fiscal_year': fiscal_year,
+                'voucher_type': 'Advance Booking',
+                'voucher_no': advance_booking_doc.name,
+                'remarks': 'Amount BDT {} received from {}'.format(payment.amount, advance_booking_doc.customer),
+                'debit': 0,
+                'credit': payment.amount,
+                'debit_in_account_currency': 0,
+                'credit_in_account_currency': payment.amount,
+                'is_opening': 'No',
+                'party_type': 'Customer',
+                'party': advance_booking_doc.customer,
+                'project': None,
+                'post_net_value': None,
+                'account': 'Debtors - SPA',
+                'against': payment.account,
+                'account_currency': 'BDT',
+                'is_advance': 'Yes',
+                'cost_center': advance_booking_doc.cost_center
             }
         )
+        gl_entries.append(dict_1)
 
-        accounting_dimensions = get_accounting_dimensions()
-        dimension_dict = frappe._dict()
+        dict_2 = frappe._dict(
+            {
+                'company': self.company,
+                'posting_date': advance_booking_doc.posting_date,
+                'fiscal_year': fiscal_year,
+                'voucher_type': 'Advance Booking',
+                'voucher_no': advance_booking_doc.name,
+                'remarks': 'Amount BDT {} received from {}'.format(payment.amount, advance_booking_doc.customer),
+                'debit': payment.amount,
+                'credit': 0,
+                'debit_in_account_currency': payment.amount,
+                'credit_in_account_currency': 0,
+                'is_opening': 'No',
+                'party_type': None,
+                'party': None,
+                'project': None,
+                'post_net_value': None,
+                'account': payment.account,
+                'account_currency': 'BDT',
+                'against': advance_booking_doc.customer,
+                'is_advance': 'Yes',
+                'cost_center': advance_booking_doc.cost_center
+            })
 
-        for dimension in accounting_dimensions:
-            dimension_dict[dimension] = self.get(dimension)
-            if item and item.get(dimension):
-                dimension_dict[dimension] = item.get(dimension)
-
-        gl_dict.update(dimension_dict)
-        gl_dict.update(args)
-
-        if not account_currency:
-            account_currency = get_account_currency(gl_dict.account)
-
-        # if gl_dict.account and self.doctype not in [
-        #     "Journal Entry",
-        #     "Period Closing Voucher",
-        #     "Payment Entry",
-        #     "Purchase Receipt",
-        #     "Purchase Invoice",
-        #     "Stock Entry",
-        # ]:
-        #     self.validate_account_currency(gl_dict.account, account_currency)
-
-        if gl_dict.account and self.doctype not in [
-            "Journal Entry",
-            "Period Closing Voucher",
-            "Payment Entry",
-        ]:
-            set_balance_in_account_currency(
-                gl_dict, account_currency, self.get(
-                    "conversion_rate"), "BDT"
-            )
-
-        return gl_dict
-
-
-def set_balance_in_account_currency(
-        gl_dict, account_currency=None, conversion_rate=None, company_currency=None
-):
-    if (not conversion_rate) and (account_currency != company_currency):
-        frappe.throw(
-            _("Account: {0} with currency: {1} can not be selected").format(
-                gl_dict.account, account_currency
-            )
-        )
-
-    gl_dict["account_currency"] = (
-        company_currency if account_currency == company_currency else account_currency
-    )
-
-    # set debit/credit in account currency if not provided
-    if flt(gl_dict.debit) and not flt(gl_dict.debit_in_account_currency):
-        gl_dict.debit_in_account_currency = (
-            gl_dict.debit
-            if account_currency == company_currency
-            else flt(gl_dict.debit / conversion_rate, 2)
-        )
-
-    if flt(gl_dict.credit) and not flt(gl_dict.credit_in_account_currency):
-        gl_dict.credit_in_account_currency = (
-            gl_dict.credit
-            if account_currency == company_currency
-            else flt(gl_dict.credit / conversion_rate, 2)
-        )
+        gl_entries.append(dict_2)
 
 
 def consolidate_pos_invoices(pos_invoices=None, closing_entry=None):
     pos_invoices = pos_invoices or (
         closing_entry and closing_entry.get("pos_transactions"))
-    if not pos_invoices:
+    advance_booking_reference = closing_entry.get("advance_booking_reference")
+    if not pos_invoices and not advance_booking_reference:
         frappe.throw(_("There must be at lest one invoice"),
                      title=_("Invoice not found"))
 
