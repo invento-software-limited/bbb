@@ -2217,13 +2217,16 @@ erpnext.PointOfSale.ItemCart = class {
         frm.script_manager.trigger('customer', frm.doc.doctype, frm.doc.name).then(() => {
             frappe.run_serially([
                 () => frm.doc.ignore_pricing_rule = (me.ignore_pricing_rule == "Yes") ? 1 : 0,
+                () => frm.doc.taxes = [],
                 () => me.fetch_customer_details(customer_value),
                 () => me.events.customer_details_updated(me.customer_info),
                 () => me.update_customer_section(),
-                () => me.update_totals_section(),
                 // () => me.events.set_cache_data({'pos_customer': this.value}),
                 // () => me.check_out_validation(true),
                 () => me.update_advance_booking_cart(items),
+                () => me.update_totals_section(),
+                () => frappe.model.set_value(frm.doctype, frm.docname, 'total_advance', advance_booking_doc.total_advance),
+                () => console.log("frm ",frm.doc),
                 () => frappe.dom.unfreeze()
             ]);
         })
@@ -2232,14 +2235,17 @@ erpnext.PointOfSale.ItemCart = class {
     update_advance_booking_cart(items) {
         const me = this;
         const frm = me.events.get_frm();
-        for (var index in items) {
-            let item = items[index]
-            var args = {
-                'field': "qty",
-                'item': item,
-                'value': "+" + item.qty
+        setTimeout(function(){
+            for (var index in items) {
+                let item = items[index]
+                var args = {
+                    'field': "qty",
+                    'item': item,
+                    'value': "+" + item.qty
+                }
+                me.events.on_cart_update(args)
             }
-            me.events.on_cart_update(args)
-        }
+        }, 300)
+
     }
 }

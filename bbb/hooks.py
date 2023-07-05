@@ -131,6 +131,7 @@ doc_events = {
     },
     "Sales Invoice": {
         "on_submit": "bbb.bbb.sales_invoice.on_submit",
+        # "before_submit": "bbb.bbb.sales_invoice.before_submit",
     },
 
     "POS Invoice": {
@@ -153,7 +154,7 @@ override_doctype_class = {
     "Sales Invoice": "bbb.bbb.controllers.sales_invoice.CustomSalesInvoice",
     "POS Invoice": "bbb.bbb.controllers.pos_invoice.CustomPOSInvoice",
     "Sales Order": "bbb.bbb.controllers.sales_order.CustomSalesOrder",
-    "POS Closing Entry": "bbb.bbb.controllers.pos_closing_entry.CustomPOSClosingEntry",
+    # "POS Closing Entry": "bbb.bbb.controllers.pos_closing_entry.CustomPOSClosingEntry",
     # "Delivery Note": "bbb.bbb.controllers.delivery_note.CustomDeliveryNote",
 }
 
