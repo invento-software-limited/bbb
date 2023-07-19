@@ -390,7 +390,9 @@ erpnext.PointOfSale.Controller = class {
                 () => me.make_new_invoice(),
                 () => me.cart.update_served_by_for_advance_booking(doc),
                 () => me.cart.update_customer_for_advance_booking(doc),
-                // () => frappe.model.set_value("POS Invoice", me.frm.doc.name, "total_advance", doc.tota_advance)
+                () => frappe.model.set_value("POS Invoice", me.frm.doc.name, "advance_booking_doc", doc.name),
+                () => me.cart.allocate_advances_automatically(me.frm),
+                () => me.cart.update_totals_section(),
                 () => me.cart.render_rounded_total(doc),
                 () => dialog.hide()
               ]);
@@ -1156,12 +1158,12 @@ erpnext.PointOfSale.Controller = class {
 
   async update_paid_amount() {
     let payments = this.frm.doc.payments
-    frappe.model.set_value(this.frm.doctype, this.frm.docname, 'paid_amount', this.base_rounded_total);
-    frappe.model.set_value(this.frm.doctype, this.frm.docname, 'base_paid_amount', this.base_rounded_total);
-    payments[0].amount = this.base_rounded_total
-    payments[0].base_amount = this.base_rounded_total
+    frappe.model.set_value(this.frm.doctype, this.frm.docname, 'paid_amount', (this.base_rounded_total - this.total_advance));
+    frappe.model.set_value(this.frm.doctype, this.frm.docname, 'base_paid_amount', (this.base_rounded_total - this.total_advance));
+    payments[0].amount = (this.base_rounded_total - this.total_advance)
+    payments[0].base_amount = (this.base_rounded_total - this.total_advance)
     frappe.model
-      .set_value(payments[0].doctype, payments[0].name, 'amount', this.base_rounded_total)
+      .set_value(payments[0].doctype, payments[0].name, 'amount', (this.base_rounded_total - this.total_advance))
       .then(() => this.payment.update_totals_section(this.frm.doc))
   }
 

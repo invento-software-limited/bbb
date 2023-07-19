@@ -29,9 +29,9 @@ class CustomPOSClosingEntry(POSClosingEntry):
         consolidate_pos_invoices(closing_entry=self)
         self.create_gl_entries()
 
-    def on_cancel(self):
-        unconsolidate_pos_invoices(closing_entry=self)
-        self.cancel_gl_entry()
+    # def on_cancel(self):
+    #     unconsolidate_pos_invoices(closing_entry=self)
+    #     self.cancel_gl_entry()
 
     def validate(self):
         super(CustomPOSClosingEntry, self).validate()
@@ -115,7 +115,7 @@ class CustomPOSClosingEntry(POSClosingEntry):
                 'account': 'Debtors - SPA',
                 'against': payment.account,
                 'account_currency': 'BDT',
-                'is_advance': 'Yes',
+                'is_advance': 'No',
                 'cost_center': advance_booking_doc.cost_center
             }
         )
@@ -141,7 +141,7 @@ class CustomPOSClosingEntry(POSClosingEntry):
                 'account': payment.account,
                 'account_currency': 'BDT',
                 'against': advance_booking_doc.customer,
-                'is_advance': 'Yes',
+                'is_advance': 'No',
                 'cost_center': advance_booking_doc.cost_center
             })
 
@@ -334,6 +334,7 @@ def process_merging_into_sales_invoice(doc):
     sales_invoice.set_posting_time = 1
 
     sales_invoice.save()
+    # print()
     sales_invoice.submit()
 
     return sales_invoice.name
@@ -357,11 +358,8 @@ def process_merging_into_credit_note(doc):
 
 
 def merge_pos_invoice_into(invoice, doc):
-    items, payments, taxes = [], [], []
+    items, payments, taxes, advances = [], [], [], []
     loyalty_amount_sum, loyalty_points_sum = 0, 0
-    invoice_name = None
-    naming_series = None
-    posting_date = None
     loyalty_amount_sum, loyalty_points_sum, idx = 0, 0, 1
     invoice_name = "SINV-" + doc.name
     naming_series = "SINV-" + doc.naming_series
@@ -379,6 +377,20 @@ def merge_pos_invoice_into(invoice, doc):
         si_item = map_child_doc(
             item, invoice, {"doctype": "Sales Invoice Item"})
         items.append(si_item)
+        
+    for adv in doc.get("advances"):
+        adv_detail = frappe._dict({
+            "parent": invoice.name,
+			"parenttype": "Sales Invoice",
+			"doctype": "Sales Invoice Advance",
+			"reference_type": "Advance Booking",
+			"reference_name": adv.reference_name,
+			"remarks": adv.remarks,
+			"advance_amount": flt(adv.advance_amount),
+			"allocated_amount": flt(adv.allocated_amount),
+			"ref_exchange_rate": 1
+        })
+        advances.append(adv_detail)
 
     for tax in doc.get("taxes"):
         si_taxes = map_child_doc(
@@ -404,16 +416,17 @@ def merge_pos_invoice_into(invoice, doc):
     invoice.set("naming_series", naming_series)
     invoice.set("name", invoice_name)
     invoice.set("posting_date", posting_date)
-    invoice.set("change_amount", doc.change_amount)
-    invoice.set("base_change_amount", doc.base_change_amount)
     invoice.set("additional_discount_percentage",
                 doc.additional_discount_percentage)
     invoice.set("discount_amount", doc.discount_amount)
     invoice.set("taxes_and_charges", doc.taxes_and_charges)
     invoice.set("ignore_pricing_rule", doc.ignore_pricing_rule)
-
+    invoice.set("allocate_advances_automatically", 1)
+    invoice.set("advance_booking_doc", doc.advance_booking_doc)
+    invoice.set("advances", advances)
+    invoice.set("total_advance", doc.total_advance)
+    invoice.set("outstanding_amount", 0)
     invoice.customer = doc.customer
-
     return invoice
 
 
@@ -439,8 +452,6 @@ def update_pos_invoices(doc, sales_invoice="", credit_note=""):
 
 
 def cancel_linked_invoices(si_name):
-    print("SI Name", si_name)
     si = frappe.get_doc("Sales Invoice", si_name)
-    print("SI", si)
     si.flags.ignore_validate = True
     si.cancel()

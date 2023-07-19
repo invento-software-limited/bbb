@@ -217,7 +217,7 @@ class CustomPOSInvoice(POSInvoice):
     def set_status(self, update=False, status=None, update_modified=True):
         rounded_total = self.rounded()
         paid_amount = self.paid_amount
-        outstanding_amount = rounded_total - paid_amount
+        outstanding_amount = (rounded_total - self.total_advance) - paid_amount
 
         if self.is_new():
             if self.get("amended_from"):

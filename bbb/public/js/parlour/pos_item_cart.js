@@ -288,10 +288,11 @@ erpnext.PointOfSale.ItemCart = class {
             if ($(this).attr('style').indexOf('--blue-500') == -1) return;
             const frm = me.events.get_frm();
             let rounded_total = frm.doc.rounded_total;
+            let total_advance = frm.doc.total_advance;
             let payments = frm.doc.payments;
-            payments[0].amount = rounded_total;
-            payments[0].base_amount = rounded_total;
-            frappe.model.set_value(frm.doctype, frm.docname, 'paid_amount', rounded_total);
+            payments[0].amount = (rounded_total - total_advance);
+            payments[0].base_amount = (rounded_total - total_advance);
+            frappe.model.set_value(frm.doctype, frm.docname, 'paid_amount', (rounded_total - total_advance));
             $(".add-discount-wrapper").attr('can_click', 'disabled');
             $(".add-discount-amount-wrapper").attr('can_click', 'disabled');
             me.wrapper.find('.customer-cart-container').css('grid-column', 'span 5 / span 5');
@@ -2189,9 +2190,7 @@ erpnext.PointOfSale.ItemCart = class {
                 if (r.message.disabled == 0) {
                     frm.script_manager.trigger('served_by', frm.doc.doctype, frm.doc.name);
                     frappe.run_serially([
-                        // () => me.check_out_validation(true),
                         () => me.served_by_info = { 'served_by': served_by_value },
-                        // () => me.events.set_cache_data({'pos_served_by': this.value}),
                         () => me.update_served_by_section(),
                         () => frappe.dom.unfreeze()
                     ]);
@@ -2221,10 +2220,7 @@ erpnext.PointOfSale.ItemCart = class {
                 () => me.fetch_customer_details(customer_value),
                 () => me.events.customer_details_updated(me.customer_info),
                 () => me.update_customer_section(),
-                // () => me.events.set_cache_data({'pos_customer': this.value}),
-                // () => me.check_out_validation(true),
                 () => me.update_advance_booking_cart(items),
-                () => me.update_totals_section(),
                 () => frappe.model.set_value(frm.doctype, frm.docname, 'total_advance', advance_booking_doc.total_advance),
                 () => console.log("frm ",frm.doc),
                 () => frappe.dom.unfreeze()
@@ -2248,4 +2244,14 @@ erpnext.PointOfSale.ItemCart = class {
         }, 300)
 
     }
+
+    allocate_advances_automatically(frm) {
+        frappe.call({
+            doc: frm.doc,
+            method: "set_advance_booking_advances",
+            callback: function(r, rt) {
+                refresh_field("advances");
+            }
+        })
+	}
 }
