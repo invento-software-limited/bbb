@@ -11,6 +11,7 @@ from frappe.utils import (
     flt,
     formatdate,
     getdate,
+    now,
 )
 
 from erpnext.accounts.doctype.pos_closing_entry.pos_closing_entry import POSClosingEntry
@@ -514,6 +515,8 @@ def merge_pos_invoice_into(invoice, doc):
     invoice.set("naming_series", naming_series)
     invoice.set("name", invoice_name)
     invoice.set("posting_date", posting_date)
+    invoice.set("change_amount", doc.change_amount)
+    invoice.set("base_change_amount", doc.base_change_amount)
     invoice.additional_discount_percentage = 0
     invoice.discount_amount = 0.0
     invoice.taxes_and_charges = None
@@ -558,3 +561,19 @@ def update_advance_booking(doc, sales_invoice="", credit_note="", cancel=True):
         frappe.db.set_value("Advance Booking", adv_booking, 'status', 'To Deliver' if cancel else 'Completed')
         frappe.db.set_value("Advance Booking", adv_booking, 'consolidated_invoice', None if (sales_invoice == "" and credit_note == "") else (credit_note if doc.is_return else sales_invoice))
         frappe.db.set_value("Advance Booking", adv_booking, 'consolidated_pos_invoice', None if cancel == True else doc.name)
+
+        if sales_invoice:
+            frappe.db.sql(
+                """UPDATE `tabGL Entry` SET is_cancelled = 1,
+                modified=%s, modified_by=%s
+                where voucher_type=%s and voucher_no=%s and is_cancelled = 0""",
+                (now(), frappe.session.user, 'Advance Booking', adv_booking),
+            )
+        elif credit_note:
+            frappe.db.sql(
+                """UPDATE `tabGL Entry` SET is_cancelled = 0,
+                modified=%s, modified_by=%s
+                where voucher_type=%s and voucher_no=%s and is_cancelled = 0""",
+                (now(), frappe.session.user, 'Advance Booking', adv_booking),
+            )
+            
