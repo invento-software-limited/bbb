@@ -739,7 +739,7 @@ frappe.ui.form.on('Sales Invoice', {
 	onload: function(frm, cdt, cdn) {
     let doc = locals[cdt][cdn]
 		frm.redemption_conversion_factor = null;
-    if(doc.sales_type === "Distribution"){
+    if(doc.sales_type === "Distribution" || doc.advance_booking_doc){
       frappe.model.set_value(cdt, cdn, 'set_warehouse', '')
       // frappe.model.set_value(cdt, cdn, 'allocate_advances_automatically', 1);
       // frappe.model.set_value(cdt, cdn, 'update_stock', 1);
@@ -787,8 +787,7 @@ frappe.ui.form.on('Sales Invoice', {
 
 	hide_fields: function(frm) {
 		let doc = frm.doc;
-		var parent_fields = ['project', 'due_date', 'is_opening', 'source', 'total_advance', 'get_advances',
-		'advances', 'from_date', 'to_date'];
+		var parent_fields = ['project', 'due_date', 'is_opening', 'source', 'get_advances', 'from_date', 'to_date'];
 
 		if(cint(doc.is_pos) == 1) {
 			hide_field(parent_fields);

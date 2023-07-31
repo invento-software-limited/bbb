@@ -10,7 +10,7 @@ from frappe.utils.nestedset import get_root_of
 from erpnext.accounts.doctype.pos_invoice.pos_invoice import get_stock_availability
 from erpnext.accounts.doctype.pos_profile.pos_profile import get_child_nodes, get_item_groups
 from frappe.www.printview import get_html_and_style
-from frappe.utils import now_datetime, nowdate, get_datetime
+from frappe.utils import now_datetime, nowdate, get_datetime, flt
 
 
 def search_by_term(search_term, warehouse, price_list):
@@ -145,7 +145,8 @@ def get_items(start, page_length, price_list, item_group, pos_profile, search_te
         for item in items_data:
             item_code = item.item_code
             item_price = item_prices.get(item_code) or {}
-            item_stock_qty, is_stock_item = get_stock_availability(item_code, warehouse)
+            item_stock_qty, is_stock_item = get_stock_availability(
+                item_code, warehouse)
 
             row = {}
             row.update(item)
@@ -246,7 +247,8 @@ def item_group_query(doctype, txt, searchfield, start, page_len, filters):
 def check_opening_entry(user):
     open_vouchers = frappe.db.get_all(
         "POS Opening Entry",
-        filters={"user": user, "pos_closing_entry": ["in", ["", None]], "docstatus": 1},
+        filters={"user": user, "pos_closing_entry": [
+            "in", ["", None]], "docstatus": 1},
         fields=["name", "company", "pos_profile", "period_start_date"],
         order_by="period_start_date desc",
     )
@@ -385,13 +387,47 @@ def get_all(doctype, name, print_format, no_letterhead, letterhead, settings, la
 @frappe.whitelist()
 def get_advance_booking(pos_profile, customer=None, name=None):
     if customer and name:
-        advance_booking_list = frappe.get_all('Advance Booking', {'pos_profile': pos_profile, 'owner': frappe.session.user, 'name': name, 'customer': customer}, ['name', 'customer', 'actual_service_date'])
+        advance_booking_list = frappe.get_all('Advance Booking', {
+                                              'pos_profile': pos_profile, 'owner': frappe.session.user, 'name': name, 'customer': customer}, ['name', 'customer', 'actual_service_date'])
     elif customer:
-        advance_booking_list = frappe.get_all('Advance Booking', {'pos_profile': pos_profile, 'owner': frappe.session.user, 'customer': customer}, ['name', 'customer', 'actual_service_date'])
+        advance_booking_list = frappe.get_all('Advance Booking', {
+                                              'pos_profile': pos_profile, 'owner': frappe.session.user, 'customer': customer}, ['name', 'customer', 'actual_service_date'])
     elif name:
-        advance_booking_list = frappe.get_all('Advance Booking', {'pos_profile': pos_profile, 'owner': frappe.session.user, 'name': name}, ['name', 'customer', 'actual_service_date'])
+        advance_booking_list = frappe.get_all('Advance Booking', {
+                                              'pos_profile': pos_profile, 'owner': frappe.session.user, 'name': name}, ['name', 'customer', 'actual_service_date'])
     else:
         advance_booking_list = []
-        # advance_booking_list = frappe.get_all('Advance Booking', {'pos_profile': pos_profile}, ['name', 'customer', 'actual_service_date'])
-       
+        advance_booking_list = frappe.get_all('Advance Booking', {'pos_profile': pos_profile}, [
+                                              'name', 'customer', 'actual_service_date'])
+
     return advance_booking_list
+
+
+@frappe.whitelist()
+def set_advance_booking_advances(self):
+    """Returns list of advances against Account, Party, Reference"""
+
+    advance_booking_doc = frappe.get_doc(
+        'Advance Booking', self.advance_booking_doc)
+    self.set("advances", [])
+    advance_allocated = 0
+    if self.get("party_account_currency") == self.company_currency:
+        amount = self.get("base_rounded_total") or self.base_grand_total
+    else:
+        amount = self.get("rounded_total") or self.grand_total
+
+    allocated_amount = min(amount - advance_allocated,
+                           advance_booking_doc.total_advance)
+    advance_allocated += flt(allocated_amount)
+
+    advance_row = {
+        "doctype": "Sales Invoice Advance",
+        "reference_type": "Advance Booking",
+        "reference_name": advance_booking_doc.name,
+        "remarks": 'Amount BDT {} received from {}'.format(advance_booking_doc.total_advance, advance_booking_doc.customer),
+        "advance_amount": flt(advance_booking_doc.total_advance),
+        "allocated_amount": flt(advance_booking_doc.total_advance),
+        "ref_exchange_rate": 1
+    }
+
+    self.append("advances", advance_row)

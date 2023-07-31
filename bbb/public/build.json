@@ -22,6 +22,17 @@
 		"public/js/parlour/pos_past_order_summary.js",
 		"public/js/parlour/pos_controller.js"
 	],
+
+	"js/restaurant.min.js": [
+		"public/js/restaurant/pos_item_selector.js",
+		"public/js/restaurant/pos_item_cart.js",
+		"public/js/restaurant/pos_item_details.js",
+		"public/js/restaurant/pos_number_pad.js",
+		"public/js/restaurant/pos_payment.js",
+		"public/js/restaurant/pos_past_order_list.js",
+		"public/js/restaurant/pos_past_order_summary.js",
+		"public/js/restaurant/pos_controller.js"
+	],
 	"js/custom-app-include-js.js": [
 		"public/js/customer_quick_entry.js"
 	]

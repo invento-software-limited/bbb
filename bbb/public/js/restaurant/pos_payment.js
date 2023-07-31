@@ -541,9 +541,8 @@ erpnext.PointOfSale.Payment = class {
 	update_totals_section(doc) {
 		if (!doc) doc = this.events.get_frm().doc;
 		const frm = this.events.get_frm();
-		const total_advance = doc.total_advance
 		const paid_amount = doc.paid_amount
-		const grand_total = doc.rounded_total - total_advance;
+		const grand_total = doc.rounded_total;
 		const remaining = grand_total - paid_amount;
 		const change = doc.change_amount || remaining <= 0 ? -1 * remaining : undefined;
 		const currency = doc.currency;

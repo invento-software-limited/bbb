@@ -13,6 +13,7 @@ def after_insert_or_on_submit(doc, method):
     total_taxes_and_charges = flt(doc.total_taxes_and_charges, 1)
     total = flt(doc.total, 1)
     discount_amount = flt(doc.discount_amount, 1)
+    total_advance = doc.total_advance
     grand_total = doc.grand_total
     if grand_total is not None:
         divisible_number = int((grand_total / 5)) * 5
@@ -22,7 +23,7 @@ def after_insert_or_on_submit(doc, method):
         rounding_adjustment = 0
         payments = doc.payments
 
-        paid_amount = 0
+        paid_amount = total_advance
         for payment in payments:
             paid_amount += payment.amount
 
@@ -53,8 +54,8 @@ def after_insert_or_on_submit(doc, method):
                 frappe.db.set_value("POS Invoice", doc.name, "base_rounded_total", divisible_number - 5)
                 # frappe.db.set_value("POS Invoice", doc.name, "base_grand_total", divisible_number - 5)
 
-            frappe.db.set_value("POS Invoice", doc.name, "paid_amount", paid_amount)
-            frappe.db.set_value("POS Invoice", doc.name, "base_paid_amount", paid_amount)
+            frappe.db.set_value("POS Invoice", doc.name, "paid_amount", paid_amount - total_advance)
+            frappe.db.set_value("POS Invoice", doc.name, "base_paid_amount", paid_amount - total_advance)
             frappe.db.set_value("POS Invoice", doc.name, "change_amount", change_amount)
             frappe.db.set_value("POS Invoice", doc.name, "base_change_amount", change_amount)
             frappe.db.set_value("POS Invoice", doc.name, "outstanding_amount", outstanding_amount)
@@ -92,8 +93,8 @@ def after_insert_or_on_submit(doc, method):
                 frappe.db.set_value("POS Invoice", doc.name, "base_rounded_total", divisible_number + 5)
                 # frappe.db.set_value("POS Invoice", doc.name, "base_grand_total", divisible_number + 5)
 
-            frappe.db.set_value("POS Invoice", doc.name, "paid_amount", paid_amount)
-            frappe.db.set_value("POS Invoice", doc.name, "base_paid_amount", paid_amount)
+            frappe.db.set_value("POS Invoice", doc.name, "paid_amount", paid_amount - total_advance)
+            frappe.db.set_value("POS Invoice", doc.name, "base_paid_amount", paid_amount - total_advance)
             frappe.db.set_value("POS Invoice", doc.name, "change_amount", change_amount)
             frappe.db.set_value("POS Invoice", doc.name, "base_change_amount", change_amount)
             frappe.db.set_value("POS Invoice", doc.name, "outstanding_amount", outstanding_amount)
