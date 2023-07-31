@@ -1,0 +1,26 @@
+{
+ "content": null,
+ "creation": "2023-07-31 15:22:04.411168",
+ "docstatus": 0,
+ "doctype": "Page",
+ "idx": 0,
+ "modified": "2023-07-31 15:22:04.411168",
+ "modified_by": "Administrator",
+ "module": "Bbb",
+ "name": "bbb-restaurant",
+ "owner": "Administrator",
+ "page_name": "bbb-restaurant",
+ "roles": [
+  {
+   "role": "System Manager"
+  },
+  {
+   "role": "BBB Admin"
+  }
+ ],
+ "script": null,
+ "standard": "Yes",
+ "style": null,
+ "system_page": 0,
+ "title": "Restaurant"
+}
