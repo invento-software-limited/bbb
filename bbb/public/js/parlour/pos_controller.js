@@ -391,6 +391,8 @@ erpnext.PointOfSale.Controller = class {
                 () => me.cart.update_served_by_for_advance_booking(doc),
                 () => me.cart.update_customer_for_advance_booking(doc),
                 () => frappe.model.set_value("POS Invoice", me.frm.doc.name, "advance_booking_doc", doc.name),
+                () => frappe.model.set_value("POS Invoice", me.frm.doc.name, "discount_amount", doc.discount_amount),
+                () => frappe.model.set_value("POS Invoice", me.frm.doc.name, "total_advance", doc.total_advance),
                 () => me.cart.allocate_advances_automatically(me.frm),
                 () => me.cart.update_totals_section(),
                 () => me.cart.render_rounded_total(doc),
@@ -418,7 +420,6 @@ erpnext.PointOfSale.Controller = class {
         callback: function (r) {
           if (!r.exc) {
             // code snippet
-            console.log(r);
             if (r.message.length !== 0) {
               // console.log("=====>>>", r.message)
               get_items_template(d, r.message, me)

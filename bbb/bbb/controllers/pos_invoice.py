@@ -267,3 +267,36 @@ class CustomPOSInvoice(POSInvoice):
 
         if update:
             self.db_set("status", self.status, update_modified=update_modified)
+
+    @frappe.whitelist()
+    def set_advance_booking_advances(self):
+        """Returns list of advances against Account, Party, Reference"""
+        advance_booking_doc = frappe.get_doc(
+            'Advance Booking', self.advance_booking_doc)
+        
+        self.set("advances", [])
+        advance_allocated = 0
+        # if self.get("party_account_currency") == self.company_currency:
+        # 	amount = self.get("base_rounded_total") or self.base_grand_total
+        # else:
+        # 	amount = self.get("rounded_total") or self.grand_total
+
+        # allocated_amount = min(self.rounded_total - advance_allocated, advance_booking_doc.total_advance)
+        # advance_allocated += flt(allocated_amount)
+        outstanding_amount = self.rounded_total - advance_booking_doc.total_advance
+
+        advance_row = frappe._dict({
+            "parent": self.name,
+            "parenttype": "Sales Invoice",
+            "doctype": "Sales Invoice Advance",
+            "reference_type": "Advance Booking",
+            "reference_name": advance_booking_doc.name,
+            "remarks": 'Amount BDT {} received from {}'.format(advance_booking_doc.total_advance, advance_booking_doc.customer),
+            "advance_amount": flt(advance_booking_doc.total_advance),
+            "allocated_amount": flt(advance_booking_doc.total_advance),
+            "ref_exchange_rate": 1
+        })
+
+        # self.paid_amount = flt(self.rounded_total - advance_booking_doc.total_advance)
+        self.set("outstanding_amount", 0)
+        self.set("advances", [advance_row])

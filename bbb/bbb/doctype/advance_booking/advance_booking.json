@@ -17,6 +17,7 @@
   "tax_id",
   "pos_profile",
   "consolidated_invoice",
+  "consolidated_pos_invoice",
   "is_pos",
   "is_return",
   "update_billed_amount_in_sales_order",
@@ -1046,6 +1047,7 @@
    "collapsible_depends_on": "advances",
    "fieldname": "advances_section",
    "fieldtype": "Section Break",
+   "hidden": 1,
    "label": "Advance Payments",
    "oldfieldtype": "Section Break",
    "options": "fa fa-money",
@@ -1617,12 +1619,19 @@
    "label": "Billing Status",
    "options": "\nNot Billed\nFully Billed\nPartly Billed\nClosed\nNot Billed and Discounted\nOverdue and Discounted\nOverdue",
    "read_only": 1
+  },
+  {
+   "fieldname": "consolidated_pos_invoice",
+   "fieldtype": "Link",
+   "label": "Consolidated POS Invoice",
+   "options": "POS Invoice",
+   "read_only": 1
   }
  ],
  "index_web_pages_for_search": 1,
  "is_submittable": 1,
  "links": [],
- "modified": "2023-06-21 21:12:29.074552",
+ "modified": "2023-07-26 12:36:53.960291",
  "modified_by": "Administrator",
  "module": "Bbb",
  "name": "Advance Booking",
