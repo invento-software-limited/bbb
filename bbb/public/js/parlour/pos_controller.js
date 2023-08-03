@@ -453,6 +453,9 @@ erpnext.PointOfSale.Controller = class {
           fieldname: "customer",
           label: __("Customer"),
           options: "Customer",
+          get_query:function(){
+            return { query: "bbb.bbb.controllers.queries.customer_query" }
+          },
           onchange: function (e) {
             // cur_dialog.fields_dict.item_code.value
             get_advance_booking(d, me)

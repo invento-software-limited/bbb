@@ -386,19 +386,20 @@ def get_all(doctype, name, print_format, no_letterhead, letterhead, settings, la
 
 @frappe.whitelist()
 def get_advance_booking(pos_profile, customer=None, name=None):
+    print(name)
     if customer and name:
         advance_booking_list = frappe.get_all('Advance Booking', {
-                                              'pos_profile': pos_profile, 'owner': frappe.session.user, 'name': name, 'customer': customer}, ['name', 'customer', 'actual_service_date'])
+                                              'pos_profile': pos_profile, 'name': name, 'customer': customer, 'status': ['!=', 'complete'], 'docstatus': 1}, ['name', 'customer', 'actual_service_date'])
     elif customer:
         advance_booking_list = frappe.get_all('Advance Booking', {
-                                              'pos_profile': pos_profile, 'owner': frappe.session.user, 'customer': customer}, ['name', 'customer', 'actual_service_date'])
+                                              'pos_profile': pos_profile, 'customer': customer, 'status': ['!=', 'complete'], 'docstatus': 1}, ['name', 'customer', 'actual_service_date'])
     elif name:
         advance_booking_list = frappe.get_all('Advance Booking', {
-                                              'pos_profile': pos_profile, 'owner': frappe.session.user, 'name': name}, ['name', 'customer', 'actual_service_date'])
+                                              'pos_profile': pos_profile, 'name': name, 'status': ['!=', 'complete'], 'docstatus': 1}, ['name', 'customer', 'actual_service_date'])
     else:
         advance_booking_list = []
-        advance_booking_list = frappe.get_all('Advance Booking', {'pos_profile': pos_profile}, [
-                                              'name', 'customer', 'actual_service_date'])
+        # advance_booking_list = frappe.get_all('Advance Booking', {'pos_profile': pos_profile}, [
+        #                                       'name', 'customer', 'actual_service_date'])
 
     return advance_booking_list
 

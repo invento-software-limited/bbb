@@ -30,8 +30,111 @@ erpnext.selling.AdvanceBooking = erpnext.selling.SellingController.extend({
 		}
 
 		erpnext.accounts.dimensions.setup_dimension_filters(this.frm, this.frm.doctype);
+		this.check_opening_entry()
+		
+	},
+	fetch_opening_entry() {
+		return frappe.call("erpnext.selling.page.point_of_sale.point_of_sale.check_opening_entry", { "user": frappe.session.user });
 	},
 
+	check_opening_entry() {
+		this.fetch_opening_entry().then((r) => {
+			if (r.message.length) {
+				// assuming only one opening voucher is available for the current user
+				// this.prepare_app_defaults(r.message[0]);
+			} else {
+				this.create_opening_voucher();
+			}
+		});
+	},
+
+
+
+	create_opening_voucher() {
+		const me = this;
+		const table_fields = [
+			{
+				fieldname: "mode_of_payment", fieldtype: "Link",
+				in_list_view: 1, label: "Mode of Payment",
+				options: "Mode of Payment", reqd: 1
+			},
+			{
+				fieldname: "opening_amount", fieldtype: "Currency",
+				in_list_view: 1, label: "Opening Amount",
+				options: "company:company_currency",
+				change: function () {
+					dialog.fields_dict.balance_details.df.data.some(d => {
+						if (d.idx == this.doc.idx) {
+							d.opening_amount = this.value;
+							dialog.fields_dict.balance_details.grid.refresh();
+							return true;
+						}
+					});
+				}
+			}
+		];
+		const fetch_pos_payment_methods = () => {
+			const pos_profile = dialog.fields_dict.pos_profile.get_value();
+			if (!pos_profile) return;
+			frappe.db.get_doc("POS Profile", pos_profile).then(({ payments }) => {
+				dialog.fields_dict.balance_details.df.data = [];
+				payments.forEach(pay => {
+					const { mode_of_payment } = pay;
+					dialog.fields_dict.balance_details.df.data.push({ mode_of_payment, opening_amount: '0' });
+				});
+				dialog.fields_dict.balance_details.grid.refresh();
+			});
+		}
+		const dialog = new frappe.ui.Dialog({
+			title: __('Create POS Opening Entry'),
+			static: true,
+			fields: [
+				{
+					fieldtype: 'Link', label: __('Company'), default: frappe.defaults.get_default('company'),
+					options: 'Company', fieldname: 'company', reqd: 1
+				},
+				{
+					fieldtype: 'Link', label: __('POS Profile'),
+					options: 'POS Profile', fieldname: 'pos_profile', reqd: 1,
+					get_query: () => pos_profile_query,
+					onchange: () => fetch_pos_payment_methods()
+				},
+				{
+					fieldname: "balance_details",
+					fieldtype: "Table",
+					label: "Opening Balance Details",
+					cannot_add_rows: false,
+					in_place_edit: true,
+					reqd: 1,
+					data: [],
+					fields: table_fields
+				}
+			],
+			primary_action: async function({ company, pos_profile, balance_details }) {
+				if (!balance_details.length) {
+					frappe.show_alert({
+						message: __("Please add Mode of payments and opening balance details."),
+						indicator: 'red'
+					})
+					return frappe.utils.play_sound("error");
+				}
+
+				// filter balance details for empty rows
+				balance_details = balance_details.filter(d => d.mode_of_payment);
+
+				const method = "erpnext.selling.page.point_of_sale.point_of_sale.create_opening_voucher";
+				await frappe.call({ method, args: { pos_profile, company, balance_details }, freeze:true });
+				// !res.exc && me.prepare_app_defaults(res.message);
+				dialog.hide();
+			},
+			primary_action_label: __('Submit')
+		});
+		dialog.show();
+		const pos_profile_query = {
+			query: 'erpnext.accounts.doctype.pos_profile.pos_profile.pos_profile_query',
+			filters: { company: dialog.fields_dict.company.get_value() }
+		};
+	},
 	refresh(doc) {
 		this._super();
 		if (doc.docstatus == 1 && !doc.is_return) {
