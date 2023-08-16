@@ -9,7 +9,6 @@ from erpnext.stock.report.stock_ledger.stock_ledger import get_item_group_condit
 def execute(filters=None):
     columns = get_columns()
     data = get_items(filters)
-    print(data)
     return columns, data
 
 
@@ -26,6 +25,7 @@ def get_columns():
         # {"label": _("Email"), "fieldname": "email", "fieldtype": "Data", "width": 150},
         # {"label": _("Mobile Number"), "fieldname": "mobile_number", "fieldtype": "Data", "width": 150},
         {"label": _("Total Search Count"), "fieldname": "total_search_count", "width": 140},
+        {"label": _("Total Sale Count"), "fieldname": "total_sale_count", "width": 100},
         {"label": _("Company"), "fieldname": "company", "width": 200},
     ]
     return columns
@@ -57,7 +57,7 @@ def get_items(filters):
     conditions = get_conditions(filters)
 
     query_result = frappe.db.sql(
-        """select COUNT(*) as total_search_count, product_search_log.date, product_search_log.product_name,
+        """select COUNT(*) as total_search_count, COUNT(case product_search_log.is_sale when 1 then 1 else null end) as total_sale_count, product_search_log.date, product_search_log.product_name,
             product_search_log.served_by, product_search_log.location, product_search_log.company,
             product_search_log.product, product_search_log.customer, product_search_log.customer_name, product_search_log.location
         from `tabProduct Search Log` product_search_log where {} group by product_search_log.product""".format(conditions), as_dict=True)

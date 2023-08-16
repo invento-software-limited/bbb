@@ -17,7 +17,8 @@
   "customer_name",
   "email",
   "mobile_number",
-  "company"
+  "company",
+  "is_sale"
  ],
  "fields": [
   {
@@ -98,13 +99,20 @@
    "label": "Product",
    "options": "Item",
    "reqd": 1
+  },
+  {
+   "default": "0",
+   "fieldname": "is_sale",
+   "fieldtype": "Check",
+   "label": "is Sale",
+   "read_only": 1
   }
  ],
  "index_web_pages_for_search": 1,
  "links": [],
- "modified": "2022-05-22 16:36:09.712242",
+ "modified": "2023-08-16 14:51:30.263009",
  "modified_by": "Administrator",
- "module": "BBB",
+ "module": "Bbb",
  "name": "Product Search Log",
  "name_case": "Title Case",
  "owner": "Administrator",
