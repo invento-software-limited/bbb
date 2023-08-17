@@ -8,6 +8,7 @@
  "engine": "InnoDB",
  "field_order": [
   "date",
+  "time",
   "product",
   "product_name",
   "location",
@@ -106,11 +107,18 @@
    "fieldtype": "Check",
    "label": "is Sale",
    "read_only": 1
+  },
+  {
+   "default": "Now",
+   "fieldname": "time",
+   "fieldtype": "Time",
+   "label": "Time",
+   "reqd": 1
   }
  ],
  "index_web_pages_for_search": 1,
  "links": [],
- "modified": "2023-08-16 14:51:30.263009",
+ "modified": "2023-08-16 15:24:51.611293",
  "modified_by": "Administrator",
  "module": "Bbb",
  "name": "Product Search Log",
