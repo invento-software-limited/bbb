@@ -48,13 +48,16 @@ def distribution_excell_generate(doc):
     data = []
     columns = get_columns(doc)
     for item in doc.get("purchase_distribution_items"):
+        data_dict = {}
+        single_data = {}
+        data_dict["item_code"] = item.get("item_code")
         for percentage in doc.get("outlet_selection_table"):
-            data_dict = {}
-            data_dict["item_code"] = item.get("item_code")
             warehouse = percentage.get("warehouse").lower().replace(" ","_").replace("-","_")
             percentage = percentage.get("percentage")
-            data_dict[warehouse] = (float(percentage) / 100) * float(item.get("qty"))
-            data.append(data_dict)
+            single_data[warehouse] = (float(percentage) / 100) * float(item.get("qty"))
+        for key,value in single_data.items():
+            data_dict[key] = value
+        data.append(data_dict)
     
     file_name = 'stock_distribution.xlsx'
     generate_excel_and_download(columns, data, file_name, height=20)
