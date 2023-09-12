@@ -4,11 +4,12 @@
 import frappe
 import json
 from frappe.model.document import Document
-import datetime
+import os
 import io
 import openpyxl
 from openpyxl.utils import get_column_letter
 from openpyxl.styles import Font, PatternFill, Alignment
+import pandas as pd
 
 class StockDistribution(Document):
     
@@ -54,12 +55,12 @@ def distribution_excell_generate(doc):
         for percentage in doc.get("outlet_selection_table"):
             warehouse = percentage.get("warehouse").lower().replace(" ","_").replace("-","_")
             percentage = percentage.get("percentage")
-            single_data[warehouse] = (float(percentage) / 100) * float(item.get("qty"))
+            single_data[warehouse] = round((float(percentage) / 100) * float(item.get("qty")))
         for key,value in single_data.items():
             data_dict[key] = value
         data.append(data_dict)
     
-    file_name = 'stock_distribution.xlsx'
+    file_name = '{}.xlsx'.format(doc.get("name"))
     generate_excel_and_download(columns, data, file_name, height=20)
     
     return "Ok"
@@ -136,3 +137,65 @@ def generate_row(ws, row_count, column_values, font=None, font_size=None, color=
         ws.row_dimensions[row_count].height = height
 
     return cells
+
+def get_site_directory_path():
+    site_name = frappe.local.site
+    cur_dir = os.getcwd()
+    return os.path.join(cur_dir, site_name)
+
+@frappe.whitelist()
+def validate_qty_excell_data(file_url,pr):
+    excel_file_path = get_site_directory_path() + file_url
+    df = pd.read_excel(excel_file_path)
+    json_data = df.to_dict(orient='records')
+    excell_dict = {}
+    excell_item_list = []
+    grand_total = 0
+    for item in json_data:
+        item_code = "{}".format(item.get("Item Code"))
+        excell_item_list.append(item_code)
+        total = 0
+        for key , value in item.items():
+            if key != "Item Code":
+                total += value
+                grand_total += value
+        excell_dict[item_code] = total
+    purchase_receipt = frappe.get_doc("Purchase Receipt",pr)
+    if purchase_receipt.items:
+        for item in purchase_receipt.items:
+            if item.get("item_code") in excell_item_list:
+                excell_qty = excell_dict.get(item.get("item_code"))
+                pr_qty = item.get("qty")
+                if excell_qty != pr_qty:
+                    frappe.throw("Quantity Isn't Equal For Item {}".format(item.get("item_code")))
+            else:
+                frappe.throw("Item {} Isn't Available In Distribution Excell".format(item.get("item_code")))
+    if grand_total != purchase_receipt.total_qty:
+        frappe.throw("Total Quantity In Not Equal")
+        
+    create_stock_transfer(excell_dict)
+            
+def create_stock_transfer(data):
+    if data:
+        stock_transfer = frappe.new_doc("Stock Entry")
+        items = []
+        for key,value in data.items():
+            data_dict = {}
+            data_dict["item_code"] = key
+            data_dict["qty"] = value
+            items.append(data)
+            break
+        stock_transfer.stock_entry_type = "Material Transfer"
+        
+        stock_transfer.save()
+        
+        
+    
+@frappe.whitelist()
+def get_purchase_receipt(purchase_order):
+    receipt = frappe.db.sql("""select pr.name from `tabPurchase Receipt Item` as pri 
+                                left join `tabPurchase Receipt` as pr on pri.parent = pr.name 
+                                    where pri.purchase_order = '{}' group by pr.name""".format(purchase_order))
+    if len(receipt) <= 1:
+        return receipt[0][0]
+    

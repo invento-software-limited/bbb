@@ -17,10 +17,12 @@
   "column_break_bkkrz",
   "outlet_selection_table",
   "download_links_section",
-  "distribute_items",
-  "distribution_download_link",
+  "download_distribute_excell",
+  "get_purchase_receipt",
+  "against_purchase_receipt",
   "column_break_wykeg",
-  "upload_distribution",
+  "match_with_receipt",
+  "upload_distribution_excell",
   "amended_from"
  ],
  "fields": [
@@ -88,29 +90,40 @@
    "label": "Download Links"
   },
   {
-   "fieldname": "distribute_items",
-   "fieldtype": "Button",
-   "label": "Distribute Items"
-  },
-  {
-   "fieldname": "distribution_download_link",
-   "fieldtype": "Attach",
-   "label": "Distribution Download Link"
-  },
-  {
    "fieldname": "column_break_wykeg",
    "fieldtype": "Column Break"
   },
   {
-   "fieldname": "upload_distribution",
+   "fieldname": "match_with_receipt",
+   "fieldtype": "Button",
+   "label": "Match With Receipt"
+  },
+  {
+   "fieldname": "download_distribute_excell",
+   "fieldtype": "Button",
+   "label": "Download Distribute excell"
+  },
+  {
+   "fieldname": "upload_distribution_excell",
    "fieldtype": "Attach",
-   "label": "Upload Distribution"
+   "label": "Upload Distribution Excell"
+  },
+  {
+   "fieldname": "against_purchase_receipt",
+   "fieldtype": "Link",
+   "label": "Against Purchase Receipt",
+   "options": "Purchase Receipt"
+  },
+  {
+   "fieldname": "get_purchase_receipt",
+   "fieldtype": "Button",
+   "label": "Get Purchase Receipt"
   }
  ],
  "index_web_pages_for_search": 1,
  "is_submittable": 1,
  "links": [],
- "modified": "2023-09-11 14:54:37.070555",
+ "modified": "2023-09-12 11:53:32.257925",
  "modified_by": "Administrator",
  "module": "Bbb",
  "name": "Stock Distribution",
@@ -126,6 +139,31 @@
    "report": 1,
    "role": "System Manager",
    "share": 1,
+   "write": 1
+  },
+  {
+   "create": 1,
+   "delete": 1,
+   "email": 1,
+   "export": 1,
+   "print": 1,
+   "read": 1,
+   "report": 1,
+   "role": "Stock Manager",
+   "share": 1,
+   "submit": 1,
+   "write": 1
+  },
+  {
+   "create": 1,
+   "email": 1,
+   "export": 1,
+   "print": 1,
+   "read": 1,
+   "report": 1,
+   "role": "Stock User",
+   "share": 1,
+   "submit": 1,
    "write": 1
   }
  ],
