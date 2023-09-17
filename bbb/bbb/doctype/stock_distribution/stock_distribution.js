@@ -35,6 +35,9 @@ frappe.ui.form.on('Stock Distribution', {
 				callback: function(response) {
 					if (response.message) {
 						frm.set_value("against_purchase_receipt" , response.message)
+					}else{
+						frm.set_value("against_purchase_receipt" , "")
+						frappe.throw(`No Purchase Receipt Against ${frm.doc.purchase_order}`)
 					}
 				}
 			});
@@ -43,22 +46,17 @@ frappe.ui.form.on('Stock Distribution', {
 		}
 	},
 	download_distribute_excell: function(frm){
-		if (frm.doc.purchase_distribution_items && frm.doc.outlet_selection_table){
+		var total_percentage = 0;
+        if (frm.doc.outlet_selection_table){
+            $.each(frm.doc.outlet_selection_table, function(index, row){
+                total_percentage += row.percentage || 0;
+            });
+        }
+		if (frm.doc.purchase_distribution_items && frm.doc.outlet_selection_table && total_percentage === 100){
 			let url = `/api/method/bbb.bbb.doctype.stock_distribution.stock_distribution.distribution_excell_generate`;
 			open_url_post(url, {"doc": frm.doc}, true);
-		}
-	},
-	match_with_receipt:function(frm){
-		if (frm.doc.upload_distribution_excell && frm.doc.against_purchase_receipt){
-			frappe.call({
-				method: 'bbb.bbb.doctype.stock_distribution.stock_distribution.validate_qty_excell_data',
-				args: {
-					file_url: frm.doc.upload_distribution_excell,
-					pr : frm.doc.against_purchase_receipt
-				},
-			});
 		}else{
-			frappe.throw("Please Upload Distribution excell And Set Against Purchase Receipt")
+			frappe.throw("Total Distribution Percentage Not Equal 100 ")
 		}
 	}
 });
@@ -71,9 +69,6 @@ frappe.ui.form.on('Outlet Selection Table', {
                 total_percentage += row.percentage || 0;
             });
         }
-		var ext = 100 - total_percentage
-		if (total_percentage !== 100) {
-			frappe.msgprint(`Need ${ext} to complete percentage`)
-		}
+		frm.set_value("total_percentage",total_percentage)
 	}
 })

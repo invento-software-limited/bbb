@@ -11,17 +11,18 @@
   "supplier",
   "get_items_to_distribute",
   "column_break_qzmun",
+  "company",
   "posting_date",
   "item_and_outlet_selection_section",
   "purchase_distribution_items",
   "column_break_bkkrz",
   "outlet_selection_table",
+  "total_percentage",
   "download_links_section",
   "download_distribute_excell",
   "get_purchase_receipt",
   "against_purchase_receipt",
   "column_break_wykeg",
-  "match_with_receipt",
   "upload_distribution_excell",
   "amended_from"
  ],
@@ -29,8 +30,10 @@
   {
    "fieldname": "purchase_order",
    "fieldtype": "Link",
+   "in_list_view": 1,
    "label": "Purchase Order",
-   "options": "Purchase Order"
+   "options": "Purchase Order",
+   "reqd": 1
   },
   {
    "fetch_from": "purchase_order.supplier",
@@ -58,7 +61,8 @@
    "fieldname": "purchase_distribution_items",
    "fieldtype": "Table",
    "label": "Purchase distribution Items",
-   "options": "Purchase Distribution Item"
+   "options": "Purchase Distribution Item",
+   "reqd": 1
   },
   {
    "fieldname": "column_break_bkkrz",
@@ -68,7 +72,8 @@
    "fieldname": "outlet_selection_table",
    "fieldtype": "Table",
    "label": "Outlet Selection Table",
-   "options": "Outlet Selection Table"
+   "options": "Outlet Selection Table",
+   "reqd": 1
   },
   {
    "fieldname": "amended_from",
@@ -94,11 +99,6 @@
    "fieldtype": "Column Break"
   },
   {
-   "fieldname": "match_with_receipt",
-   "fieldtype": "Button",
-   "label": "Match With Receipt"
-  },
-  {
    "fieldname": "download_distribute_excell",
    "fieldtype": "Button",
    "label": "Download Distribute excell"
@@ -111,19 +111,35 @@
   {
    "fieldname": "against_purchase_receipt",
    "fieldtype": "Link",
+   "in_list_view": 1,
    "label": "Against Purchase Receipt",
-   "options": "Purchase Receipt"
+   "options": "Purchase Receipt",
+   "reqd": 1
   },
   {
    "fieldname": "get_purchase_receipt",
    "fieldtype": "Button",
    "label": "Get Purchase Receipt"
+  },
+  {
+   "fieldname": "company",
+   "fieldtype": "Link",
+   "in_list_view": 1,
+   "label": "Company",
+   "options": "Company",
+   "reqd": 1
+  },
+  {
+   "fieldname": "total_percentage",
+   "fieldtype": "Float",
+   "label": "Total Percentage",
+   "read_only": 1
   }
  ],
  "index_web_pages_for_search": 1,
  "is_submittable": 1,
  "links": [],
- "modified": "2023-09-12 11:53:32.257925",
+ "modified": "2023-09-14 10:17:28.171813",
  "modified_by": "Administrator",
  "module": "Bbb",
  "name": "Stock Distribution",
