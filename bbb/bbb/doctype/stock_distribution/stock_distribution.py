@@ -108,6 +108,19 @@ def get_purchase_order_items(po_number):
     return items
 
 @frappe.whitelist()
+def get_outlet_items(template):
+    temp = frappe.get_doc("Outlet Template", template)
+    items = []
+    
+    for item in temp.outlets:
+        items.append({
+            'warehouse': item.warehouse,
+            'percentage': item.percentage
+        })
+    
+    return items
+
+@frappe.whitelist()
 def distribution_excell_generate(doc):
     if not doc: doc = {}
     try:
@@ -120,11 +133,18 @@ def distribution_excell_generate(doc):
     for item in doc.get("purchase_distribution_items"):
         data_dict = {}
         single_data = {}
+        total_wr_wise = 0
         data_dict["item_code"] = item.get("item_code")
         for percentage in doc.get("outlet_selection_table"):
             warehouse = percentage.get("warehouse").lower().replace(" ","_").replace("-","&")
             percentage = percentage.get("percentage")
-            single_data[warehouse] = round((float(percentage) / 100) * float(item.get("qty")))
+            round_am = round((float(percentage) / 100) * float(item.get("qty")))
+            single_data[warehouse] = round_am
+            total_wr_wise += round_am
+            
+        frappe.msgprint(str(single_data))
+        frappe.msgprint(str(item.get("qty")))
+        
         for key,value in single_data.items():
             data_dict[key] = value
         data.append(data_dict)
@@ -135,9 +155,9 @@ def distribution_excell_generate(doc):
         random_word = ''.join(random.choice(string.ascii_lowercase) for _ in range(8))
         name += random_word
     file_name = '{}.xlsx'.format(name)
-    generate_excel_and_download(columns, data, file_name, height=20)
+    # generate_excel_and_download(columns, data, file_name, height=20)
     
-    return "Ok"
+    # return "Ok"
     
         
 def get_columns(doc):

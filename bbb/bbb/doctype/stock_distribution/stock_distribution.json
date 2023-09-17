@@ -1,7 +1,7 @@
 {
  "actions": [],
  "allow_rename": 1,
- "autoname": "format:{supplier}-{purchase_order}",
+ "autoname": "format:{supplier}",
  "creation": "2023-09-11 12:15:23.815790",
  "doctype": "DocType",
  "editable_grid": 1,
@@ -16,6 +16,7 @@
   "item_and_outlet_selection_section",
   "purchase_distribution_items",
   "column_break_bkkrz",
+  "outlet_template",
   "outlet_selection_table",
   "total_percentage",
   "download_links_section",
@@ -31,6 +32,7 @@
    "fieldname": "purchase_order",
    "fieldtype": "Link",
    "in_list_view": 1,
+   "in_standard_filter": 1,
    "label": "Purchase Order",
    "options": "Purchase Order",
    "reqd": 1,
@@ -40,6 +42,8 @@
    "fetch_from": "purchase_order.supplier",
    "fieldname": "supplier",
    "fieldtype": "Link",
+   "in_list_view": 1,
+   "in_standard_filter": 1,
    "label": "Supplier",
    "options": "Supplier"
   },
@@ -113,9 +117,9 @@
    "fieldname": "against_purchase_receipt",
    "fieldtype": "Link",
    "in_list_view": 1,
+   "in_standard_filter": 1,
    "label": "Against Purchase Receipt",
-   "options": "Purchase Receipt",
-   "reqd": 1
+   "options": "Purchase Receipt"
   },
   {
    "fieldname": "get_purchase_receipt",
@@ -125,7 +129,6 @@
   {
    "fieldname": "company",
    "fieldtype": "Link",
-   "in_list_view": 1,
    "label": "Company",
    "options": "Company",
    "reqd": 1
@@ -135,12 +138,18 @@
    "fieldtype": "Float",
    "label": "Total Percentage",
    "read_only": 1
+  },
+  {
+   "fieldname": "outlet_template",
+   "fieldtype": "Link",
+   "label": "Outlet Template",
+   "options": "Outlet Template"
   }
  ],
  "index_web_pages_for_search": 1,
  "is_submittable": 1,
  "links": [],
- "modified": "2023-09-17 15:23:27.349907",
+ "modified": "2023-09-17 16:18:44.050318",
  "modified_by": "Administrator",
  "module": "Bbb",
  "name": "Stock Distribution",

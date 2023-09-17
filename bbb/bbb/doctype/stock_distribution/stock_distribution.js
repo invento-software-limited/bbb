@@ -25,6 +25,27 @@ frappe.ui.form.on('Stock Distribution', {
 			});
 		}
 	},
+	outlet_template: function(frm){
+		if (frm.doc.outlet_template){
+			frappe.call({
+				method: 'bbb.bbb.doctype.stock_distribution.stock_distribution.get_outlet_items',
+				args: {
+					template: frm.doc.outlet_template
+				},
+				callback: function(response) {
+					if (response.message) {
+						frm.clear_table('outlet_selection_table');
+						$.each(response.message, function(i, item) {
+							var row = frappe.model.add_child(frm.doc, 'Outlet Selection Table', 'outlet_selection_table');
+							row.warehouse = item.warehouse;
+							row.percentage = item.percentage;
+						});
+						frm.refresh_field('outlet_selection_table');
+					}
+				}
+			});
+		}
+	},
 	get_purchase_receipt:function(frm){
 		if (frm.doc.purchase_order){
 			frappe.call({

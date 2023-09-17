@@ -1,0 +1,93 @@
+{
+ "actions": [],
+ "allow_rename": 1,
+ "autoname": "format: {template_name}",
+ "creation": "2023-09-17 16:05:45.758857",
+ "doctype": "DocType",
+ "editable_grid": 1,
+ "engine": "InnoDB",
+ "field_order": [
+  "template_name",
+  "column_break_gokfh",
+  "total_percentage",
+  "section_break_cxmdm",
+  "outlets"
+ ],
+ "fields": [
+  {
+   "fieldname": "outlets",
+   "fieldtype": "Table",
+   "label": "Outlets",
+   "options": "Outlet Selection Table",
+   "reqd": 1
+  },
+  {
+   "fieldname": "total_percentage",
+   "fieldtype": "Float",
+   "label": "Total Percentage",
+   "read_only": 1
+  },
+  {
+   "fieldname": "template_name",
+   "fieldtype": "Data",
+   "in_list_view": 1,
+   "label": "Template Name",
+   "reqd": 1,
+   "unique": 1
+  },
+  {
+   "fieldname": "section_break_cxmdm",
+   "fieldtype": "Section Break"
+  },
+  {
+   "fieldname": "column_break_gokfh",
+   "fieldtype": "Column Break"
+  }
+ ],
+ "index_web_pages_for_search": 1,
+ "links": [],
+ "modified": "2023-09-17 16:28:01.922863",
+ "modified_by": "Administrator",
+ "module": "Bbb",
+ "name": "Outlet Template",
+ "owner": "Administrator",
+ "permissions": [
+  {
+   "create": 1,
+   "delete": 1,
+   "email": 1,
+   "export": 1,
+   "print": 1,
+   "read": 1,
+   "report": 1,
+   "role": "System Manager",
+   "share": 1,
+   "write": 1
+  },
+  {
+   "create": 1,
+   "delete": 1,
+   "email": 1,
+   "export": 1,
+   "print": 1,
+   "read": 1,
+   "report": 1,
+   "role": "Stock Manager",
+   "share": 1,
+   "write": 1
+  },
+  {
+   "create": 1,
+   "email": 1,
+   "export": 1,
+   "print": 1,
+   "read": 1,
+   "report": 1,
+   "role": "Stock User",
+   "share": 1,
+   "write": 1
+  }
+ ],
+ "sort_field": "modified",
+ "sort_order": "DESC"
+}
