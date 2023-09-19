@@ -8,6 +8,7 @@
  "engine": "InnoDB",
  "field_order": [
   "date",
+  "time",
   "product",
   "product_name",
   "location",
@@ -17,7 +18,8 @@
   "customer_name",
   "email",
   "mobile_number",
-  "company"
+  "company",
+  "is_sale"
  ],
  "fields": [
   {
@@ -98,13 +100,27 @@
    "label": "Product",
    "options": "Item",
    "reqd": 1
+  },
+  {
+   "default": "0",
+   "fieldname": "is_sale",
+   "fieldtype": "Check",
+   "label": "is Sale",
+   "read_only": 1
+  },
+  {
+   "default": "Now",
+   "fieldname": "time",
+   "fieldtype": "Time",
+   "label": "Time",
+   "reqd": 1
   }
  ],
  "index_web_pages_for_search": 1,
  "links": [],
- "modified": "2022-05-22 16:36:09.712242",
+ "modified": "2023-08-16 15:24:51.611293",
  "modified_by": "Administrator",
- "module": "BBB",
+ "module": "Bbb",
  "name": "Product Search Log",
  "name_case": "Title Case",
  "owner": "Administrator",

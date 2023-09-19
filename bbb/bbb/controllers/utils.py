@@ -3,8 +3,9 @@ import json
 import frappe
 import datetime
 from frappe.permissions import get_doctypes_with_read
-from frappe.utils import cint, cstr
+from frappe.utils import cint, cstr, now
 from frappe.utils import cint, flt, fmt_money, get_link_to_form, getdate, today, cstr
+from frappe.model.naming import set_name_from_naming_options
 
 from erpnext.accounts.doctype.pricing_rule.utils import filter_pricing_rules_for_qty_amount
 
@@ -369,48 +370,101 @@ def resolved_accounts_receivable():
     invoice_list = []
     i = 0
     for invoice in sales_invoices:
-        if i == 63:
-            continue
-
-        i += 1
-
         sales_invoice = frappe.get_doc('Sales Invoice', invoice.get('name'))
-        payments = sales_invoice.payments
         invoice_list.append(sales_invoice.name)
-        if sales_invoice.rounded_total > 0 and sales_invoice.paid_amount > sales_invoice.rounded_total and len(payments) == 1:
+        if sales_invoice.rounded_total > 0 and sales_invoice.paid_amount > sales_invoice.rounded_total:
             outstanding_amount = sales_invoice.outstanding_amount
             if outstanding_amount < 0:
-                debtors_gl = frappe.get_doc('GL Entry', {'voucher_no': invoice.get('name'), 'account': 'Debtors - BBB',
-                                                         'credit': sales_invoice.paid_amount})
-                against_ac = debtors_gl.against
-                paid_gl = frappe.get_doc('GL Entry', {'voucher_no': invoice.get('name'), 'account': against_ac})
+                change_amount_abs = abs(0 - outstanding_amount)
+                posting_date = sales_invoice.posting_date
+                year = posting_date.year
+                # print(year, change_amount_abs)
 
-                frappe.db.sql(
-                    """UPDATE `tabGL Entry` SET credit = '%s', credit_in_account_currency = '%s' WHERE name='%s'""" % (sales_invoice.rounded_total,
-                    sales_invoice.rounded_total, debtors_gl.name))
+                gl_list = frappe.db.get_list("GL Entry", {"voucher_no": sales_invoice.name})
+                if len(gl_list) > 0:
+                    gl = frappe.db.get_value('GL Entry', gl_list[0].get('name'),
+                                             ['creation', 'modified', 'modified_by', 'owner', 'posting_date'])
 
-                frappe.db.sql(
-                    """UPDATE `tabGL Entry` SET debit = '%s', debit_in_account_currency = '%s' WHERE name='%s'""" % (sales_invoice.rounded_total,
-                    sales_invoice.rounded_total, paid_gl.name))
+                sql_1 = """INSERT INTO `tabGL Entry` (name, creation, modified, modified_by, owner, posting_date, account, party_type, party,
+                 cost_center, against_voucher_type, against_voucher, debit, credit, account_currency, debit_in_account_currency, credit_in_account_currency,
+                  against, voucher_type, voucher_no, remarks, is_opening, is_advance, fiscal_year, company, is_cancelled, docstatus, to_rename) VALUES ('{}', '{}', '{}', '{}', '{}', '{}', '{}', 
+                  '{}', '{}', '{}', '{}', '{}', '{}', '{}', '{}', '{}', '{}', '{}', '{}', '{}', '{}', '{}', '{}', '{}', '{}', '{}', '{}', '{}')""".format(frappe.generate_hash(txt="", length=10), gl[0], gl[1],
+                                                                                                        gl[2], gl[3],
+                                                                                                        gl[4],
+                                                                                                        'Debtors - BBB',
+                                                                                                        "Customer",
+                                                                                                        sales_invoice.customer,
+                                                                                                        sales_invoice.cost_center,
+                                                                                                        "Sales Invoice",
+                                                                                                        sales_invoice.name,
+                                                                                                        change_amount_abs,
+                                                                                                        0.0, "BDT",
+                                                                                                        change_amount_abs,
+                                                                                                        0.0,
+                                                                                                        sales_invoice.account_for_change_amount,
+                                                                                                        "Sales Invoice",
+                                                                                                        sales_invoice.name,
+                                                                                                        "No Remarks",
+                                                                                                        "No", "No",
+                                                                                                        year,
+                                                                                                        sales_invoice.company,
+                                                                                                        0, 1, 1)
 
-                frappe.db.sql(
-                    """UPDATE `tabSales Invoice` SET paid_amount = '%s', outstanding_amount = '0' WHERE name='%s'""" % (sales_invoice.rounded_total, sales_invoice.name))
+                sql_2 = """INSERT INTO `tabGL Entry` (name, creation, modified, modified_by, owner, posting_date, account, party_type, party,
+                 cost_center, against_voucher_type, against_voucher, debit, credit, account_currency, debit_in_account_currency, credit_in_account_currency,
+                  against, voucher_type, voucher_no, remarks, is_opening, is_advance, fiscal_year, company, is_cancelled, docstatus, to_rename) VALUES ('{}', '{}', '{}', '{}', '{}', '{}', '{}', 
+                  '{}', '{}', '{}', '{}', '{}', '{}', '{}', '{}', '{}', '{}', '{}', '{}', '{}', '{}', '{}', '{}', '{}', '{}', '{}', '{}', '{}')""".format(frappe.generate_hash(txt="", length=10), gl[0], gl[1],
+                                                                                                        gl[2], gl[3],
+                                                                                                        gl[4],
+                                                                                                        sales_invoice.account_for_change_amount,
+                                                                                                        None,
+                                                                                                        None,
+                                                                                                        sales_invoice.cost_center,
+                                                                                                        "Sales Invoice",
+                                                                                                        sales_invoice.name,
+                                                                                                        0.0,
+                                                                                                        change_amount_abs,
+                                                                                                        "BDT",
+                                                                                                        0.0,
+                                                                                                        change_amount_abs,
+                                                                                                        sales_invoice.customer,
+                                                                                                        "Sales Invoice",
+                                                                                                        sales_invoice.name,
+                                                                                                        "No Remarks",
+                                                                                                        "No", "No",
+                                                                                                        year,
+                                                                                                        sales_invoice.company,
+                                                                                                        0, 1, 1)
 
 
 
-                payment = payments[0]
-                frappe.db.sql(
-                    """UPDATE `tabSales Invoice Payment` SET amount = '%s' WHERE name='%s'""" % (sales_invoice.rounded_total, payment.name))
+                if sales_invoice.is_return == 1:
+                    frappe.db.sql(sql_1)
+                    frappe.db.sql(sql_2)
+                    frappe.db.set_value('Sales Invoice', sales_invoice.name, 'outstanding_amount', 0)
+                    frappe.db.set_value('Sales Invoice', sales_invoice.name, 'change_amount', change_amount_abs)
+                    frappe.db.set_value('Sales Invoice', sales_invoice.name, 'base_change_amount', change_amount_abs)
+                    frappe.db.set_value('Sales Invoice', sales_invoice.name, 'status', 'Return')
+                    frappe.db.commit()
+                    # print("s 1", sales_invoice.name)
+                # else:
+                    # frappe.db.set_value('Sales Invoice', sales_invoice.name, 'status', 'Paid')
+                # frappe.db.commit()
+                #     print("s 2", sales_invoice.name)
+            # else:
+            #     frappe.db.set_value('Sales Invoice', sales_invoice.name, 'outstanding_amount', 0)
+            #     if sales_invoice.is_return == 1:
+            #         frappe.db.set_value('Sales Invoice', sales_invoice.name, 'status', 'Return')
+            #     else:
+            #         frappe.db.set_value('Sales Invoice', sales_invoice.name, 'status', 'Paid')
+            #     frappe.db.commit()
+            #     print(sales_invoice.name)
 
-
-                frappe.db.commit()
-
-                # print(gl_list)
-                # elif outstanding_amount > 0:
-                #     print(sales_invoice)
-                #     print(outstanding_amount)
-    # print(invoice_list)
-    # print(len(sales_invoices))
+        # elif sales_invoice.rounded_total < 0 and sales_invoice.paid_amount > sales_invoice.rounded_total:
+        #     if sales_invoice.outstanding_amount < 0 and sales_invoice.is_return == 1:
+        #         frappe.db.set_value('Sales Invoice', sales_invoice.name, 'outstanding_amount', 0)
+        #         frappe.db.commit()
+        #         print(sales_invoice.name)
 
 
 from erpnext.accounts.report.accounts_receivable.accounts_receivable import ReceivablePayableReport

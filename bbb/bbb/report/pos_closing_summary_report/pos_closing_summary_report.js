@@ -53,7 +53,6 @@ frappe.query_reports["POS Closing Summary Report"] = {
     ],
     "formatter": function (value, row, column, data, default_formatter) {
         value = default_formatter(value, row, column, data);
-        console.log(column.fieldname, data);
         if (data !== undefined) {
             if (column.fieldname === "status" && data.status === "Open") {
                 value = "<span style='color:green'>" + value + "</span>";
@@ -63,8 +62,6 @@ frappe.query_reports["POS Closing Summary Report"] = {
                 value = "<span style='color:darkred'>" + value + "</span>";
             }
         }
-
-
         return value
 
     },

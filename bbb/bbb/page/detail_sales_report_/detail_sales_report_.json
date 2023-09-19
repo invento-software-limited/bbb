@@ -1,0 +1,24 @@
+{
+ "content": null,
+ "creation": "2023-08-17 14:39:18.903124",
+ "docstatus": 0,
+ "doctype": "Page",
+ "idx": 0,
+ "modified": "2023-08-17 14:39:18.903124",
+ "modified_by": "Administrator",
+ "module": "Bbb",
+ "name": "detail-sales-report-",
+ "owner": "Administrator",
+ "page_name": "detail-sales-report-",
+ "restrict_to_domain": "",
+ "roles": [
+  {
+   "role": "System Manager"
+  }
+ ],
+ "script": null,
+ "standard": "Yes",
+ "style": null,
+ "system_page": 0,
+ "title": "Detail Sales Report For Management"
+}

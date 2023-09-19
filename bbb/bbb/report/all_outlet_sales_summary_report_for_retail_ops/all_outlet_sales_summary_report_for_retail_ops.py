@@ -48,8 +48,8 @@ def get_columns():
          "convertible": "rate", "options": "currency"},
         {"label": _("UCB"), "fieldname": "UCB", "fieldtype": "Currency", "width": 120,
          "convertible": "rate", "options": "currency"},
-        {"label": _("Rounding"), "fieldname": "rounding_adjustment", "fieldtype": "Currency", "width": 120,
-         "convertible": "rate", "options": "currency"},
+        # {"label": _("Rounding"), "fieldname": "rounding_adjustment", "fieldtype": "Currency", "width": 120,
+        #  "convertible": "rate", "options": "currency"},
         {"label": _("VAT"), "fieldname": "vat", "fieldtype": "Currency", "width": 120,
          "convertible": "rate", "options": "currency"},
     ]

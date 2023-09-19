@@ -103,6 +103,11 @@ def after_insert_or_on_submit(doc, method):
             # if outstanding_amount == 0 and doc.docstatus !=0:
             #     frappe.db.set_value("POS Invoice", doc.name, "status", "Paid")
 
+    # update product search log
+    for item in doc.items:
+        search_items = frappe.db.get_all("Product Search Log", filters={"location": doc.pos_profile, "served_by":doc.served_by, "date": doc.posting_date, "product": item.item_code}, fields=["name"], order_by="creation desc")
+        if search_items:
+            frappe.db.set_value("Product Search Log", search_items[0].get('name'), 'is_sale', 1)
 
 @frappe.whitelist()
 def set_pos_cached_data(invoice_data=None):

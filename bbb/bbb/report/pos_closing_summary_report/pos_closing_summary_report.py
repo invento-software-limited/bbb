@@ -104,20 +104,21 @@ def get_item_price_qty_data(filters):
 
 
                 date_string = str(opening_entry[0].get('posting_date'))
+                # time = opening_entry[0].get('period_start_date').strftime("%I:%M %P")
                 current_date_string= filters.get("date")
                 date_format = "%Y-%m-%d"
                 current_date = datetime.datetime.strptime(current_date_string, date_format)
-                specific_date = datetime.datetime.strptime(date_string, date_format)
+                opening_date = datetime.datetime.strptime(date_string, date_format)
 
                 # Calculate the difference in days
-                days_difference = (current_date - specific_date).days
+                days_difference = (current_date - opening_date).days
 
                 # Print the result
                 if days_difference == 1:
-                    status = "Yesterday"
+                    status = "Opened Yesterday"
                 else:
-                    status = str(days_difference) + " days ago"
-                result['status'] = "Open " + status
+                    status = "Opened " + str(days_difference) + " days ago"
+                result['status'] = status
 
     # print(query_results)
     return query_results
