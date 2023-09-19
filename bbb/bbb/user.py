@@ -10,13 +10,13 @@ def validate(doc, method):
             permission_doc.save()
         else:
             permission_doc.delete()
-    elif doc.company:
-        new_doc = frappe.new_doc('User Permission')
-        new_doc.user = doc.email
-        new_doc.allow = 'Company'
-        new_doc.for_value = doc.company
-        new_doc.insert()
-        new_doc.save()
+    # elif doc.company:
+    #     new_doc = frappe.new_doc('User Permission')
+    #     new_doc.user = doc.email
+    #     new_doc.allow = 'Company'
+    #     new_doc.for_value = doc.company
+    #     new_doc.insert()
+    #     new_doc.save()
 
     print(user_permission)
 

@@ -1,0 +1,203 @@
+{
+ "actions": [],
+ "allow_rename": 1,
+ "autoname": "format:{YYYY}-{####}",
+ "creation": "2023-09-11 12:15:23.815790",
+ "doctype": "DocType",
+ "editable_grid": 1,
+ "engine": "InnoDB",
+ "field_order": [
+  "purchase_order",
+  "supplier",
+  "get_items_to_distribute",
+  "column_break_qzmun",
+  "company",
+  "posting_date",
+  "item_and_outlet_selection_section",
+  "purchase_distribution_items",
+  "column_break_bkkrz",
+  "outlet_template",
+  "outlet_selection_table",
+  "total_percentage",
+  "download_links_section",
+  "download_distribute_excell",
+  "get_purchase_receipt",
+  "against_purchase_receipt",
+  "column_break_wykeg",
+  "upload_distribution_excell",
+  "amended_from"
+ ],
+ "fields": [
+  {
+   "fieldname": "purchase_order",
+   "fieldtype": "Link",
+   "in_list_view": 1,
+   "in_standard_filter": 1,
+   "label": "Purchase Order",
+   "options": "Purchase Order",
+   "reqd": 1,
+   "unique": 1
+  },
+  {
+   "bold": 1,
+   "fetch_from": "purchase_order.supplier",
+   "fieldname": "supplier",
+   "fieldtype": "Link",
+   "in_global_search": 1,
+   "in_list_view": 1,
+   "in_standard_filter": 1,
+   "label": "Supplier",
+   "options": "Supplier"
+  },
+  {
+   "fieldname": "column_break_qzmun",
+   "fieldtype": "Column Break"
+  },
+  {
+   "default": "Today",
+   "fieldname": "posting_date",
+   "fieldtype": "Date",
+   "label": "Posting Date"
+  },
+  {
+   "fieldname": "item_and_outlet_selection_section",
+   "fieldtype": "Section Break",
+   "label": "Item And Outlet Selection"
+  },
+  {
+   "fieldname": "purchase_distribution_items",
+   "fieldtype": "Table",
+   "label": "Purchase distribution Items",
+   "options": "Purchase Distribution Item",
+   "reqd": 1
+  },
+  {
+   "fieldname": "column_break_bkkrz",
+   "fieldtype": "Column Break"
+  },
+  {
+   "fieldname": "outlet_selection_table",
+   "fieldtype": "Table",
+   "label": "Outlet Selection Table",
+   "options": "Outlet Selection Table",
+   "reqd": 1
+  },
+  {
+   "fieldname": "amended_from",
+   "fieldtype": "Link",
+   "label": "Amended From",
+   "no_copy": 1,
+   "options": "Stock Distribution",
+   "print_hide": 1,
+   "read_only": 1
+  },
+  {
+   "fieldname": "get_items_to_distribute",
+   "fieldtype": "Button",
+   "label": "Get Items To Distribute"
+  },
+  {
+   "fieldname": "download_links_section",
+   "fieldtype": "Section Break",
+   "label": "Download Links"
+  },
+  {
+   "fieldname": "column_break_wykeg",
+   "fieldtype": "Column Break"
+  },
+  {
+   "fieldname": "download_distribute_excell",
+   "fieldtype": "Button",
+   "label": "Download Distribute excell"
+  },
+  {
+   "fieldname": "upload_distribution_excell",
+   "fieldtype": "Attach",
+   "label": "Upload Distribution Excell"
+  },
+  {
+   "fieldname": "against_purchase_receipt",
+   "fieldtype": "Link",
+   "in_list_view": 1,
+   "in_standard_filter": 1,
+   "label": "Against Purchase Receipt",
+   "options": "Purchase Receipt"
+  },
+  {
+   "fieldname": "get_purchase_receipt",
+   "fieldtype": "Button",
+   "label": "Get Purchase Receipt"
+  },
+  {
+   "fieldname": "company",
+   "fieldtype": "Link",
+   "label": "Company",
+   "options": "Company",
+   "reqd": 1
+  },
+  {
+   "fieldname": "total_percentage",
+   "fieldtype": "Float",
+   "label": "Total Percentage",
+   "read_only": 1
+  },
+  {
+   "fieldname": "outlet_template",
+   "fieldtype": "Link",
+   "label": "Outlet Template",
+   "options": "Outlet Template"
+  }
+ ],
+ "index_web_pages_for_search": 1,
+ "is_submittable": 1,
+ "links": [],
+ "modified": "2023-09-18 10:14:20.776095",
+ "modified_by": "Administrator",
+ "module": "Bbb",
+ "name": "Stock Distribution",
+ "name_case": "Title Case",
+ "owner": "Administrator",
+ "permissions": [
+  {
+   "create": 1,
+   "delete": 1,
+   "email": 1,
+   "export": 1,
+   "print": 1,
+   "read": 1,
+   "report": 1,
+   "role": "System Manager",
+   "share": 1,
+   "write": 1
+  },
+  {
+   "create": 1,
+   "delete": 1,
+   "email": 1,
+   "export": 1,
+   "print": 1,
+   "read": 1,
+   "report": 1,
+   "role": "Stock Manager",
+   "share": 1,
+   "submit": 1,
+   "write": 1
+  },
+  {
+   "create": 1,
+   "email": 1,
+   "export": 1,
+   "print": 1,
+   "read": 1,
+   "report": 1,
+   "role": "Stock User",
+   "share": 1,
+   "submit": 1,
+   "write": 1
+  }
+ ],
+ "show_name_in_global_search": 1,
+ "sort_field": "modified",
+ "sort_order": "DESC",
+ "title_field": "supplier"
+}
