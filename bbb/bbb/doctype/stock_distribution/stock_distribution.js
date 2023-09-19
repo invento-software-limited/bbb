@@ -2,6 +2,21 @@
 // For license information, please see license.txt
 
 frappe.ui.form.on('Stock Distribution', {
+	refresh: function (frm){
+        frm.set_query("against_purchase_receipt", function() {
+            return {
+                "filters": {'supplier' : ["=", frm.doc.supplier]},
+            };
+        });
+    },
+	test: function(frm){
+		frappe.call({
+			method: 'bbb.bbb.doctype.stock_distribution.stock_distribution.distribution_excell_generate',
+			args: {
+				doc: frm.doc
+			}
+		});
+	},
 	get_items_to_distribute: function(frm){
 		if (frm.doc.purchase_order){
 			frappe.call({

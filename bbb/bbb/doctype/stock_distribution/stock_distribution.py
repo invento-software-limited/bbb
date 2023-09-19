@@ -32,6 +32,7 @@ class StockDistribution(Document):
             excell_dict = {}
             excell_item_list = []
             grand_total = 0
+            message = ""
             for item in json_data:
                 item_code = "{}".format(item.get("Item Code"))
                 excell_item_list.append(item_code)
@@ -49,11 +50,13 @@ class StockDistribution(Document):
                         pr_qty = item.get("qty")
                         if excell_qty != pr_qty:
                             remain = excell_qty - pr_qty
-                            frappe.throw("Quantity Isn't Equal For Item {item} need {qt_y} ".format(item=item.get("item_code"),qt_y = remain))
+                            single_message = "Quantity Isn't Equal For Item {item} need {qt_y} \n, ".format(item=item.get("item_code"),qt_y = remain)
+                            message += single_message
                     else:
                         frappe.throw("Item {} Isn't Available In Distribution Excell".format(item.get("item_code")))
+                        
             if grand_total != purchase_receipt.total_qty:
-                frappe.throw("Total Quantity In Not Equal")
+                frappe.throw(message)
                 
             self.create_stock_transfer(purchase_receipt,json_data)
         else:
@@ -135,19 +138,34 @@ def distribution_excell_generate(doc):
         single_data = {}
         total_wr_wise = 0
         data_dict["item_code"] = item.get("item_code")
+        max_percentage = -1  # Assuming all percentages are non-negative
+        warehouse_with_max_percentage = None
+        
+        # loop throw outlet percentage
         for percentage in doc.get("outlet_selection_table"):
             warehouse = percentage.get("warehouse").lower().replace(" ","_").replace("-","&")
-            percentage = percentage.get("percentage")
-            round_am = round((float(percentage) / 100) * float(item.get("qty")))
+            out_percentage = percentage.get("percentage")
+            round_am = round((float(out_percentage) / 100) * float(item.get("qty")))
             single_data[warehouse] = round_am
             total_wr_wise += round_am
             
-        frappe.msgprint(str(single_data))
-        frappe.msgprint(str(item.get("qty")))
+            # get max percentage warehouse
+            if percentage.get("percentage") > max_percentage:
+                max_percentage = percentage.get("percentage")
+                warehouse_with_max_percentage = percentage.get("warehouse")
+        
         
         for key,value in single_data.items():
             data_dict[key] = value
+            
+        if total_wr_wise != item.get("qty"):
+            diff = item.get("qty") - total_wr_wise
+            max_percentage_warehouse = warehouse_with_max_percentage.lower().replace(" ","_").replace("-","&")
+            max_percentage_warehouse_value = data_dict.get(max_percentage_warehouse) + diff
+            data_dict[max_percentage_warehouse] = max_percentage_warehouse_value
+        
         data.append(data_dict)
+        
     name = "distribute-"
     if doc.get("purchase_order"):
         name += doc.get("purchase_order")
@@ -155,9 +173,9 @@ def distribution_excell_generate(doc):
         random_word = ''.join(random.choice(string.ascii_lowercase) for _ in range(8))
         name += random_word
     file_name = '{}.xlsx'.format(name)
-    # generate_excel_and_download(columns, data, file_name, height=20)
+    generate_excel_and_download(columns, data, file_name, height=20)
     
-    # return "Ok"
+    return "Ok"
     
         
 def get_columns(doc):
