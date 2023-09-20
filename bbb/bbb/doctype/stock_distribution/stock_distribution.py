@@ -9,7 +9,6 @@ import io
 import openpyxl
 from openpyxl.utils import get_column_letter
 from openpyxl.styles import Font, PatternFill, Alignment
-import pandas as pd
 import random
 import string
 
@@ -26,22 +25,32 @@ class StockDistribution(Document):
     
     def on_submit(self):
         if self.upload_distribution_excell and self.against_purchase_receipt:
+            # File Path
             excel_file_path = get_site_directory_path() + self.upload_distribution_excell
-            df = pd.read_excel(excel_file_path)
-            json_data = df.to_dict(orient='records')
+            
+            # Structure Excell Data
             excell_dict = {}
             excell_item_list = []
             grand_total = 0
             message = ""
-            for item in json_data:
-                item_code = "{}".format(item.get("Item Code"))
+            excell_data = []
+            workbook = openpyxl.load_workbook(excel_file_path, data_only=True)
+            sheet = workbook.active
+            labels = [cell.value for cell in sheet[1]]
+            for row in sheet.iter_rows(min_row=2, values_only=True):
+                item_code = "{}".format(row[0])
                 excell_item_list.append(item_code)
                 total = 0
-                for key , value in item.items():
-                    if key != "Item Code":
-                        total += value
-                        grand_total += value
+                row_data = {}
+                for x in row[1:]:
+                    total += x
+                    grand_total += x
+                for i, value in enumerate(row):
+                    label = labels[i]
+                    row_data[label] = value
+                excell_data.append(row_data)
                 excell_dict[item_code] = total
+                
             purchase_receipt = frappe.get_doc("Purchase Receipt",self.against_purchase_receipt)
             if purchase_receipt.items:
                 for item in purchase_receipt.items:
@@ -58,16 +67,16 @@ class StockDistribution(Document):
             if grand_total != purchase_receipt.total_qty:
                 frappe.throw(message)
                 
-            self.create_stock_transfer(purchase_receipt,json_data)
+            self.create_stock_transfer(purchase_receipt,excell_data)
         else:
             frappe.throw("Please Upload Distribution excell And Set Against Purchase Receipt")
                 
-    def create_stock_transfer(self,purchase_receipt,json_data):
-        if purchase_receipt.items and json_data:
+    def create_stock_transfer(self,purchase_receipt,excell_data):
+        if purchase_receipt.items and excell_data:
             company = purchase_receipt.company
             items = []
             for item in purchase_receipt.items:
-                for outlet in json_data:
+                for outlet in excell_data:
                     if item.get("item_code") == str(outlet.get("Item Code")):
                         for key,value in outlet.items():
                             if key != "Item Code":
@@ -92,7 +101,7 @@ class StockDistribution(Document):
                 "company": company,  # Replace with the actual company name
                 "items": items
             })
-            stock_entry.save()
+            stock_entry.save(ignore_permissions=True)
 
 # Fetch Purchase Order Items
 @frappe.whitelist()
