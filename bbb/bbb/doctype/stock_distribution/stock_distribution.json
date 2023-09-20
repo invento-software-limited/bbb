@@ -10,17 +10,17 @@
   "purchase_order",
   "supplier",
   "get_items_to_distribute",
+  "download_distribute_excell",
   "column_break_qzmun",
   "company",
   "posting_date",
+  "outlet_template",
   "item_and_outlet_selection_section",
   "purchase_distribution_items",
   "column_break_bkkrz",
-  "outlet_template",
   "outlet_selection_table",
   "total_percentage",
   "download_links_section",
-  "download_distribute_excell",
   "get_purchase_receipt",
   "against_purchase_receipt",
   "column_break_wykeg",
@@ -65,22 +65,22 @@
    "label": "Item And Outlet Selection"
   },
   {
+   "allow_bulk_edit": 1,
    "fieldname": "purchase_distribution_items",
    "fieldtype": "Table",
    "label": "Purchase distribution Items",
-   "options": "Purchase Distribution Item",
-   "reqd": 1
+   "options": "Purchase Distribution Item"
   },
   {
    "fieldname": "column_break_bkkrz",
    "fieldtype": "Column Break"
   },
   {
+   "allow_bulk_edit": 1,
    "fieldname": "outlet_selection_table",
    "fieldtype": "Table",
    "label": "Outlet Selection Table",
-   "options": "Outlet Selection Table",
-   "reqd": 1
+   "options": "Outlet Selection Table"
   },
   {
    "fieldname": "amended_from",
@@ -98,8 +98,7 @@
   },
   {
    "fieldname": "download_links_section",
-   "fieldtype": "Section Break",
-   "label": "Download Links"
+   "fieldtype": "Section Break"
   },
   {
    "fieldname": "column_break_wykeg",
@@ -108,12 +107,13 @@
   {
    "fieldname": "download_distribute_excell",
    "fieldtype": "Button",
-   "label": "Download Distribute excell"
+   "hidden": 1,
+   "label": "Download Distribute In Excell"
   },
   {
    "fieldname": "upload_distribution_excell",
    "fieldtype": "Attach",
-   "label": "Upload Distribution Excell"
+   "label": "Upload Distribution In Excell"
   },
   {
    "fieldname": "against_purchase_receipt",
@@ -151,7 +151,7 @@
  "index_web_pages_for_search": 1,
  "is_submittable": 1,
  "links": [],
- "modified": "2023-09-20 09:40:29.324225",
+ "modified": "2023-09-20 14:00:25.874797",
  "modified_by": "Administrator",
  "module": "Bbb",
  "name": "Stock Distribution",

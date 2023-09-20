@@ -9,6 +9,17 @@ frappe.ui.form.on('Stock Distribution', {
             };
         });
     },
+	validate:function(frm){
+		var total_percentage = 0;
+        if (frm.doc.outlet_selection_table){
+            $.each(frm.doc.outlet_selection_table, function(index, row){
+                total_percentage += row.percentage || 0;
+            });
+        }
+		frm.set_value("total_percentage",total_percentage)
+		frm.set_df_property('download_distribute_excell', 'hidden', 0);
+	},
+
 	get_items_to_distribute: function(frm){
 		if (frm.doc.purchase_order){
 			frappe.call({
@@ -52,6 +63,16 @@ frappe.ui.form.on('Stock Distribution', {
 				}
 			});
 		}
+	},
+	outlet_selection_table:function(frm){
+		var total_percentage = 0;
+		if (frm.doc.outlet_selection_table){
+			$.each(frm.doc.outlet_selection_table, function(index, row){
+				console.log("ppp")
+				total_percentage += row.percentage || 0;
+			});
+		}
+		frm.set_value("total_percentage",total_percentage)
 	},
 	get_purchase_receipt:function(frm){
 		if (frm.doc.purchase_order){
