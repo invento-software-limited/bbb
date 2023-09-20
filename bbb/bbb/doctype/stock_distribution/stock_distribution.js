@@ -9,14 +9,6 @@ frappe.ui.form.on('Stock Distribution', {
             };
         });
     },
-	test: function(frm){
-		frappe.call({
-			method: 'bbb.bbb.doctype.stock_distribution.stock_distribution.distribution_excell_generate',
-			args: {
-				doc: frm.doc
-			}
-		});
-	},
 	get_items_to_distribute: function(frm){
 		if (frm.doc.purchase_order){
 			frappe.call({
