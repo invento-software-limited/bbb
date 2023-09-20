@@ -93,8 +93,8 @@ class StockDistribution(Document):
                                 data_dict["t_warehouse"] = final
                                 data_dict["uom"] = item.get("uom")
                                 data_dict["reference_purchase_receipt"] = purchase_receipt.name
-                                items.append(data_dict)
-            
+                                if value > 0:
+                                    items.append(data_dict)
             stock_entry = frappe.get_doc({
                 "doctype": "Stock Entry",
                 "stock_entry_type": "Material Transfer",  # You can set the purpose as per your use case
