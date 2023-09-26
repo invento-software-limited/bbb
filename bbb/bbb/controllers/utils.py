@@ -494,3 +494,30 @@ def update_customers_dob():
             birthday_str = str(birth_year) + '-' + str(birth_month) + '-' + str(birth_day)
             date_format = getdate(birthday_str)
             frappe.db.set_value('Customer', customer.get('name'), 'dob', date_format)
+
+
+def update_woocommerce_stock(bin_name):
+    bin = frappe.db.get_value("Bin", bin_name, ['actual_qty', 'item_code', 'warehouse'], as_dict=True)
+    item = frappe.db.get_value("Item", bin.get('item_code'), 'woocommerce_id', as_dict=True)                             
+    woocommerce_settings = frappe.get_doc("Woocommerce Settings")
+
+    if item.get('woocommerce_id') and woocommerce_settings.warehouse == bin.get('warehouse'):
+        from woocommerce import API
+        wcapi = API(
+            url=woocommerce_settings.woocommerce_server_url,
+            consumer_key=woocommerce_settings.api_consumer_key,
+            consumer_secret=woocommerce_settings.api_consumer_secret,
+            wp_api=True,
+            version="wc/v3",
+            query_string_auth=True,
+        )
+
+        data = {
+            "stock_quantity": bin.get('actual_qty'),
+            "manage_stock": True
+        }
+        url = "products/" + str(item.get('woocommerce_id'))
+        wcapi.put(url, data).json()
+        
+    
+    
