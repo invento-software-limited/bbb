@@ -155,6 +155,7 @@ override_doctype_class = {
     "POS Invoice": "bbb.bbb.controllers.pos_invoice.CustomPOSInvoice",
     "Sales Order": "bbb.bbb.controllers.sales_order.CustomSalesOrder",
     "POS Closing Entry": "bbb.bbb.controllers.pos_closing_entry.CustomPOSClosingEntry",
+    "Stock Ledger Entry": "bbb.bbb.controllers.stock_ledger_entry.CustomStockLedgerEntry",
     # "Delivery Note": "bbb.bbb.controllers.delivery_note.CustomDeliveryNote",
 }
 
