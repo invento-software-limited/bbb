@@ -243,3 +243,6 @@ user_data_fields = [
 # auth_hooks = [
 # 	"bbb.auth.validate"
 # ]
+fixtures = [
+    "Workflow State", "Workflow", "Workflow Action Master"
+]
