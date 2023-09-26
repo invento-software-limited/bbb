@@ -498,8 +498,8 @@ def update_customers_dob():
 
 def update_woocommerce_stock(doc, method):
     from woocommerce import API
-    if doc.voucher_type != 'Woocommerce Order':
-        woocommerce_settings = frappe.get_doc("Woocommerce Settings")
+    woocommerce_settings = frappe.get_doc("Woocommerce Settings")
+    if doc.voucher_type != 'Woocommerce Order' and woocommerce_settings.disabled == 0:
         bin = frappe.db.get_value("Bin", {'item_code': doc.item_code, 'warehouse': doc.warehouse}, 'actual_qty', as_dict=1)
 
         if woocommerce_settings.warehouse == doc.warehouse and bin:
