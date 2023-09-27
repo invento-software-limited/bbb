@@ -148,9 +148,9 @@ doc_events = {
     "User":{
         "validate": "bbb.bbb.user.validate"
     },
-    # "Stock Ledger Entry":{
-    #     "validate": "bbb.bbb.controllers.utils.update_woocommerce_stock"
-    # },
+    "Stock Ledger Entry":{
+        "on_update": "bbb.bbb.controllers.utils.update_woocommerce_stock"
+    },
     # "Bin":{
     #     "on_update": "bbb.bbb.controllers.utils.update_woocommerce_stock"
     # }
