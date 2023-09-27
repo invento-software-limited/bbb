@@ -504,12 +504,12 @@ def update_woocommerce_stock(doc, method):
     if doc.voucher_type != 'Woocommerce Order' and bbb_settings.woocommerce_status == "Enabled":
         bin = frappe.db.get_value("Bin", {'item_code': doc.item_code, 'warehouse': doc.warehouse}, 'actual_qty', as_dict=1)
 
-        if woocommerce_settings.warehouse == doc.warehouse and bin:
-            pre_qty = bin.get('actual_qty')
+        if woocommerce_settings.warehouse == doc.warehouse:
+            pre_qty = bin.get('actual_qty') or 0
             incoming_value = doc.actual_qty
             woocommerce_id = frappe.db.get_value('Item', doc.item_code, 'woocommerce_id')
 
-            if woocommerce_id and bin:
+            if woocommerce_id:
                 wcapi = API(
                     url=woocommerce_settings.woocommerce_server_url,
                     consumer_key=woocommerce_settings.api_consumer_key,
