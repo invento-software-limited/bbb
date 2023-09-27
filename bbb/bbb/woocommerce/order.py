@@ -18,6 +18,9 @@ from erpnext.stock.stock_ledger import make_sl_entries
 
 @frappe.whitelist(allow_guest=True)
 def update_or_cancel(*args, **kwargs):
+	bbb_settings = frappe.get_doc("BBB Settings")
+	if bbb_settings.woocommerce_status == "Disabled":
+		return
 	try:
 		order(*args, **kwargs)
 	except Exception:
@@ -199,10 +202,10 @@ def get_sl_entries(d, args):
 def search_for_woocommerce_id_or_sku_or_barcode_number(search_value, sku):
 	from erpnext.accounts.doctype.pos_invoice.pos_invoice import get_stock_availability
  
-	# woocommerce id
+	# search woocommerce id
 	item_code = frappe.db.get_value('Item', {'woocommerce_id': search_value}, 'item_code', as_dict=True)
 
-	# sku
+	# search sku
 	if not item_code:
 		item_code = frappe.db.get_value('Item', {'sku': sku}, 'item_code', as_dict=True)
 	
@@ -211,6 +214,13 @@ def search_for_woocommerce_id_or_sku_or_barcode_number(search_value, sku):
 		item_code = frappe.db.get_value(
 			"Item Barcode", {"barcode": search_value}, ["barcode", "parent as item_code"], as_dict=True
 		)
+
+ 	# search item code
+	if not item_code:
+		item_code = frappe.db.get_value(
+			"Item", {"item_code": search_value}, ["item_code"], as_dict=True
+		)
+
 
 	if item_code:
 		item_info = frappe.db.get_value(
