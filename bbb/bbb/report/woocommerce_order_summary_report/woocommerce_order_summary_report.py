@@ -28,10 +28,9 @@ def execute(filters=None):
 
 def get_data(filters, currency):
     conditions = get_conditions(filters)
-    # if conditions:
-    #     query_result = frappe.db.sql(f"""select posting_date, posting_time, json_data from `tabWoocommerce Order` as order where {conditions}""", as_dict=True)
-    # else:
-    query_result = frappe.db.sql("""select name, status, posting_date, posting_time, json_data, company from `tabWoocommerce Order` limit 100""", as_dict=True)
+    query_result = frappe.db.sql(
+        """select name, status, posting_date, posting_time, json_data, company from `tabWoocommerce Order` as wc_order where wc_order.docstatus=1 and {}""".format(conditions), as_dict=True)
+    # query_result = frappe.db.sql("""select name, status, posting_date, posting_time, json_data, company from `tabWoocommerce Order` limit 100""", as_dict=True)
 
 
     total_sell_qty = 0
@@ -112,32 +111,45 @@ def get_data(filters, currency):
     datasets.append({"name": _("Total Fulfilled Qty"), "values": chart_data.get('total_fulfilled_qty', [])})
     datasets.append({"name": _("Total Cancelled Qty"), "values": chart_data.get('total_cancelled_qty', [])})
     chart = {"data": {"labels": chart_data.get('labels', []), "datasets": datasets}}
-    chart["type"] = "bar"
+    chart["type"] = "line"
     chart["colors"] = ['#68AB30', '#2490EF', '#dc3545']
     
     message = ''
     
     return woocommerce_data, message, chart, summary_data
 
+# def get_conditions(filters):
+
+#     conditions = []
+#     if filters.get("from_date"):
+#         conditions.append("order.posting_date >= '%s'" % filters.get("from_date"))
+
+#     if filters.get("to_date"):
+#         conditions.append("order.posting_date <= '%s'" % filters.get("to_date"))
+
+#     if filters.get("status"):
+#         conditions.append("order.status = '%s'" % filters.get("status"))
+
+#     if filters.get("company"):
+#         conditions.append("order.company = '%s'" % filters.get("company"))
+        
+        
+#     if conditions:
+#         conditions = " and ".join(conditions)
+
+#     return conditions
+
 def get_conditions(filters):
-
     conditions = []
+
     if filters.get("from_date"):
-        conditions.append("order.posting_date >= '%s'" % filters.get("from_date"))
-
+        conditions.append("wc_order.posting_date>='%s'" % filters.get("from_date"))
     if filters.get("to_date"):
-        conditions.append("order.posting_date <= '%s'" % filters.get("to_date"))
-
-    if filters.get("status"):
-        conditions.append("order.status = '%s'" % filters.get("status"))
-
+        conditions.append("wc_order.posting_date<='%s'" % filters.get("to_date"))
     if filters.get("company"):
-        conditions.append("order.company = '%s'" % filters.get("company"))
-        
-        
+        conditions.append("wc_order.company='%s'" % filters.get("company"))
     if conditions:
         conditions = " and ".join(conditions)
-
     return conditions
 
 def get_columns():
@@ -163,7 +175,7 @@ def get_columns():
         #     "width": 100,
         # },
         {
-            "label": _("Total Qty"),
+            "label": _("Ordered Qty"),
             "fieldname": "total_qty",
             "fieldtype": "Text",
             "width": 100,
@@ -189,16 +201,11 @@ def get_columns():
     ]
 
     return columns
-
-
-
-
-# def get_daily_report(report_data):
     
 
 def get_weekly_report(report_data):
     if len(report_data) < 1:
-        return []
+        return [], {}
     get_data = chunk_list_data(report_data, 6)
     week_list = []
     chart_data = {"labels": [], 'total_ordered_qty': [], 'total_fulfilled_qty': [], 'total_cancelled_qty': []}
@@ -254,7 +261,7 @@ def chunk_list_data(list_data, n):
 def get_daily_report(report_data):
     from collections import defaultdict 
     if len(report_data) < 1:
-        return []
+        return [], {}
     
     tmp = defaultdict(list)
     for item in report_data:
@@ -312,7 +319,7 @@ def get_monthly_data(report_data):
     import datetime
     
     if len(report_data) < 1:
-        return []
+        return [], {}
     
     tmp = defaultdict(list)
     for item in report_data:
