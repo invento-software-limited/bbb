@@ -56,26 +56,34 @@ def order(*args, **kwargs):
 			order = frappe.request.data
 		status = order.get('status')
 		items = order.get('line_items')
-		# items = [{"id":270,"name":"test sku2","product_id":'6010',"variation_id":0,"quantity":1,"tax_class":"","subtotal":"15000.00","subtotal_tax":"0.00","total":"15000.00","total_tax":"0.00","taxes":[],"meta_data":[],"sku":"001","price":15000,"image":{"id":"","src":""},"parent_name":None}]
-		# status = 'processing'
-		# order = {'id': 22, 'parent_id': 22, 'status': 'processing'}
-		doc = create_woocommerce_order(order)
-		sle = update_stock_ledger(items, status, doc)
-		frappe.db.commit()
-		return sle
+
+		if status in ['processing', 'cancelled', 'delivered']:
+			doc = create_woocommerce_order(order)
+			if status != 'delivered':
+				sle = update_stock_ledger(items, status, doc)
+			frappe.db.commit()
+			return sle
 
 def create_woocommerce_order(order):
-	doc = frappe.new_doc("Woocommerce Order")
-	doc.woocommerce_id = order.get('id')
-	doc.parent_id = order.get('parent_id')
-	doc.posting_date = nowdate()
-	doc.posting_time = nowtime()
-	doc.json_data = json.dumps(order)
-	doc.woocommerce_status = order.get('status')
-	doc.insert(ignore_permissions=1)
-	# doc.save()
-	doc.submit()
-	return doc
+	try:
+		order, status = frappe.db.get_value("Woocommerce Order", {'woocommerce_id': order.get('id')}, ['name', 'status'])
+		if order:
+			# frappe.db.set_value('Woocommerce Order', order, 'status', order.get('status'))
+			doc = frappe.get_doc('Woocommerce Order', order)
+			doc.status = order.get('status')
+			doc.save()
+	except:
+		doc = frappe.new_doc("Woocommerce Order")
+		doc.woocommerce_id = order.get('id')
+		doc.parent_id = order.get('parent_id')
+		doc.posting_date = nowdate()
+		doc.posting_time = nowtime()
+		doc.json_data = json.dumps(order)
+		doc.woocommerce_status = order.get('status')
+		doc.insert(ignore_permissions=1)
+		# doc.save()
+		doc.submit()
+		return doc
 
 def update_stock_ledger(items, status, doc):
 	sl_entries = []
