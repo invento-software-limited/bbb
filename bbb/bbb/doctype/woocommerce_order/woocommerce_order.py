@@ -10,7 +10,9 @@ class WoocommerceOrder(Document):
 		super(WoocommerceOrder, self).__init__(*args, **kwargs)
         
 	def validate(self):
-		if self.woocommerce_status == 'processing' and self.docstatus == 1:
+		if self.woocommerce_status == 'cancelled' and self.docstatus == 1:
+			self.status = 'Cancelled'
+		elif self.woocommerce_status == 'processing' and self.docstatus == 1:
 			self.status = 'Ordered'
-		elif self.woocommerce_status == 'complete' and self.docstatus == 1:
+		elif self.woocommerce_status == 'delivered' and self.docstatus == 1:
 			self.status = 'Fulfilled'

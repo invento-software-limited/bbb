@@ -71,16 +71,17 @@ frappe.query_reports["Woocommerce Stock Balance Log"] = {
 		// 	"fieldtype": "Link",
 		// 	"options": "UOM"
 		// },
+		// {
+		// 	"fieldname": "show_variant_attributes",
+		// 	"label": __("Show Variant Attributes"),
+		// 	"fieldtype": "Check"
+		// },
+		// {
+		// 	"fieldname": 'show_stock_ageing_data',
+		// 	"label": __('Show Stock Ageing Data'),
+		// 	"fieldtype": 'Check'
+		// },
 		{
-			"fieldname": "show_variant_attributes",
-			"label": __("Show Variant Attributes"),
-			"fieldtype": "Check"
-		},
-		{
-			"fieldname": 'show_stock_ageing_data',
-			"label": __('Show Stock Ageing Data'),
-			"fieldtype": 'Check'
-		},		{
 			"fieldname": "company",
 			"label": __("Company"),
 			"fieldtype": "Link",
@@ -99,10 +100,10 @@ frappe.query_reports["Woocommerce Stock Balance Log"] = {
 		else if (column.fieldname == "in_qty" && data && data.in_qty > 0) {
 			value = "<span style='color:green'>" + value + "</span>";
 		}
-		else if (column.fieldname == "bal_qty" && data && data.in_qty > 0) {
+		else if (column.fieldname == "bal_qty" && data && data.bal_qty > 0) {
 			value = "<span style='color:green'>" + value + "</span>";
 		}
-		else if (column.fieldname == "bal_qty" && data && data.in_qty <= 0) {
+		else if (column.fieldname == "bal_qty" && data && data.bal_qty <= 0) {
 			value = "<span style='color:red'>" + value + "</span>";
 		}
 
