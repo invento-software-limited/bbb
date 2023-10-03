@@ -8,7 +8,7 @@
  "engine": "InnoDB",
  "field_order": [
   "status",
-  "woocommerce__id",
+  "woocommerce_id",
   "parent_id",
   "woocommerce_status",
   "column_break_4",
@@ -20,11 +20,6 @@
   "amended_from"
  ],
  "fields": [
-  {
-   "fieldname": "woocommerce__id",
-   "fieldtype": "Data",
-   "label": "Woocommerce  Id"
-  },
   {
    "fieldname": "parent_id",
    "fieldtype": "Data",
@@ -85,12 +80,17 @@
    "label": "Company",
    "options": "Company",
    "read_only": 1
+  },
+  {
+   "fieldname": "woocommerce_id",
+   "fieldtype": "Data",
+   "label": "Woocommerce  Id"
   }
  ],
  "index_web_pages_for_search": 1,
  "is_submittable": 1,
  "links": [],
- "modified": "2023-10-03 09:17:00.040214",
+ "modified": "2023-10-03 10:22:45.187596",
  "modified_by": "Administrator",
  "module": "Bbb",
  "name": "Woocommerce Order",
