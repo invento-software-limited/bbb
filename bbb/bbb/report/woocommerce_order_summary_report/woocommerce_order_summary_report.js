@@ -100,21 +100,21 @@ frappe.query_reports["Woocommerce Order Summary Report"] = {
 		
 		if (column.fieldname == "cancelled_qty" && data) {
 			if(value.split("_")[0] !== 'val'){
-				value = "<span style='color:red; font-weight:bold'>" + value + "</span>";
+				value = "<span style='font-weight:bold'>" + value + "</span>";
 			}else{
 				value = "<span'>" + value.split("_")[1] + "</span>";
 			}
 		}
 		else if (column.fieldname == "ordered_qty" && data) {
 			if(value.split("_")[0] !== 'val'){
-				value = "<span style='color:green; font-weight:bold'>" + value + "</span>";
+				value = "<span style='font-weight:bold'>" + value + "</span>";
 			}else{
 				value = "<span'>" + value.split("_")[1] + "</span>";
 			}
 		}
 		else if (column.fieldname == "fulfilled_qty" && data) {
 			if(value.split("_")[0] !== 'val'){
-				value = "<span style='color:blue; font-weight:bold'>" + value + "</span>";
+				value = "<span style='font-weight:bold'>" + value + "</span>";
 			}else{
 				value = "<span'>" + value.split("_")[1] + "</span>";
 			}
