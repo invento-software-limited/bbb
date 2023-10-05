@@ -35,5 +35,15 @@
 	],
 	"js/custom-app-include-js.js": [
 		"public/js/customer_quick_entry.js"
+	],
+	"js/erp-pos.js": [
+		"bbb/page/erp_pos/pos_item_selector.js",
+		"bbb/page/erp_pos/pos_item_cart.js",
+		"bbb/page/erp_pos/pos_item_details.js",
+		"bbb/page/erp_pos/pos_number_pad.js",
+		"bbb/page/erp_pos/pos_payment.js",
+		"bbb/page/erp_pos/pos_past_order_list.js",
+		"bbb/page/erp_pos/pos_past_order_summary.js",
+		"bbb/page/erp_pos/pos_controller.js"
 	]
 }
