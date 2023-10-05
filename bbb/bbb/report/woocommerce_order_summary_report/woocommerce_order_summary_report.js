@@ -64,7 +64,7 @@ frappe.query_reports["Woocommerce Order Summary Report"] = {
 			"label": __("Periodicity"),
 			"fieldtype": "Select",
 			"default": "Daily",
-			"options": ["Daily", "Weekly", "Monthly"]
+			"options": ["Daily", "Monthly"]
 		},
 
 		// {

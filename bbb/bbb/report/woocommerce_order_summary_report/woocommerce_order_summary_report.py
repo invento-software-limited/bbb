@@ -150,11 +150,12 @@ def prepare_data(data, periodicity, sum_qty=False):
             tmp_list, ext = get_daily_report(tmp_list, True)
             end_date = single_data['posting_date']
             if periodicity == "Daily":
-                date = start_date
+                date = datetime.datetime.strptime(start_date, "%Y-%m-%d").strftime("%d-%m-%Y")
             elif periodicity == "Weekly":
                 date = '{} - {}'.format(start_date, end_date)
             elif periodicity == "Monthly":
-                date = datetime.datetime.strptime(start_date, "%Y-%m-%d").strftime("%B")
+                date = datetime.datetime.strptime(start_date, "%Y-%m-%d").strftime("%B-%Y")
+
             else:
                 date = ''
             
@@ -188,7 +189,7 @@ def prepare_data(data, periodicity, sum_qty=False):
             tmp_list.append({
                 'indent': 1,
                 'is_group': 0,
-                'posting_date':  single_data.get('posting_date'),
+                'posting_date':  datetime.datetime.strptime(single_data.get('posting_date'), "%Y-%m-%d").strftime("%d-%m-%Y"),
                 'ordered_qty': "val_" + str(ordered_qty),
                 'cancelled_qty': "val_" + str(cancelled_qty),
                 'fulfilled_qty': "val_" + str(fulfilled_qty),
