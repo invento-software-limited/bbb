@@ -61,7 +61,7 @@ erpnext.PointOfSale.ItemSelector = class {
 		!item_group && (item_group = this.parent_item_group);
 
 		return frappe.call({
-			method: "bbb.bbb.point_of_sale.get_items",
+			method: "bbb.bbb.restaurant.get_items",
 			freeze: true,
 			args: { start, page_length, price_list, item_group, search_term, pos_profile },
 		});

@@ -4,6 +4,7 @@ erpnext.PointOfSale.ItemCart = class {
         this.events = events;
         this.customer_info = undefined;
         this.served_by_info = undefined;
+        this.table_no_info = undefined;
         this.ignore_discount = undefined;
         this.ignore_pricing_rule = "No";
         this.hide_images = settings.hide_images;
@@ -46,6 +47,12 @@ erpnext.PointOfSale.ItemCart = class {
             `<div class="served-by-section"></div>`
         );
         this.$customer_header_section.append(
+            `<div class="table-no-section"></div>`
+        );
+        this.$customer_header_section.append(
+            `<div class="order-type-section"></div>`
+        );
+        this.$customer_header_section.append(
             `<div class="pricing-discount-section"></div>`
         );
         this.$customer_header_section.append(
@@ -58,12 +65,16 @@ erpnext.PointOfSale.ItemCart = class {
 
         this.$customer_section = this.$customer_header_section.find('.customer-section');
         this.$served_by_section = this.$customer_header_section.find('.served-by-section');
+        this.$table_no_section = this.$customer_header_section.find('.table-no-section');
+        this.$order_type_section = this.$customer_header_section.find('.order-type-section');
         this.$pricing_rule_discount_section = this.$customer_header_section.find('.pricing-discount-section');
         this.$menu_section = this.$customer_header_section.find('.menu-section');
         this.$pos_profile_section = this.$customer_header_section.find('.pos-profile-section');
 
         this.make_customer_selector();
         this.make_served_by_selector();
+        this.make_table_no_selector();
+        this.make_order_type_selector();
         this.make_discount_price_selector();
         this.make_menu_dropdown();
     }
@@ -85,6 +96,24 @@ erpnext.PointOfSale.ItemCart = class {
         frm.set_value('served_by', '');
         this.make_served_by_selector();
         this.served_by_field.set_focus();
+    }
+    reset_table_no_selector() {
+        const frm = this.events.get_frm();
+        if(frm.doc.is_return === 1) return;
+        // if($('.checkout-btn').is(":visible")) return;
+
+        frm.set_value('served_by', '');
+        this.make_table_no_selector();
+        this.table_no_field.set_focus();
+    }
+    reset_order_type_selector() {
+        const frm = this.events.get_frm();
+        if(frm.doc.is_return === 1) return;
+        // if($('.checkout-btn').is(":visible")) return;
+
+        frm.set_value('served_by', '');
+        this.make_order_type_selector();
+        this.order_type_field.set_focus();
     }
     reset_ignore_discount_selector() {
         const frm = this.events.get_frm();
@@ -195,7 +224,14 @@ erpnext.PointOfSale.ItemCart = class {
                     </div>
                 </div>
             </div>
-			<div class="checkout-btn">Checkout</div>
+            <div class="row">
+                <div class="col-md-6">
+                    <div class="checkout-btn">Checkout</div>
+                </div>
+                <div class="col-md-6">
+                    <div class="confirm-order-btn">Confirm Order</div>
+                </div>
+            </div>
 			<div class="edit-cart-btn">Edit Cart</div>`
         );
         $('.total-section').css('visibility', 'hidden');
@@ -248,6 +284,12 @@ erpnext.PointOfSale.ItemCart = class {
         this.$served_by_section.on('click', '.reset-served-by-btn', function () {
             me.reset_served_by_selector();
         });
+        this.$table_no_section.on('click', '.reset-table-no-btn', function () {
+            me.reset_table_no_selector();
+        });
+        this.$order_type_section.on('click', '.order-type-btn', function () {
+            me.reset_order_type_selector();
+        });
         this.$pricing_rule_discount_section.on('click', '.reset-ignore_pricing-rule-btn', function () {
             me.reset_ignore_discount_selector();
         });
@@ -280,6 +322,15 @@ erpnext.PointOfSale.ItemCart = class {
             this.numpad_value = '';
         });
 
+
+        this.$component.on('click', '.confirm-order-btn', function () {
+            if ($(this).attr('style').indexOf('--blue-500') == -1) return;
+            const frm = me.events.get_frm();
+            frappe.model.set_value(frm.doc.doctype, frm.doc.name, 'status', 'Ordered')
+            me.events.save_ordered_invoice()
+        });
+
+
         this.$component.on('click', '.checkout-btn', function () {
             if ($(this).attr('style').indexOf('--blue-500') == -1) return;
             const frm = me.events.get_frm();
@@ -293,7 +344,7 @@ erpnext.PointOfSale.ItemCart = class {
             me.wrapper.find('.customer-cart-container').css('grid-column', 'span 5 / span 5');
             me.events.checkout();
             me.toggle_checkout_btn(false);
-            //rabi
+            //rabiul
             if(!frm.doc.additional_discount_percentage || frm.doc.additional_discount_percentage === 0){
                 frappe.model.set_value(frm.doc.doctype, frm.doc.name, 'additional_discount_percentage', 0);
                 me.$add_discount_elem.css({
@@ -426,7 +477,7 @@ erpnext.PointOfSale.ItemCart = class {
             shortcut: "ctrl+enter",
             action: () => this.$component.find(".checkout-btn").click(),
             condition: () => this.$component.is(":visible") && !this.$totals_section.find('.edit-cart-btn').is(':visible') && this.wrapper.find('.customer-cart-container').css('grid-column', 'span 5 / span 5'),
-            description: __("Checkout Order / Submit Order / New Order"),
+            description: __("Checkout Order / Submit Order / New Order / Confirm Order"),
             ignore_inputs: true,
             page: cur_page.page.page
         });
@@ -528,7 +579,7 @@ erpnext.PointOfSale.ItemCart = class {
                 label: __('Served By'),
                 fieldtype: 'Link',
                 options: 'Served By',
-                placeholder: __('Search by name, location'),
+                placeholder: __('Search by name'),
                 get_query: () => query,
                 onchange: function () {
                     if (this.value) {
@@ -565,6 +616,70 @@ erpnext.PointOfSale.ItemCart = class {
             render_input: true,
         });
         this.served_by_field.toggle_label(false);
+    }
+
+    make_table_no_selector() {
+        this.$table_no_section.html(`
+			<div class="table-no-field"></div>
+		`);
+        const me = this;
+        const query = {query: 'bbb.bbb.controllers.queries.table_number_query'};
+        this.table_no_field = frappe.ui.form.make_control({
+            df: {
+                label: __('Table No'),
+                fieldtype: 'Link',
+                options: 'Restaurant Table Number',
+                placeholder: __('Search name'),
+                get_query: () => query,
+                onchange: function () {
+                    if (this.value) {
+                        const frm = me.events.get_frm();
+                        frappe.dom.freeze();
+                        frappe.model.set_value(frm.doc.doctype, frm.doc.name, 'restaurant_table_number', this.value);
+                        
+                        frm.script_manager.trigger('restaurant_table_number', frm.doc.doctype, frm.doc.name).then(() => {
+                            frappe.run_serially([
+                                () => me.table_no_info = {'restaurant_table_number': this.value},
+                                () => me.update_table_no_section(),
+                                () => frappe.dom.unfreeze()
+                            ]);
+                        })
+                    }
+                },
+            },
+            parent: this.$table_no_section.find('.table-no-field'),
+            render_input: true,
+        });
+        this.table_no_field.toggle_label(false);
+    }
+
+
+    make_order_type_selector() {
+        this.$order_type_section.html(`
+			<div class="order-type-field"></div>
+		`);
+        const me = this;
+        this.order_type_field = frappe.ui.form.make_control({
+            df: {
+                label: __('Order Type'),
+                fieldtype: 'Select',
+                options: [{'value': 'Dining', 'description': ''},{'value': 'Take Away', 'description': ''}, {'value': 'Delivery', 'description': ''}],
+                placeholder: __('Order Type'),
+                onchange: function () {
+                    if (this.value) {
+                        // console.log(this.value)
+                        // const frm = me.events.get_frm();
+                        // frappe.dom.freeze();
+                        // frappe.model.set_value(frm.doc.doctype, frm.doc.name, 'customer', this.value);
+                        // frm.script_manager.trigger('customer', frm.doc.doctype, frm.doc.name)
+                        // frappe.dom.unfreeze();
+                    }
+                },
+            },
+            parent: this.$order_type_section.find('.order-type-field'),
+            render_input: true,
+        });
+        this.order_type_field.toggle_label(false);
     }
 
     make_pos_profile() {
@@ -653,8 +768,8 @@ erpnext.PointOfSale.ItemCart = class {
                         </button>
                         <ul class="dropdown-menu dropdown-menu-right" role="menu">
                             <li>
-                                <a class="grey-link dropdown-item" href="#" id="check_item_stock">
-                                    <span class="menu-item-label" data-label="Check Item Stock"><span class="alt-underline">C</span>heck Item Stock</span>
+                                <a class="grey-link dropdown-item" href="#" id="view_order_list">
+                                    <span class="menu-item-label" data-label="Check Item Stock"><span class="alt-underline">V</span>iew Orders</span>
                                 </a>
                             </li>
 <!--                            <li>-->
@@ -668,7 +783,7 @@ erpnext.PointOfSale.ItemCart = class {
                                     <span class="menu-item-label" data-label="Reset Cart"><span class="alt-underline">R</span>eset Cart</span>
                                 </a>
                             </li>
-                            <li>
+                            <!---<li>
                                 <a class="grey-link dropdown-item toggle_recent_order-1" href="#" id="toggle_recent_order">
 
                                     <span class="menu-item-label" data-label="Toggle Sidebar"><span class="alt-underline">T</span>oggle Recent Orders</span>
@@ -679,7 +794,7 @@ erpnext.PointOfSale.ItemCart = class {
 
                                     <span class="menu-item-label" data-label="Toggle Sidebar"><span class="alt-underline">S</span>ave as Draft</span>
                                 </a>
-                            </li>
+                            </li>-->
                             <li>
                                 <a class="grey-link dropdown-item" href="#" id="close_pos">
 
@@ -977,6 +1092,36 @@ erpnext.PointOfSale.ItemCart = class {
 
     }
 
+    update_table_no_section() {
+        // const frm = this.events.get_frm();
+        let style=''
+        // if(frm.doc.is_return){
+        //     style = "display: none;";
+        // }
+
+        const {restaurant_table_number} = this.table_no_info || {};
+        
+        if (restaurant_table_number) {
+            // let served_by_name = served_by.split('-')[0]
+            this.$table_no_section.html(
+                `<div class="table-no-details">
+					<div class="table-no-display">
+						<div class="table-no-name-desc">
+							<div class="table-no-name">${restaurant_table_number}</div>
+						</div>
+						<div class="reset-table-no-btn" reset-served-attr="" data-table-no="${escape(restaurant_table_number)}" style="${style}">
+							<svg width="32" height="32" viewBox="0 0 14 14" fill="none">
+								<path d="M4.93764 4.93759L7.00003 6.99998M9.06243 9.06238L7.00003 6.99998M7.00003 6.99998L4.93764 9.06238L9.06243 4.93759" stroke="#8D99A6"/>
+							</svg>
+						</div>
+					</div>
+				</div>`
+            );
+        } else {
+            this.reset_table_no_selector();
+        }
+
+    }
     update_customer_section() {
         const frm = this.events.get_frm();
         let style=''
@@ -1425,11 +1570,13 @@ erpnext.PointOfSale.ItemCart = class {
     toggle_checkout_btn(show_checkout) {
         if (show_checkout) {
             this.$totals_section.find('.checkout-btn').css('display', 'flex');
+            this.$totals_section.find('.confirm-order-btn').css('display', 'flex');
             this.$totals_section.find('.edit-cart-btn').css('display', 'none');
             this.$add_discount_elem.find('input').removeAttr('disabled')
             this.$add_discount_amount_elem.find('input').removeAttr('disabled')
         } else {
             this.$totals_section.find('.checkout-btn').css('display', 'none');
+            this.$totals_section.find('.confirm-order-btn').css('display', 'none');
             this.$totals_section.find('.edit-cart-btn').css('display', 'flex');
         }
     }
@@ -1438,6 +1585,9 @@ erpnext.PointOfSale.ItemCart = class {
         if (toggle) {
             this.$add_discount_elem.css('display', 'flex');
             this.$add_discount_amount_elem.css('display', 'flex');
+            this.$cart_container.find('.confirm-order-btn').css({
+                'background-color': 'var(--blue-500)'
+            });
             this.$cart_container.find('.checkout-btn').css({
                 'background-color': 'var(--blue-500)'
             });
@@ -1445,6 +1595,9 @@ erpnext.PointOfSale.ItemCart = class {
             this.$add_discount_elem.css('display', 'none');
             this.$add_discount_amount_elem.css('display', 'none');
             this.$cart_container.find('.checkout-btn').css({
+                'background-color': 'var(--blue-200)'
+            });
+            this.$cart_container.find('.confirm-order-btn').css({
                 'background-color': 'var(--blue-200)'
             });
 
@@ -1802,6 +1955,9 @@ erpnext.PointOfSale.ItemCart = class {
         //     this.update_cached_data(cached_data)
         // }
         // else {
+        // this.fetch_served_by_details(frm.doc.served_by).then(() => {
+        //     this.update_served_by_section();
+        // });
         this.fetch_served_by_details(frm.doc.served_by).then(() => {
             this.update_served_by_section();
         });
@@ -1882,11 +2038,16 @@ erpnext.PointOfSale.ItemCart = class {
         // }, 5000);
 
 
-
         if (frm.doc.docstatus === 1) {
             this.$totals_section.find('.checkout-btn').css('display', 'none');
             this.$totals_section.find('.edit-cart-btn').css('display', 'none');
-        } else {
+        }
+        // else if(frm.doc.status == "Ordered" || frm.doc.__islocal == 1){
+        //     this.$totals_section.find('.checkout-btn').css('display', 'none');
+        //     this.$totals_section.find('.confirm-order-btn').css('display', 'flex');
+        //     this.$totals_section.find('.edit-cart-btn').css('display', 'none');
+        // }
+        else {
             this.$totals_section.find('.checkout-btn').css('display', 'flex');
             this.$totals_section.find('.edit-cart-btn').css('display', 'none');
         }
@@ -2009,6 +2170,7 @@ erpnext.PointOfSale.ItemCart = class {
             this.$totals_section.find('.edit-cart-btn').css('display', 'none');
         }
     }
+    
 
     // toggle_selector(enabled) {
     //     this.$customer_section.find('.customer-section').setAttribute('disabled');

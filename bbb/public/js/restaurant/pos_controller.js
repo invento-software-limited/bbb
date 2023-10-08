@@ -172,9 +172,9 @@ erpnext.PointOfSale.Controller = class {
             e.preventDefault();
             me.open_form_view();
         });
-        $('#check_item_stock').bind('click', function (e) {
+        $('#view_order_list').bind('click', function (e) {
             e.preventDefault();
-            me.check_item_stock();
+            me.view_order_list();
         });
         $('#add_damaged_product').bind('click', function (e) {
             e.preventDefault();
@@ -224,20 +224,27 @@ erpnext.PointOfSale.Controller = class {
         frappe.set_route("Form", this.frm.doc.doctype, this.frm.doc.name);
     }
 
-    check_item_stock() {
-        function get_items_template(dialog, data){
+    view_order_list() {
+        const me = this;
+        function get_items_template(me, d, data){
             var html = `<div class="card mb-4">
                 {% if data %}
                     <div class="dashboard-list-item" style="padding: 12px 15px;">
                         <div class="row col-md-12">
                             <div class="col-sm-3 text-muted" style="margin-top: 8px;">
-                                Warehouse
+                                Voucher No
                             </div>
-                            <div class="col-sm-7 text-muted" style="margin-top: 8px;">
-                                Item Name
+                            <div class="col-sm-3 text-muted" style="margin-top: 8px;">
+                                Table No
                             </div>
                             <div class="col-sm-2 text-muted" style="margin-top: 8px;">
-                                Stock Status
+                                Qty
+                            </div>
+                            <div class="col-sm-2 text-muted" style="margin-top: 8px;">
+                                
+                            </div>
+                            <div class="col-sm-2 text-muted" style="margin-top: 8px;">
+                                
                             </div>
                         </div>
                     </div>
@@ -245,83 +252,94 @@ erpnext.PointOfSale.Controller = class {
                         <div class="dashboard-list-item" style="padding: 7px 15px;">
                             <div class="row col-md-12">
                                 <div class="col-sm-3" style="margin-top: 8px;">
-                                    <a data-type="warehouse" data-name="{{ d.warehouse }}">
-                                        {{ d.warehouse }}</a>
+                                    <a data-type="name" data-name="{{ d.name }}">
+                                        {{ d.name }}</a>
                                     </div>
-                                    <div class="col-sm-7" style="margin-top: 8px; ">
-                                        <a data-type="item" data-name="{{ d.item_name }}">
-                                            {{ d.item_name }}</a>
-                                        </div>
-                                    <div class="col-sm-2 text-center" style="margin-top: 8px;">
-                                        {% if d.actual_qty > 5 %}
-                                            <span style="color: green">+5</span>
-                                        {% else %}
-                                            <span style="color: red">-5</span>
-                                        {% endif %}
+                                    <div class="col-sm-3" style="margin-top: 8px; ">
+                                        <a data-type="item" data-name="{{ d.table_number }}">
+                                            {{ d.table_number }}</a>
+                                    </div>
+                                    <div class="col-sm-2" style="margin-top: 8px; ">
+                                        <a data-type="item" data-name="{{ d.table_number }}">
+                                            {{ d.total_qty }}</a>
+                                    </div>
+                                    <div class="col-sm-2" style="margin-top: 8px; ">
+                                        <button class="btn btn-primary edit_order" name={{ d.name }} style="float:right"> Edit</button>
+                                    </div>
+                                    <div class="col-sm-2" style="margin-top: 8px;">
+                                        <button class="btn btn-success checkout_order text-right" name={{ d.name }}> Checkout</button>
                                     </div>
                                 </div>
                             </div>
                         {% endfor %}
                     {% else %}
                         <div class="mt-2 mb-2 text-center">
-                            <span class="text-md-center">Item Not Found!</span>
+                            <span class="text-md-center">Orders Not Found!</span>
                         </div>
                     {% endif %}
                 </div>`;
+            
+            var table_data = frappe.render_template(html, {'data': data});
+            d.fields_dict.orders.$wrapper.html(table_data);
+            $('.edit_order').on('click', function(){
+                let name = $(this).attr('name');
+                frappe.db.get_doc('POS Invoice', name)
+                .then(doc => {
+                    frappe.run_serially([
+                        // () => me.frm.refresh($(this).attr('name')),
+                        () => me.frm.refresh(doc.name),
+                        () => me.frm.call('reset_mode_of_payments'),
+                        () => me.cart.load_invoice(),
+                        () => d.hide()
+                    ]);
+                })
 
-            var table_data = frappe.render_template(html, {data: data});
-            d.fields_dict.items.$wrapper.html(table_data);
+            });
+            $('.checkout_order').on('click', function(){
+                let name = $(this).attr('name');
+                frappe.db.get_doc('POS Invoice', name)
+                .then(doc => {
+                    frappe.run_serially([
+                        // () => me.frm.refresh($(this).attr('name')),
+                        () => me.frm.refresh(doc.name),
+                        () => me.frm.call('reset_mode_of_payments'),
+                        () => me.cart.load_invoice(),
+                        () => me.cart.$component.find(".checkout-btn").click(),
+                        () => d.hide()
+                    ]);
+                })
+            })
         }
 
-        function get_items(item){
+        function get_items(me, d){
             frappe.call({
-                method: 'bbb.bbb.page.item_stock.item_stock.get_item_stock_data',
-                args: {
-                    search_text: item
-                },
+                method: 'bbb.bbb.controllers.utils.get_restaurant_order_list',
                 callback: function(r) {
                     if (!r.exc) {
                         // code snippet
                         // console.log(r);
                         if(r.message.length !== 0){
-                            // console.log("=====>>>", r.message)
-                            get_items_template(d, r.message)
+                            get_items_template(me, d, r.message)
                         }
                         else{
-                            get_items_template(d, null)
+                            get_items_template(me, d, null)
                         }
                     }
                 }
             });
         }
-
         var d = new frappe.ui.Dialog({
-            title: "Item Stock Status",
+            title: "Order List",
             fields: [
                 {
-                    fieldtype: "Data",
-                    fieldname: "item",
-                    label: __("Item"),
-                    reqd: 1,
-                    onchange: function (e) {
-                        // cur_dialog.fields_dict.item_code.value
-                        get_items(this.value)
-                    }
-                },
-                {
-                  fieldtype: "Column Break"
-                },
-                {
-                    fieldtype: "Section Break"
-                },
-                {
-                    'fieldname': 'items',
-                    'fieldtype': 'HTML'
+                    fieldname: 'orders',
+                    fieldtype: 'HTML',
                 },
             ],
         });
         d.show();
         d.$wrapper.find('.modal-dialog').css("max-width", "800px");
+        get_items(me, d)
     }
 
     add_damaged_product(){
@@ -376,6 +394,36 @@ erpnext.PointOfSale.Controller = class {
         if (this.frm.doc.items.length == 0) {
             frappe.show_alert({
                 message: __("You must add atleast one item to save it as draft."),
+                indicator: 'red'
+            });
+            frappe.utils.play_sound("error");
+            return;
+        }
+
+        this.frm.save(undefined, undefined, undefined, () => {
+            frappe.show_alert({
+                message: __("There was an error saving the document."),
+                indicator: 'red'
+            });
+            frappe.utils.play_sound("error");
+        }).then(() => {
+            frappe.run_serially([
+                () => location.reload()
+                // () => frappe.dom.freeze(),
+                // () => this.make_new_invoice(),
+                // () => frappe.dom.unfreeze(),
+            ]);
+        });
+    }
+
+    save_ordered_invoice() {
+        if (!this.$components_wrapper.is(":visible")) return;
+        const frm = this.frm;
+
+        this.get_naming_series(this);
+        if (this.frm.doc.items.length == 0) {
+            frappe.show_alert({
+                message: __("You must add atleast one item."),
                 indicator: 'red'
             });
             frappe.utils.play_sound("error");
@@ -465,7 +513,8 @@ erpnext.PointOfSale.Controller = class {
                 get_initial_paid_amount: () => this.initial_paid_amount,
                 set_initial_paid_amount: (paid_amount) => this.set_initial_paid_amount(paid_amount),
                 check_free_item_pricing_rules: () => this.check_free_item_pricing_rules(),
-                update_additional_discount_on_tag: () => this.update_additional_discount_on_tag()
+                update_additional_discount_on_tag: () => this.update_additional_discount_on_tag(),
+                save_ordered_invoice : () => this.save_ordered_invoice()
             }
         })
     }
@@ -1355,7 +1404,6 @@ erpnext.PointOfSale.Controller = class {
 
         });
         frm.refresh_field('items');
-        console.log(frm)
 
     }
 };
