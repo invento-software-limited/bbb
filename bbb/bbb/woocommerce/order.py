@@ -61,15 +61,15 @@ def order(*args, **kwargs):
 			doc = create_woocommerce_order(order)
 			if status != 'delivered':
 				sle = update_stock_ledger(items, status, doc)
-			frappe.db.commit()
-			return sle
+				frappe.db.commit()
+				return sle
 
 def create_woocommerce_order(order):
 	STATUS = {'processing': "Ordered", 'cancelled': 'Cancelled', 'delivered': 'Fulfilled'}
 	try:
-		wc_order, status = frappe.db.get_value("Woocommerce Order", {'woocommerce_id': order.get('id')}, ['name', 'status'])
+		wc_order, status = frappe.db.get_value("Woocommerce Order", {'woocommerce_id': str(order.get('id'))}, ['name', 'status'])
 		if wc_order:
-			doc = frappe.get_doc('Woocommerce Order', {'name': wc_order})
+			doc = frappe.get_doc('Woocommerce Order', {'name': str(wc_order)})
 			doc.status = STATUS.get(order.get('status'))
 			doc.save()
 	except:
