@@ -1,5 +1,6 @@
 frappe.provide('erpnext.PointOfSale');
 frappe.pages['bbb-restaurant'].on_page_load = function(wrapper) {
+    frappe.require("assets/bbb/css/restaurant-pos.css");
     frappe.ui.make_app_page({
         parent: wrapper,
         // title: __('Point of Sale'),

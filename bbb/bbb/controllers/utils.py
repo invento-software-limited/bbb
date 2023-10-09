@@ -525,5 +525,9 @@ def update_woocommerce_stock(doc, method):
                 url = "products/" + str(woocommerce_id)
                 wcapi.put(url, data).json()
         
-    
-    
+        
+@frappe.whitelist()    
+def get_restaurant_order_list():
+    order_list = []
+    order_list = frappe.db.get_all(doctype='POS Invoice', filters={'status': 'Ordered'}, fields=['name', 'restaurant_table_number', 'total_qty', 'rounded_total'])
+    return order_list

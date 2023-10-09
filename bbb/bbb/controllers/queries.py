@@ -810,3 +810,37 @@ def served_by_query(doctype, txt, searchfield, start, page_len, filters):
                              'start': start,
                              'page_len': page_len
                          })
+
+
+@frappe.whitelist()
+@frappe.validate_and_sanitize_search_inputs
+def table_number_query(doctype, txt, searchfield, start, page_len, filters):
+    conditions = []
+
+    fields = ["name", "table_number"]
+
+    fields = get_fields("Restaurant Table Number", fields)
+
+    searchfields = " or ".join(field + " like %(txt)s" for field in ["name", "table_number"])
+
+    return frappe.db.sql("""select {fields} from `tabRestaurant Table Number`
+		where docstatus < 2
+			and ({scond}) and disabled=0
+			{fcond} {mcond}
+		order by
+			if(locate(%(_txt)s, name), locate(%(_txt)s, name), 99999),
+			if(locate(%(_txt)s, table_number), locate(%(_txt)s, table_number), 99999),
+			idx desc,
+			name, table_number
+		limit %(start)s, %(page_len)s""".format(**{
+        "fields": ", ".join(fields),
+        "scond": searchfields,
+        "mcond": get_match_cond(doctype),
+        "fcond": get_filters_cond(doctype, filters, conditions).replace('%', '%%'),
+    }), {
+                             'txt': "%%%s%%" % txt,
+                             '_txt': txt.replace("%", ""),
+                             'start': start,
+                             'page_len': page_len
+                         })
+
