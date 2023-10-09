@@ -663,16 +663,16 @@ erpnext.PointOfSale.ItemCart = class {
             df: {
                 label: __('Order Type'),
                 fieldtype: 'Select',
-                options: [{'value': 'Dining', 'description': ''},{'value': 'Take Away', 'description': ''}, {'value': 'Delivery', 'description': ''}],
+                options: ['Dining', 'Take Away','Delivery'],
                 placeholder: __('Order Type'),
+                default: "Dining",
                 onchange: function () {
                     if (this.value) {
-                        // console.log(this.value)
-                        // const frm = me.events.get_frm();
-                        // frappe.dom.freeze();
-                        // frappe.model.set_value(frm.doc.doctype, frm.doc.name, 'customer', this.value);
-                        // frm.script_manager.trigger('customer', frm.doc.doctype, frm.doc.name)
-                        // frappe.dom.unfreeze();
+                        const frm = me.events.get_frm();
+                        frappe.dom.freeze();
+                        frappe.model.set_value(frm.doc.doctype, frm.doc.name, 'restaurant_order_type', this.value);
+                        frm.script_manager.trigger('restaurant_order_type', frm.doc.doctype, frm.doc.name)
+                        frappe.dom.unfreeze();
                     }
                 },
             },

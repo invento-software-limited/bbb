@@ -355,6 +355,8 @@ def get_past_order_list(search_term, status, limit=3):
 def validate(doc, method):
     if not doc.customer:
         frappe.throw(_("You must select a customer before submit"), CustomerValidationError, title="Missing")
+    if doc.company == 'BBB Restaurant' and doc.docstatus == 0:
+        doc.status = 'Ordered'
 
 
 def get_tag_conditions(values):

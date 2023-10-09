@@ -429,7 +429,7 @@ erpnext.PointOfSale.Controller = class {
             frappe.utils.play_sound("error");
             return;
         }
-
+        
         this.frm.save(undefined, undefined, undefined, () => {
             frappe.show_alert({
                 message: __("There was an error saving the document."),
@@ -437,8 +437,11 @@ erpnext.PointOfSale.Controller = class {
             });
             frappe.utils.play_sound("error");
         }).then(() => {
+            // frappe.db.set_value(frm.doc.doctype, frm.doc.name, 'status', 'Ordered')
+            // this.print_receipt(this.frm);
+            // frappe.ui.toolbar.clear_cache();
             frappe.run_serially([
-                () => location.reload()
+                () => location.reload(),
                 // () => frappe.dom.freeze(),
                 // () => this.make_new_invoice(),
                 // () => frappe.dom.unfreeze(),
