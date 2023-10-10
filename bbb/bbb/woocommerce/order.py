@@ -73,18 +73,20 @@ def create_woocommerce_order(order):
 		doc.status = wc_status.get(order.get('status'))
 		doc.save()
 			
-	except:
-		doc = frappe.new_doc("Woocommerce Order")
-		doc.woocommerce_id = order.get('id')
-		doc.parent_id = order.get('parent_id')
-		doc.posting_date = nowdate()
-		doc.posting_time = nowtime()
-		doc.json_data = json.dumps(order)
-		doc.woocommerce_status = order.get('status')
-		doc.insert(ignore_permissions=1)
-		# doc.save()
-		doc.submit()
-		return doc
+	except Exception:
+		frappe.log_error(frappe.get_traceback(), "WooCommerce Error")
+		raise
+		# doc = frappe.new_doc("Woocommerce Order")
+		# doc.woocommerce_id = order.get('id')
+		# doc.parent_id = order.get('parent_id')
+		# doc.posting_date = nowdate()
+		# doc.posting_time = nowtime()
+		# doc.json_data = json.dumps(order)
+		# doc.woocommerce_status = order.get('status')
+		# doc.insert(ignore_permissions=1)
+		# # doc.save()
+		# doc.submit()
+		# return doc
 
 def update_stock_ledger(items, status, doc):
 	sl_entries = []
