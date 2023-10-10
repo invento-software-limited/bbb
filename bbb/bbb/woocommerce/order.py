@@ -70,11 +70,11 @@ def create_woocommerce_order(order):
 		doc = frappe.get_doc('Woocommerce Order', {'woocommerce_id': str(order.get('id'))})
 		doc.status = wc_status.get(order.get('status'))
 		doc.save()
-			
+		return doc	
 	except:
 		doc = frappe.new_doc("Woocommerce Order")
 		doc.woocommerce_id = order.get('id')
-		doc.parent_id = order.get('parent_id')
+		doc.parent_id = order.get('parent_id')		
 		doc.posting_date = nowdate()
 		doc.posting_time = nowtime()
 		doc.json_data = json.dumps(order)
