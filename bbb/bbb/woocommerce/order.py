@@ -67,26 +67,22 @@ def order(*args, **kwargs):
 def create_woocommerce_order(order):
 	wc_status = {'processing': "Ordered", 'cancelled': 'Cancelled', 'delivered': 'Fulfilled'}
 	try:
-		# wc_order, status = frappe.db.get_value("Woocommerce Order", {'woocommerce_id': str(order.get('id'))}, ['name', 'status'])
-		# if wc_order:
 		doc = frappe.get_doc('Woocommerce Order', {'woocommerce_id': str(order.get('id'))})
 		doc.status = wc_status.get(order.get('status'))
 		doc.save()
 			
-	except Exception:
-		frappe.log_error(frappe.get_traceback(), "WooCommerce Error")
-		raise
-		# doc = frappe.new_doc("Woocommerce Order")
-		# doc.woocommerce_id = order.get('id')
-		# doc.parent_id = order.get('parent_id')
-		# doc.posting_date = nowdate()
-		# doc.posting_time = nowtime()
-		# doc.json_data = json.dumps(order)
-		# doc.woocommerce_status = order.get('status')
-		# doc.insert(ignore_permissions=1)
-		# # doc.save()
-		# doc.submit()
-		# return doc
+	except:
+		doc = frappe.new_doc("Woocommerce Order")
+		doc.woocommerce_id = order.get('id')
+		doc.parent_id = order.get('parent_id')
+		doc.posting_date = nowdate()
+		doc.posting_time = nowtime()
+		doc.json_data = json.dumps(order)
+		doc.woocommerce_status = order.get('status')
+		doc.insert()
+		# doc.save()
+		doc.submit()
+		return doc
 
 def update_stock_ledger(items, status, doc):
 	sl_entries = []
