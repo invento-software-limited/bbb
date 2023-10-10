@@ -74,6 +74,7 @@ def create_woocommerce_order(order):
 		doc.save()
 			
 	except:
+		frappe.log_error(frappe.get_traceback(), "WooCommerce Error")
 		doc = frappe.new_doc("Woocommerce Order")
 		doc.woocommerce_id = order.get('id')
 		doc.parent_id = order.get('parent_id')
