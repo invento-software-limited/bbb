@@ -65,13 +65,14 @@ def order(*args, **kwargs):
 				return sle
 
 def create_woocommerce_order(order):
-	STATUS = {'processing': "Ordered", 'cancelled': 'Cancelled', 'delivered': 'Fulfilled'}
+	wc_status = {'processing': "Ordered", 'cancelled': 'Cancelled', 'delivered': 'Fulfilled'}
 	try:
-		wc_order, status = frappe.db.get_value("Woocommerce Order", {'woocommerce_id': str(order.get('id'))}, ['name', 'status'])
-		if wc_order:
-			doc = frappe.get_doc('Woocommerce Order', {'name': str(wc_order)})
-			doc.status = STATUS.get(order.get('status'))
-			doc.save()
+		# wc_order, status = frappe.db.get_value("Woocommerce Order", {'woocommerce_id': str(order.get('id'))}, ['name', 'status'])
+		# if wc_order:
+		doc = frappe.get_doc('Woocommerce Order', {'woocommerce_id': str(order.get('id'))})
+		doc.status = wc_status.get(order.get('status'))
+		doc.save()
+			
 	except:
 		doc = frappe.new_doc("Woocommerce Order")
 		doc.woocommerce_id = order.get('id')
