@@ -54,9 +54,9 @@ doctype_js = {
         'public/js/sales_invoice.js'
     ]
 }
-# doctype_list_js = {
-#     "Item": "public/js/items.js"
-# }
+doctype_list_js = {
+    "POS Invoice": "public/js/pos_invoice_list.js"
+}
 # doctype_tree_js = {"doctype" : "public/js/doctype_tree.js"}
 # doctype_calendar_js = {"doctype" : "public/js/doctype_calendar.js"}
 
@@ -147,7 +147,13 @@ doc_events = {
     },
     "User":{
         "validate": "bbb.bbb.user.validate"
-    }
+    },
+    "Stock Ledger Entry":{
+        "on_update": "bbb.bbb.controllers.utils.update_woocommerce_stock"
+    },
+    # "Bin":{
+    #     "on_update": "bbb.bbb.controllers.utils.update_woocommerce_stock"
+    # }
 
 }
 override_doctype_class = {
@@ -155,6 +161,7 @@ override_doctype_class = {
     "POS Invoice": "bbb.bbb.controllers.pos_invoice.CustomPOSInvoice",
     "Sales Order": "bbb.bbb.controllers.sales_order.CustomSalesOrder",
     "POS Closing Entry": "bbb.bbb.controllers.pos_closing_entry.CustomPOSClosingEntry",
+    # "Stock Ledger Entry": "bbb.bbb.controllers.stock_ledger_entry.CustomStockLedgerEntry",
     # "Delivery Note": "bbb.bbb.controllers.delivery_note.CustomDeliveryNote",
 }
 

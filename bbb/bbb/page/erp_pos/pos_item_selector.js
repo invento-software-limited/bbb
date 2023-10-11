@@ -24,9 +24,7 @@ erpnext.PointOfSale.ItemSelector = class {
 		this.wrapper.append(
 			`<section class="items-selector">
 				<div class="filter-section">
-<!--					<div class="label">${__(this.pos_profile)}</div>-->
-<!--					<div class="label"><span class="indicator-pill whitespace-nowrap blue"><span>${this.pos_profile}</span></span></div>-->
-
+					<div class="label">${__('All Items')}</div>
 					<div class="search-field"></div>
 					<div class="item-group-field"></div>
 				</div>
@@ -61,7 +59,7 @@ erpnext.PointOfSale.ItemSelector = class {
 		!item_group && (item_group = this.parent_item_group);
 
 		return frappe.call({
-			method: "bbb.bbb.restaurant.get_items",
+			method: "erpnext.selling.page.point_of_sale.point_of_sale.get_items",
 			freeze: true,
 			args: { start, page_length, price_list, item_group, search_term, pos_profile },
 		});
@@ -80,68 +78,56 @@ erpnext.PointOfSale.ItemSelector = class {
 	get_item_html(item) {
 		const me = this;
 		// eslint-disable-next-line no-unused-vars
-		const { item_image, serial_no, batch_no, barcode, actual_qty, mrp, stock_uom, price_list_rate, start_date, end_date, discount_amount, price_rule_tag } = item;
-		const indicator_color = actual_qty > 10 ? "green" : actual_qty <= 0 ? "red" : "orange";
+		const { item_image, serial_no, batch_no, barcode, actual_qty, stock_uom, price_list_rate } = item;
 		const precision = flt(price_list_rate, 2) % 1 != 0 ? 2 : 0;
-
+		let indicator_color;
 		let qty_to_display = actual_qty;
 
-		if (Math.round(qty_to_display) > 999) {
-			qty_to_display = Math.round(qty_to_display)/1000;
-			qty_to_display = qty_to_display.toFixed(1) + 'K';
+		if (item.is_stock_item) {
+			indicator_color = (actual_qty > 10 ? "green" : actual_qty <= 0 ? "red" : "orange");
+
+			if (Math.round(qty_to_display) > 999) {
+				qty_to_display = Math.round(qty_to_display)/1000;
+				qty_to_display = qty_to_display.toFixed(1) + 'K';
+			}
+		} else {
+			indicator_color = '';
+			qty_to_display = '';
 		}
 
 		function get_item_image_html() {
-			// if (!me.hide_images && item_image) {
-			// 	return `<div class="item-qty-pill">
-			// 				<span class="indicator-pill whitespace-nowrap ${indicator_color}">${qty_to_display}</span>
-			// 			</div>
-			// 			<div class="flex items-center justify-center h-32 border-b-grey text-6xl text-grey-100">
-			// 				<img
-			// 					onerror="cur_pos.item_selector.handle_broken_image(this)"
-			// 					class="h-full" src="${item_image}"
-			// 					alt="${frappe.get_abbr(item.item_name)}"
-			// 					style="object-fit: cover;">
-			// 			</div>`;
-			// } else {
-			// 	return `<div class="item-qty-pill">
-			// 				<span class="indicator-pill whitespace-nowrap ${indicator_color}">${qty_to_display}</span>
-			// 			</div>
-			// 			<div class="item-display abbr">${frappe.get_abbr(item.item_name)}</div>`;
-			// }
-
-					return `
-							<div class="item-display">
-								<div class="item-name">
-									${frappe.ellipsis(item.item_name, 500)}
-								</div>
-							</div>
-							<div class="item-qty-pill">
-<!--									<span class="indicator-pill whitespace-nowrap ${indicator_color}">${qty_to_display}</span>-->
-								<span class="indicator-pill whitespace-nowrap ${indicator_color}" style="height:17px"></span>
-							</div>`;
-
-		}
-		let tag = null
-		if(price_rule_tag){
-			tag = price_rule_tag.split(' ').join('INV');
+			if (!me.hide_images && item_image) {
+				return `<div class="item-qty-pill">
+							<span class="indicator-pill whitespace-nowrap ${indicator_color}">${qty_to_display}</span>
+						</div>
+						<div class="flex items-center justify-center h-32 border-b-grey text-6xl text-grey-100">
+							<img
+								onerror="cur_pos.item_selector.handle_broken_image(this)"
+								class="h-full" src="${item_image}"
+								alt="${frappe.get_abbr(item.item_name)}"
+								style="object-fit: cover;">
+						</div>`;
+			} else {
+				return `<div class="item-qty-pill">
+							<span class="indicator-pill whitespace-nowrap ${indicator_color}">${qty_to_display}</span>
+						</div>
+						<div class="item-display abbr">${frappe.get_abbr(item.item_name)}</div>`;
+			}
 		}
 
 		return (
 			`<div class="item-wrapper"
 				data-item-code="${escape(item.item_code)}" data-serial-no="${escape(serial_no)}"
-				data-batch-no="${escape(batch_no)}" data-uom="${escape(stock_uom)}" data-start-date="${escape(item.start_date)}"
-				data-end-date="${escape(item.end_date)}" data-discount-amount="${escape(item.discount_amount)}"
-				data-rate="${escape(price_list_rate || 0)}" data-mrp="${escape(price_list_rate || 0)}" data-tag="${escape(tag || '')}"
+				data-batch-no="${escape(batch_no)}" data-uom="${escape(stock_uom)}"
+				data-rate="${escape(price_list_rate || 0)}"
 				title="${item.item_name}">
 
 				${get_item_image_html()}
 
 				<div class="item-detail">
-				<!--
 					<div class="item-name">
 						${frappe.ellipsis(item.item_name, 18)}
-					</div>-->
+					</div>
 					<div class="item-rate">${format_currency(price_list_rate, item.currency, precision) || 0}</div>
 				</div>
 			</div>`
@@ -197,7 +183,6 @@ erpnext.PointOfSale.ItemSelector = class {
 
 	set_search_value(value) {
 		$(this.search_field.$input[0]).val(value).trigger("input");
-
 	}
 
 	bind_events() {
@@ -245,32 +230,20 @@ erpnext.PointOfSale.ItemSelector = class {
 			let batch_no = unescape($item.attr('data-batch-no'));
 			let serial_no = unescape($item.attr('data-serial-no'));
 			let uom = unescape($item.attr('data-uom'));
-			let mrp = unescape($item.attr('data-mrp'));
 			let rate = unescape($item.attr('data-rate'));
-			let title = unescape($item.attr('title'));
-			let start_date= unescape($item.attr('data-start-date'));
-			let end_date = unescape($item.attr('data-end-date'));
-			let discount_amount = unescape($item.attr('data-discount-amount'));
-			let tag = $item.attr('data-tag');
-			// console.log(start_date, end_date, item_discount_amount)
+
 			// escape(undefined) returns "undefined" then unescape returns "undefined"
 			batch_no = batch_no === "undefined" ? undefined : batch_no;
 			serial_no = serial_no === "undefined" ? undefined : serial_no;
 			uom = uom === "undefined" ? undefined : uom;
 			rate = rate === "undefined" ? undefined : rate;
-			mrp = mrp === "undefined" ? undefined : mrp;
-			title = title === "undefined" ? undefined : title;
-			start_date = start_date === "undefined" ? undefined : new Date(start_date);
-			end_date = end_date === "undefined" ? undefined : new Date(end_date);
-			discount_amount = discount_amount === "undefined" ? undefined : discount_amount;
-			tag = tag === "undefined" ? undefined : tag;
+
 			me.events.item_selected({
 				field: 'qty',
 				value: "+1",
-				item: { item_code, batch_no, serial_no, uom, rate, mrp, title, start_date, end_date, discount_amount, tag, update_rules: false},
-				item_quantity: 1
+				item: { item_code, batch_no, serial_no, uom, rate }
 			});
-			me.set_search_value('');
+			me.search_field.set_focus();
 		});
 
 		this.search_field.$input.on('input', (e) => {
@@ -340,7 +313,6 @@ erpnext.PointOfSale.ItemSelector = class {
 			}
 		}
 
-
 		this.get_items({ search_term })
 			.then(({ message }) => {
 				// eslint-disable-next-line no-unused-vars
@@ -355,10 +327,8 @@ erpnext.PointOfSale.ItemSelector = class {
 	}
 
 	add_filtered_item_to_cart() {
-		if(this.barcode_scanned){
-			this.$items_container.find(".item-wrapper").click();
-			this.barcode_scanned = false
-		}
+		this.$items_container.find(".item-wrapper").click();
+		this.set_search_value('');
 	}
 
 	resize_selector(minimize) {
@@ -371,12 +341,12 @@ erpnext.PointOfSale.ItemSelector = class {
 			this.$component.find('.search-field').css('margin', '0px var(--margin-sm)');
 
 		minimize ?
-			this.$component.css('grid-column', 'span 4 / span 4') :
-			this.$component.css('grid-column', 'span 2 / span 2');
+			this.$component.css('grid-column', 'span 2 / span 2') :
+			this.$component.css('grid-column', 'span 6 / span 6');
 
 		minimize ?
-			this.$items_container.css('grid-template-columns', 'repeat(2, minmax(0, 1fr))') :
-			this.$items_container.css('grid-template-columns', 'repeat(1, minmax(0, 1fr))');
+			this.$items_container.css('grid-template-columns', 'repeat(1, minmax(0, 1fr))') :
+			this.$items_container.css('grid-template-columns', 'repeat(4, minmax(0, 1fr))');
 	}
 
 	toggle_component(show) {
