@@ -17,9 +17,7 @@ frappe.ui.form.on('Stock Distribution', {
             });
         }
 		frm.set_value("total_percentage",total_percentage)
-		frm.set_df_property('download_distribute_excell', 'hidden', 0);
 	},
-
 	get_items_to_distribute: function(frm){
 		if (frm.doc.purchase_order){
 			frappe.call({
@@ -36,6 +34,8 @@ frappe.ui.form.on('Stock Distribution', {
 							row.item_name = item.item_name;
 							row.qty = item.qty;
 							row.rate = item.rate;
+							row.warehouse = item.warehouse;
+							row.uom = item.uom
 						});
 						frm.refresh_field('purchase_distribution_items');
 					}

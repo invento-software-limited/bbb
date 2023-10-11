@@ -11,6 +11,7 @@
   "supplier",
   "get_items_to_distribute",
   "download_distribute_excell",
+  "ignore_validation",
   "column_break_qzmun",
   "company",
   "posting_date",
@@ -105,9 +106,9 @@
    "fieldtype": "Column Break"
   },
   {
+   "depends_on": "eval:!doc.__islocal",
    "fieldname": "download_distribute_excell",
    "fieldtype": "Button",
-   "hidden": 1,
    "label": "Download Distribute In Excell"
   },
   {
@@ -146,12 +147,19 @@
    "fieldtype": "Link",
    "label": "Outlet Template",
    "options": "Outlet Template"
+  },
+  {
+   "default": "0",
+   "depends_on": "eval:!doc.__islocal",
+   "fieldname": "ignore_validation",
+   "fieldtype": "Check",
+   "label": "Ignore Validation"
   }
  ],
  "index_web_pages_for_search": 1,
  "is_submittable": 1,
  "links": [],
- "modified": "2023-09-20 14:00:25.874797",
+ "modified": "2023-10-11 09:37:25.057157",
  "modified_by": "Administrator",
  "module": "Bbb",
  "name": "Stock Distribution",
