@@ -60,8 +60,8 @@ class StockDistribution(Document):
                             excell_qty = excell_dict.get(item.get("item_code"))
                             pr_qty = item.get("qty")
                             if excell_qty != pr_qty:
-                                remain = excell_qty - pr_qty
-                                single_message = "Quantity Isn't Equal For Item {item} need {qt_y} \n, ".format(item=item.get("item_code"),qt_y = remain)
+                                remain = pr_qty - excell_qty
+                                single_message = "Quantity Isn't Equal For Item {item} need {qt_y} in excell \n, ".format(item=item.get("item_code"),qt_y = remain)
                                 message += single_message
                         else:
                             frappe.throw("Item {} Isn't Available In Distribution Excell".format(item.get("item_code")))

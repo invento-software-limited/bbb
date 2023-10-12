@@ -93,6 +93,7 @@
    "read_only": 1
   },
   {
+   "depends_on": "eval:doc.docstatus != 1",
    "fieldname": "get_items_to_distribute",
    "fieldtype": "Button",
    "label": "Get Items To Distribute"
@@ -125,6 +126,7 @@
    "options": "Purchase Receipt"
   },
   {
+   "depends_on": "eval:doc.docstatus != 1",
    "fieldname": "get_purchase_receipt",
    "fieldtype": "Button",
    "label": "Get Purchase Receipt"
@@ -159,7 +161,7 @@
  "index_web_pages_for_search": 1,
  "is_submittable": 1,
  "links": [],
- "modified": "2023-10-11 09:37:25.057157",
+ "modified": "2023-10-12 10:55:38.093652",
  "modified_by": "Administrator",
  "module": "Bbb",
  "name": "Stock Distribution",
