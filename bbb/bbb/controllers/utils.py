@@ -505,7 +505,7 @@ def update_woocommerce_stock(doc, method):
         bin = frappe.db.get_value("Bin", {'item_code': doc.item_code, 'warehouse': doc.warehouse}, 'actual_qty', as_dict=1)
 
         if woocommerce_settings.warehouse == doc.warehouse:
-            pre_qty = bin.get('actual_qty') or 0
+            pre_qty = bin.get('actual_qty') if bin else 0
             incoming_value = doc.actual_qty
             woocommerce_id = frappe.db.get_value('Item', doc.item_code, 'woocommerce_id')
 
