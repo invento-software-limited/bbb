@@ -22,87 +22,111 @@ class StockDistribution(Document):
                     total_predict += x.get("percentage")
         if total_predict != 100:
             frappe.throw("Outlet Prediction total must be 100")
-    
+        
     def on_submit(self):
-        if self.upload_distribution_excell and self.against_purchase_receipt:
-            # File Path
+        if self.ignore_validation:
+            self.stock_entry()
+        else:
+            if self.upload_distribution_excell and self.against_purchase_receipt:
+                excel_file_path = get_site_directory_path() + self.upload_distribution_excell
+                excell_dict = {}
+                excell_item_list = []
+                grand_total = 0
+                message = ""
+                excell_data = []
+                workbook = openpyxl.load_workbook(excel_file_path, data_only=True)
+                sheet = workbook.active
+                labels = [cell.value for cell in sheet[1]]
+                for row in sheet.iter_rows(min_row=2, values_only=True):
+                    item_code = "{}".format(row[0])
+                    excell_item_list.append(item_code)
+                    total = 0
+                    row_data = {}
+                    for x in row[1:]:
+                        total += x
+                        grand_total += x
+                    for i, value in enumerate(row):
+                        label = labels[i]
+                        row_data[label] = value
+                    excell_data.append(row_data)
+                    excell_dict[item_code] = total
+                    
+                purchase_receipt = frappe.get_doc("Purchase Receipt",self.against_purchase_receipt)
+                if purchase_receipt.items:
+                    for item in purchase_receipt.items:
+                        if item.get("item_code") in excell_item_list:
+                            excell_qty = excell_dict.get(item.get("item_code"))
+                            pr_qty = item.get("qty")
+                            if excell_qty != pr_qty:
+                                remain = pr_qty - excell_qty
+                                single_message = "Quantity Isn't Equal For Item {item} need {qt_y} in excell \n, ".format(item=item.get("item_code"),qt_y = remain)
+                                message += single_message
+                        else:
+                            frappe.throw("Item {} Isn't Available In Distribution Excell".format(item.get("item_code")))
+                            
+                if grand_total != purchase_receipt.total_qty:
+                    frappe.throw(message)
+                    
+                self.create_stock_transfer(purchase_receipt.items,excell_data,purchase_receipt.name)
+            else:
+                frappe.throw("Please Upload Distribution excell And Set Against Purchase Receipt")
+                
+    def stock_entry(self):
+        if self.upload_distribution_excell:
             excel_file_path = get_site_directory_path() + self.upload_distribution_excell
-            
-            # Structure Excell Data
-            excell_dict = {}
-            excell_item_list = []
-            grand_total = 0
-            message = ""
             excell_data = []
             workbook = openpyxl.load_workbook(excel_file_path, data_only=True)
             sheet = workbook.active
             labels = [cell.value for cell in sheet[1]]
             for row in sheet.iter_rows(min_row=2, values_only=True):
                 item_code = "{}".format(row[0])
-                excell_item_list.append(item_code)
                 total = 0
                 row_data = {}
                 for x in row[1:]:
                     total += x
-                    grand_total += x
                 for i, value in enumerate(row):
                     label = labels[i]
                     row_data[label] = value
                 excell_data.append(row_data)
-                excell_dict[item_code] = total
-                
-            purchase_receipt = frappe.get_doc("Purchase Receipt",self.against_purchase_receipt)
-            if purchase_receipt.items:
-                for item in purchase_receipt.items:
-                    if item.get("item_code") in excell_item_list:
-                        excell_qty = excell_dict.get(item.get("item_code"))
-                        pr_qty = item.get("qty")
-                        if excell_qty != pr_qty:
-                            remain = excell_qty - pr_qty
-                            single_message = "Quantity Isn't Equal For Item {item} need {qt_y} \n, ".format(item=item.get("item_code"),qt_y = remain)
-                            message += single_message
-                    else:
-                        frappe.throw("Item {} Isn't Available In Distribution Excell".format(item.get("item_code")))
-                        
-            if grand_total != purchase_receipt.total_qty:
-                frappe.throw(message)
-                
-            self.create_stock_transfer(purchase_receipt,excell_data)
         else:
-            frappe.throw("Please Upload Distribution excell And Set Against Purchase Receipt")
-                
-    def create_stock_transfer(self,purchase_receipt,excell_data):
-        if purchase_receipt.items and excell_data:
-            company = purchase_receipt.company
-            items = []
-            for item in purchase_receipt.items:
-                for outlet in excell_data:
-                    if item.get("item_code") == str(outlet.get("Item Code")):
-                        for key,value in outlet.items():
-                            if key != "Item Code":
-                                final = ""
-                                warehouse = key.lower().replace("_"," ").replace("&","-").title()
-                                up = warehouse.split("-")
-                                final += up[0]
-                                final += "-"
-                                final += up[1].upper()
-                                data_dict = {}
-                                data_dict["item_code"] = item.get("item_code")
-                                data_dict["qty"] = value
-                                data_dict["s_warehouse"] = item.get("warehouse")
-                                data_dict["t_warehouse"] = final
-                                data_dict["uom"] = item.get("uom")
-                                data_dict["reference_purchase_receipt"] = purchase_receipt.name
-                                if value > 0:
-                                    items.append(data_dict)
-            stock_entry = frappe.get_doc({
-                "doctype": "Stock Entry",
-                "stock_entry_type": "Material Transfer",  # You can set the purpose as per your use case
-                "company": company,  # Replace with the actual company name
-                "items": items
-            })
-            stock_entry.save(ignore_permissions=True)
+            frappe.throw("Upload Distribution Excell")
+            
+        self.create_stock_transfer(self.purchase_distribution_items,excell_data)
+        
+    def create_stock_transfer(self,purchase_receipt,excell_data,purchase_receipt_reference = None):
+        sd = self.name
+        company = self.company
+        items = []
+        for item in purchase_receipt:
+            for outlet in excell_data:
+                if item.get("item_code") == str(outlet.get("Item Code")):
+                    for key,value in outlet.items():
+                        if key != "Item Code" and value > 0:
+                            final = ""
+                            warehouse = key.lower().replace("_"," ").replace("&","-").title()
+                            up = warehouse.split("-")
+                            final += up[0]
+                            final += "-"
+                            final += up[1].upper()
+                            data_dict = {}
+                            data_dict["item_code"] = item.get("item_code")
+                            data_dict["qty"] = value
+                            data_dict["s_warehouse"] = item.get("warehouse")
+                            data_dict["t_warehouse"] = final
+                            data_dict["uom"] = item.get("uom")
+                            data_dict["reference_purchase_receipt"] = purchase_receipt_reference if purchase_receipt_reference else ""
+                            items.append(data_dict)
+                            
+        stock_entry = frappe.get_doc({
+            "doctype": "Stock Entry",
+            "stock_entry_type": "Material Transfer",  # You can set the purpose as per your use case
+            "stock_distribution" : sd,
+            "company": company,  # Replace with the actual company name
+            "items": items
+        })
+        stock_entry.save(ignore_permissions=True)
 
+        
 # Fetch Purchase Order Items
 @frappe.whitelist()
 def get_purchase_order_items(po_number):
@@ -114,7 +138,9 @@ def get_purchase_order_items(po_number):
             'item_code': item.item_code,
             'item_name': item.item_name,
             'qty': item.qty,
-            'rate': item.rate
+            'rate': item.rate,
+            'warehouse':item.warehouse,
+            'uom' : item.uom
         })
     
     return items
@@ -139,19 +165,34 @@ def distribution_excell_generate(doc):
         doc = json.loads(doc)
     except:
         pass
-    
-    data = []
+    data = caluclate_warehouse_percentage_wise_distribution(doc.get("purchase_distribution_items"),doc.get("outlet_selection_table"))
     columns = get_columns(doc)
-    for item in doc.get("purchase_distribution_items"):
+        
+    name = "distribute-"
+    if doc.get("purchase_order"):
+        name += doc.get("purchase_order")
+    else:
+        random_word = ''.join(random.choice(string.ascii_lowercase) for _ in range(8))
+        name += random_word
+    file_name = '{}.xlsx'.format(name)
+    generate_excel_and_download(columns, data, file_name, height=20)
+    
+    return "Ok"
+    
+def caluclate_warehouse_percentage_wise_distribution(items,warehouse_list,source=None):
+    data = []
+    for item in items:
         data_dict = {}
         single_data = {}
         total_wr_wise = 0
+        if source:
+            data_dict["source"] = item.warehouse
         data_dict["item_code"] = item.get("item_code")
         max_percentage = -1  # Assuming all percentages are non-negative
         warehouse_with_max_percentage = None
         
         # loop throw outlet percentage
-        for percentage in doc.get("outlet_selection_table"):
+        for percentage in warehouse_list:
             warehouse = percentage.get("warehouse").lower().replace(" ","_").replace("-","&")
             out_percentage = percentage.get("percentage")
             round_am = round((float(out_percentage) / 100) * float(item.get("qty")))
@@ -175,17 +216,7 @@ def distribution_excell_generate(doc):
         
         data.append(data_dict)
         
-    name = "distribute-"
-    if doc.get("purchase_order"):
-        name += doc.get("purchase_order")
-    else:
-        random_word = ''.join(random.choice(string.ascii_lowercase) for _ in range(8))
-        name += random_word
-    file_name = '{}.xlsx'.format(name)
-    generate_excel_and_download(columns, data, file_name, height=20)
-    
-    return "Ok"
-    
+    return data
         
 def get_columns(doc):
     columns =  [
