@@ -22,9 +22,7 @@ class StockDistribution(Document):
                     total_predict += x.get("percentage")
         if total_predict != 100:
             frappe.throw("Outlet Prediction total must be 100")
-            
         
-    
     def on_submit(self):
         if self.ignore_validation:
             self.stock_entry()
@@ -96,6 +94,7 @@ class StockDistribution(Document):
         self.create_stock_transfer(self.purchase_distribution_items,excell_data)
         
     def create_stock_transfer(self,purchase_receipt,excell_data,purchase_receipt_reference = None):
+        sd = self.name
         company = self.company
         items = []
         for item in purchase_receipt:
@@ -121,6 +120,7 @@ class StockDistribution(Document):
         stock_entry = frappe.get_doc({
             "doctype": "Stock Entry",
             "stock_entry_type": "Material Transfer",  # You can set the purpose as per your use case
+            "stock_distribution" : sd,
             "company": company,  # Replace with the actual company name
             "items": items
         })
@@ -165,19 +165,34 @@ def distribution_excell_generate(doc):
         doc = json.loads(doc)
     except:
         pass
-    
-    data = []
+    data = caluclate_warehouse_percentage_wise_distribution(doc.get("purchase_distribution_items"),doc.get("outlet_selection_table"))
     columns = get_columns(doc)
-    for item in doc.get("purchase_distribution_items"):
+        
+    name = "distribute-"
+    if doc.get("purchase_order"):
+        name += doc.get("purchase_order")
+    else:
+        random_word = ''.join(random.choice(string.ascii_lowercase) for _ in range(8))
+        name += random_word
+    file_name = '{}.xlsx'.format(name)
+    generate_excel_and_download(columns, data, file_name, height=20)
+    
+    return "Ok"
+    
+def caluclate_warehouse_percentage_wise_distribution(items,warehouse_list,source=None):
+    data = []
+    for item in items:
         data_dict = {}
         single_data = {}
         total_wr_wise = 0
+        if source:
+            data_dict["source"] = item.warehouse
         data_dict["item_code"] = item.get("item_code")
         max_percentage = -1  # Assuming all percentages are non-negative
         warehouse_with_max_percentage = None
         
         # loop throw outlet percentage
-        for percentage in doc.get("outlet_selection_table"):
+        for percentage in warehouse_list:
             warehouse = percentage.get("warehouse").lower().replace(" ","_").replace("-","&")
             out_percentage = percentage.get("percentage")
             round_am = round((float(out_percentage) / 100) * float(item.get("qty")))
@@ -201,17 +216,7 @@ def distribution_excell_generate(doc):
         
         data.append(data_dict)
         
-    name = "distribute-"
-    if doc.get("purchase_order"):
-        name += doc.get("purchase_order")
-    else:
-        random_word = ''.join(random.choice(string.ascii_lowercase) for _ in range(8))
-        name += random_word
-    file_name = '{}.xlsx'.format(name)
-    generate_excel_and_download(columns, data, file_name, height=20)
-    
-    return "Ok"
-    
+    return data
         
 def get_columns(doc):
     columns =  [

@@ -68,7 +68,6 @@ frappe.ui.form.on('Stock Distribution', {
 		var total_percentage = 0;
 		if (frm.doc.outlet_selection_table){
 			$.each(frm.doc.outlet_selection_table, function(index, row){
-				console.log("ppp")
 				total_percentage += row.percentage || 0;
 			});
 		}

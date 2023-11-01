@@ -18,6 +18,7 @@
   "outlet_template",
   "item_and_outlet_selection_section",
   "purchase_distribution_items",
+  "total_qty",
   "column_break_bkkrz",
   "outlet_selection_table",
   "total_percentage",
@@ -156,12 +157,20 @@
    "fieldname": "ignore_validation",
    "fieldtype": "Check",
    "label": "Ignore Validation"
+  },
+  {
+   "depends_on": "eval: doc.purchase_distribution_items",
+   "fetch_from": "purchase_order.total_qty",
+   "fieldname": "total_qty",
+   "fieldtype": "Float",
+   "label": "Total Qty",
+   "read_only": 1
   }
  ],
  "index_web_pages_for_search": 1,
  "is_submittable": 1,
  "links": [],
- "modified": "2023-10-12 10:55:38.093652",
+ "modified": "2023-11-01 15:40:42.177463",
  "modified_by": "Administrator",
  "module": "Bbb",
  "name": "Stock Distribution",
