@@ -22,7 +22,12 @@ class StockDistribution(Document):
                     total_predict += x.get("percentage")
         if total_predict != 100:
             frappe.throw("Outlet Prediction total must be 100")
-        
+
+        message = "Stock Distribution is Already Created With {order} Purchase Order".format(order=self.purchase_order)
+        sd = frappe.get_list("Stock Distribution" , filters={"purchase_order" : self.purchase_order , "docstatus" : 1} , fields=["name"])
+        if sd:
+            frappe.msgprint(str(message))
+            
     def on_submit(self):
         if self.ignore_validation:
             self.stock_entry()
