@@ -22,7 +22,7 @@ class StockDistribution(Document):
                     total_predict += x.get("percentage")
         if total_predict != 100:
             frappe.throw("Outlet Prediction total must be 100")
-        
+            
     def on_submit(self):
         if self.ignore_validation:
             self.stock_entry()
