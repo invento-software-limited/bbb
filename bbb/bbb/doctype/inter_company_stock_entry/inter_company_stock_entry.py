@@ -13,6 +13,13 @@ class ValidationError(frappe.ValidationError):
 
 class InterCompanyStockEntry(Document):
 	def validate(self):
+		source_company_cost_center = frappe.get_cached_value("Company", self.source_company, "cost_center")
+		target_company_cost_center = frappe.get_cached_value("Company", self.target_company, "cost_center")
+  
+		if not target_company_cost_center:
+			frappe.throw(_(f"Cost Center {source_company_cost_center} does not belong to {self.target_company}"), title=_("Validation Error"), exc=ValidationError)
+			return False
+
 		if self.source_company == self.target_company:
 			frappe.throw(_("Please set different Company"), title=_("Validation Error"), exc=ValidationError)
 			return False
@@ -56,7 +63,8 @@ def make_material_issue(doc):
 			'basic_rate' : item.basic_rate,
 			'stock_uom' : item.stock_uom,
 			'uom': item.uom,
-			's_warehouse': doc.source_warehouse
+			's_warehouse': doc.source_warehouse,
+			'cost_center': frappe.get_cached_value("Company", doc.source_company, "cost_center")
 		})
 	stock_entry.save()
 	stock_entry.submit()
@@ -79,7 +87,8 @@ def make_material_receipt(doc):
 			'basic_rate' : item.basic_rate,
 			'stock_uom' : item.stock_uom,
 			'uom': item.uom,
-			't_warehouse': doc.target_warehouse
+			't_warehouse': doc.target_warehouse,
+			'cost_center': frappe.get_cached_value("Company", doc.target_company, "cost_center")
 		})
 	stock_entry.save()
 	stock_entry.submit()
