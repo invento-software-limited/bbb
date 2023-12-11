@@ -106,6 +106,19 @@ frappe.ui.form.on('Stock Distribution', {
 		}else{
 			frappe.throw("Total Distribution Percentage Not Equal 100 ")
 		}
+	},
+	upload_distribution_excell : function(frm) {
+		if(frm.doc.upload_distribution_excell) {
+			frappe.call({
+				method: 'bbb.bbb.doctype.stock_distribution.stock_distribution.get_total_from_upload_excell',
+				args: {
+					excell: frm.doc.upload_distribution_excell
+				},
+				callback: function(response) {
+					frm.set_value("actual_distribute_qty",response.message)
+				}
+			});
+		}
 	}
 });
 
