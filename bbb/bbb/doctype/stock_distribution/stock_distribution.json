@@ -1,7 +1,7 @@
 {
  "actions": [],
  "allow_rename": 1,
- "autoname": "format:{YYYY}-{####}",
+ "autoname": "format:SD-{YYYY}-{####}",
  "creation": "2023-09-11 12:15:23.815790",
  "doctype": "DocType",
  "editable_grid": 1,
@@ -15,10 +15,12 @@
   "column_break_qzmun",
   "company",
   "posting_date",
+  "expected_delivery_date",
   "outlet_template",
   "item_and_outlet_selection_section",
   "purchase_distribution_items",
   "total_qty",
+  "actual_distribute_qty",
   "column_break_bkkrz",
   "outlet_selection_table",
   "total_percentage",
@@ -107,7 +109,7 @@
    "fieldtype": "Column Break"
   },
   {
-   "depends_on": "eval:!doc.__islocal",
+   "depends_on": "eval:!doc.__islocal && doc.docstatus === 0;",
    "fieldname": "download_distribute_excell",
    "fieldtype": "Button",
    "label": "Download Distribute In Excell"
@@ -161,14 +163,26 @@
    "fetch_from": "purchase_order.total_qty",
    "fieldname": "total_qty",
    "fieldtype": "Float",
-   "label": "Total Qty",
+   "label": "Planned Distributed Qty",
    "read_only": 1
+  },
+  {
+   "depends_on": "eval:doc.upload_distribution_excell",
+   "fieldname": "actual_distribute_qty",
+   "fieldtype": "Float",
+   "label": "Actual Distribute Qty ",
+   "read_only": 1
+  },
+  {
+   "fieldname": "expected_delivery_date",
+   "fieldtype": "Date",
+   "label": "Expected Delivery Date"
   }
  ],
  "index_web_pages_for_search": 1,
  "is_submittable": 1,
  "links": [],
- "modified": "2023-11-08 16:51:06.495978",
+ "modified": "2023-12-11 11:09:58.881070",
  "modified_by": "Administrator",
  "module": "Bbb",
  "name": "Stock Distribution",
