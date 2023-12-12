@@ -89,7 +89,7 @@
         "name": "User-outlet",
         "no_copy": 0,
         "non_negative": 0,
-        "options": "POS Profile",
+        "options": "Warehouse",
         "parent": null,
         "parentfield": null,
         "parenttype": null,
