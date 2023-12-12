@@ -70,7 +70,7 @@
         "fetch_from": "pos_profile.warehouse",
         "fetch_if_empty": 0,
         "fieldname": "outlet",
-        "fieldtype": "Data",
+        "fieldtype": "Link",
         "hidden": 0,
         "hide_border": 0,
         "hide_days": 0,
