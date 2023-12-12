@@ -531,3 +531,27 @@ def get_restaurant_order_list():
     order_list = []
     order_list = frappe.db.get_all(doctype='POS Invoice', filters={'status': 'Ordered'}, fields=['name', 'restaurant_table_number', 'total_qty', 'rounded_total'])
     return order_list
+
+
+from frappe.model.mapper import get_mapped_doc
+@frappe.whitelist()
+def make_stock_entry(source_name, target_doc=None):
+
+    def update_item(source_doc, target_doc, source_parent):
+        target_doc.qty = flt(source_doc.transfer_qty_from_stock_distribution) - flt(source_doc.qty)
+        target_doc.transfer_qty_from_stock_distribution = flt(source_doc.transfer_qty_from_stock_distribution) - flt(source_doc.qty)
+
+    doclist = get_mapped_doc(
+        "Stock Entry",
+        source_name,
+        {
+            "Stock Entry": {"doctype": "Stock Entry", "validation": {"docstatus": ["=", 1]}},
+            "Stock Entry Detail": {
+                "doctype": "Stock Entry Detail",
+                "postprocess": update_item,
+                "condition": lambda doc: doc.qty > 0,
+            },
+        },
+        target_doc
+    )
+    return doclist

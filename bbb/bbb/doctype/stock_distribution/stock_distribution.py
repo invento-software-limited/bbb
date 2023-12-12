@@ -11,6 +11,7 @@ from openpyxl.utils import get_column_letter
 from openpyxl.styles import Font, PatternFill, Alignment
 import random
 import string
+import pandas as pd
 
 class StockDistribution(Document):
     
@@ -20,8 +21,22 @@ class StockDistribution(Document):
             for x in self.outlet_selection_table:
                 if x.get("percentage"):
                     total_predict += x.get("percentage")
+                    self.send_system_notification_to_outlet_manager(x.get("warehouse"))
         if total_predict != 100:
             frappe.throw("Outlet Prediction total must be 100")
+        
+    def send_system_notification_to_outlet_manager(self,warehouse):
+            outlet_manager = frappe.get_value("User",{"outlet" : warehouse},"name")
+            if outlet_manager:
+                notification = frappe.new_doc('Notification Log')
+                notification.type = 'Alert'
+                notification.document_type = self.doctype
+                notification.document_name = self.name
+                notification.subject = 'New Stock coming on {date}'.format(date= frappe.utils.formatdate(self.expected_delivery_date))
+                notification.email_content = 'There Is a new stock comming from distribution {dis} to outlet {outlet}'.format(dis=self.name,outlet=warehouse)
+                notification.from_user = frappe.session.user
+                notification.for_user = outlet_manager
+                notification.insert(ignore_permissions=True)
             
     def on_submit(self):
         if self.ignore_validation:
@@ -32,7 +47,7 @@ class StockDistribution(Document):
                 excell_dict = {}
                 excell_item_list = []
                 grand_total = 0
-                message = ""
+                message = "In Excell Qty Isn't Equal For Item "
                 excell_data = []
                 workbook = openpyxl.load_workbook(excel_file_path, data_only=True)
                 sheet = workbook.active
@@ -59,7 +74,7 @@ class StockDistribution(Document):
                             pr_qty = item.get("qty")
                             if excell_qty != pr_qty:
                                 remain = pr_qty - excell_qty
-                                single_message = "Quantity Isn't Equal For Item {item} need {qt_y} in excell \n, ".format(item=item.get("item_code"),qt_y = remain)
+                                single_message = "<b>{item}</b> need <b>{qt_y}</b>\n, ".format(item=item.get("item_code"),qt_y = remain)
                                 message += single_message
                         else:
                             frappe.throw("Item {} Isn't Available In Distribution Excell".format(item.get("item_code")))
@@ -97,6 +112,7 @@ class StockDistribution(Document):
         sd = self.name
         company = self.company
         items = []
+        warehouses= []
         for item in purchase_receipt:
             for outlet in excell_data:
                 if item.get("item_code") == str(outlet.get("Item Code")):
@@ -108,23 +124,32 @@ class StockDistribution(Document):
                             final += up[0]
                             final += "-"
                             final += up[1].upper()
+                            warehouses.append(final)
                             data_dict = {}
                             data_dict["item_code"] = item.get("item_code")
                             data_dict["qty"] = value
+                            data_dict["transfer_qty_from_stock_distribution"] = value
                             data_dict["s_warehouse"] = item.get("warehouse")
                             data_dict["t_warehouse"] = final
                             data_dict["uom"] = item.get("uom")
                             data_dict["reference_purchase_receipt"] = purchase_receipt_reference if purchase_receipt_reference else ""
                             items.append(data_dict)
-                            
-        stock_entry = frappe.get_doc({
-            "doctype": "Stock Entry",
-            "stock_entry_type": "Material Transfer",  # You can set the purpose as per your use case
-            "stock_distribution" : sd,
-            "company": company,  # Replace with the actual company name
-            "items": items
-        })
-        stock_entry.save(ignore_permissions=True)
+        
+        # frappe.msgprint((str(items)))
+        for x in set(warehouses):
+            update_items = []
+            for y in items:
+                if x == y.get("t_warehouse"):
+                    update_items.append(y)
+                    
+            stock_entry = frappe.get_doc({
+                "doctype": "Stock Entry",
+                "stock_entry_type": "Material Transfer",  # You can set the purpose as per your use case
+                "stock_distribution" : sd,
+                "company": company,  # Replace with the actual company name
+                "items": update_items
+            })
+            stock_entry.save(ignore_permissions=True)
 
         
 # Fetch Purchase Order Items
@@ -303,3 +328,22 @@ def get_purchase_receipt(purchase_order):
     if receipt and len(receipt) <= 1:
         return receipt[0][0]
     
+    
+@frappe.whitelist()
+def get_total_from_upload_excell(excell):
+    if excell:
+        file_path = get_site_directory_path() + excell
+        # Load the workbook
+        workbook = openpyxl.load_workbook(file_path)
+        sheet = workbook.active
+        exclude_column_name = "Item Code"
+        total_sum = 0
+        for row in sheet.iter_rows(min_row=2, max_row=sheet.max_row, min_col=1, max_col=sheet.max_column):
+            for cell in row:
+                if sheet.cell(1, cell.column).value != exclude_column_name:
+                    total_sum += cell.value if cell.value is not None else 0
+
+        print("Total Sum (excluding columns with name '{}'): {}".format(exclude_column_name, total_sum))
+        workbook.close()
+        
+        return total_sum
