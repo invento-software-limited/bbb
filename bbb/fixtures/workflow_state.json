@@ -70,5 +70,17 @@
   "parenttype": null,
   "style": "Danger",
   "workflow_state_name": "Cancelled"
+ },
+ {
+  "docstatus": 0,
+  "doctype": "Workflow State",
+  "icon": "",
+  "modified": "2023-12-10 16:11:46.339957",
+  "name": "Partially Completed",
+  "parent": null,
+  "parentfield": null,
+  "parenttype": null,
+  "style": "Success",
+  "workflow_state_name": "Partially Completed"
  }
 ]
