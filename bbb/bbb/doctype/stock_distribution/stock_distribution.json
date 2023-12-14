@@ -120,6 +120,7 @@
    "label": "Upload Distribution In Excell"
   },
   {
+   "depends_on": "eval:!doc.ignore_validation",
    "fieldname": "against_purchase_receipt",
    "fieldtype": "Link",
    "in_list_view": 1,
@@ -128,7 +129,7 @@
    "options": "Purchase Receipt"
   },
   {
-   "depends_on": "eval:doc.docstatus != 1",
+   "depends_on": "eval:doc.docstatus != 1 && !doc.ignore_validation",
    "fieldname": "get_purchase_receipt",
    "fieldtype": "Button",
    "label": "Get Purchase Receipt"
@@ -182,7 +183,7 @@
  "index_web_pages_for_search": 1,
  "is_submittable": 1,
  "links": [],
- "modified": "2023-12-11 11:09:58.881070",
+ "modified": "2023-12-14 12:43:02.398506",
  "modified_by": "Administrator",
  "module": "Bbb",
  "name": "Stock Distribution",
