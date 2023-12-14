@@ -125,6 +125,8 @@ class StockDistribution(Document):
                             final += "-"
                             final += up[1].upper()
                             warehouses.append(final)
+                             
+                            # Create Stock Entry Data
                             data_dict = {}
                             data_dict["item_code"] = item.get("item_code")
                             data_dict["qty"] = value
@@ -147,6 +149,7 @@ class StockDistribution(Document):
                 "stock_entry_type": "Material Transfer",  # You can set the purpose as per your use case
                 "stock_distribution" : sd,
                 "company": company,  # Replace with the actual company name
+                "to_warehouse" : x,
                 "items": update_items
             })
             stock_entry.save(ignore_permissions=True)
@@ -324,7 +327,7 @@ def get_site_directory_path():
 def get_purchase_receipt(purchase_order):
     receipt = frappe.db.sql("""select pr.name from `tabPurchase Receipt Item` as pri 
                                 left join `tabPurchase Receipt` as pr on pri.parent = pr.name 
-                                    where pri.purchase_order = '{}' group by pr.name""".format(purchase_order))
+                                    where pri.purchase_order = '{}' and pr.docstatus = 1 group by pr.name""".format(purchase_order))
     if receipt and len(receipt) <= 1:
         return receipt[0][0]
     
