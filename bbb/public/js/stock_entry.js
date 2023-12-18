@@ -15,8 +15,10 @@ frappe.ui.form.on('Stock Entry', {
         let transfered_qty = 0;
         if (frm.doc.items) {
             frm.doc.items.forEach((d) => {
-                if (d.qty > d.transfer_qty_from_stock_distribution) {
-                    frappe.throw(`For Item <b>${d.item_code}</b> Accepted qty cannot greater then transfer qty`)
+                if (frm.doc.stock_distribution) {
+                    if (d.qty > d.transfer_qty_from_stock_distribution) {
+                        frappe.throw(`For Item <b>${d.item_code}</b> Accepted qty cannot greater then transfer qty`)
+                    }
                 }
                 accepted_qty += d.qty
                 transfered_qty += d.transfer_qty_from_stock_distribution
@@ -26,13 +28,14 @@ frappe.ui.form.on('Stock Entry', {
         frm.set_value("total_accepted_qty",accepted_qty)
     },
     validate: function(frm) {
-        
         let accepted_qty = 0;
         let transfered_qty = 0;
         if (frm.doc.items) {
             frm.doc.items.forEach((d) => {
-                if (d.qty > d.transfer_qty_from_stock_distribution) {
-                    frappe.throw(`For Item <b>${d.item_code}</b> Accepted qty cannot greater then transfer qty`)
+                if (frm.doc.stock_distribution) {
+                    if (d.qty > d.transfer_qty_from_stock_distribution) {
+                        frappe.throw(`For Item <b>${d.item_code}</b> Accepted qty cannot greater then transfer qty`)
+                    }
                 }
                 accepted_qty += d.qty
                 transfered_qty += d.transfer_qty_from_stock_distribution
@@ -48,16 +51,14 @@ frappe.ui.form.on('Stock Entry', {
 });
 
 function removeRowsWithZeroQty(frm) {
-    // Get the child table data
+    console.log("oooo")
     var items = frm.doc.items || [];
 
-    // Iterate through the rows in reverse order
     for (var i = items.length - 1; i >= 0; i--) {
-        var qty = flt(items[i].qty); // Assuming qty is a float field, adjust as needed
-
-        // Remove the row if quantity is 0
+        var qty = flt(items[i].qty);
         if (qty === 0) {
             frm.get_field('items').grid.grid_rows[i].remove();
+            frm.refresh_field("items");
         }
     }
 }

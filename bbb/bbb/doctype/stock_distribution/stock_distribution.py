@@ -2,6 +2,7 @@
 # For license information, please see license.txt
 
 import frappe
+from frappe import _
 import json
 from frappe.model.document import Document
 import os
@@ -21,7 +22,7 @@ class StockDistribution(Document):
             for x in self.outlet_selection_table:
                 if x.get("percentage"):
                     total_predict += x.get("percentage")
-                    self.send_system_notification_to_outlet_manager(x.get("warehouse"))
+                self.send_system_notification_to_outlet_manager(x.get("warehouse"))
         if total_predict != 100:
             frappe.throw("Outlet Prediction total must be 100")
         
@@ -33,7 +34,7 @@ class StockDistribution(Document):
                 notification.document_type = self.doctype
                 notification.document_name = self.name
                 notification.subject = 'New Stock coming on {date}'.format(date= frappe.utils.formatdate(self.expected_delivery_date))
-                notification.email_content = 'There Is a new stock comming from distribution {dis} to outlet {outlet}'.format(dis=self.name,outlet=warehouse)
+                notification.email_content = 'There Is a new stock comming from distribution <a href="/app/stock-distribution/{dis}" >{dis}</a>, to outlet {outlet}'.format(dis=self.name,outlet=warehouse)
                 notification.from_user = frappe.session.user
                 notification.for_user = outlet_manager
                 notification.insert(ignore_permissions=True)
@@ -125,6 +126,8 @@ class StockDistribution(Document):
                             final += "-"
                             final += up[1].upper()
                             warehouses.append(final)
+                             
+                            # Create Stock Entry Data
                             data_dict = {}
                             data_dict["item_code"] = item.get("item_code")
                             data_dict["qty"] = value
@@ -147,6 +150,7 @@ class StockDistribution(Document):
                 "stock_entry_type": "Material Transfer",  # You can set the purpose as per your use case
                 "stock_distribution" : sd,
                 "company": company,  # Replace with the actual company name
+                "to_warehouse" : x,
                 "items": update_items
             })
             stock_entry.save(ignore_permissions=True)
@@ -324,10 +328,16 @@ def get_site_directory_path():
 def get_purchase_receipt(purchase_order):
     receipt = frappe.db.sql("""select pr.name from `tabPurchase Receipt Item` as pri 
                                 left join `tabPurchase Receipt` as pr on pri.parent = pr.name 
-                                    where pri.purchase_order = '{}' group by pr.name""".format(purchase_order))
+                                    where pri.purchase_order = '{}' and pr.docstatus = 1 group by pr.name""".format(purchase_order),as_dict=1)
     if receipt and len(receipt) <= 1:
-        return receipt[0][0]
-    
+        return receipt[0].get("name")
+    elif receipt and len(receipt) > 1:
+        receipts = ""
+        for x in receipt:
+            receipts += x.get("name") + ", "
+        frappe.msgprint(str("Receipts {res} Already Created Against Order."
+                            .format(res=receipts)),title=_("Multiple Receipt"),indicator="orange")
+        return receipt[0].get("name")
     
 @frappe.whitelist()
 def get_total_from_upload_excell(excell):
