@@ -99,7 +99,6 @@ class StockDistribution(Document):
                 total = 0
                 row_data = {}
                 for x in row[1:]:
-                    frappe.msgprint(str(x))
                     if x:
                         total += x
                 for i, value in enumerate(row):
