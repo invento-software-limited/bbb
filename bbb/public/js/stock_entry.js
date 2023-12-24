@@ -1,6 +1,6 @@
 frappe.ui.form.on('Stock Entry', {
     refresh: function(frm){
-        if (frm.doc.docstatus === 1 && frm.doc.total_transfer_qty !== frm.doc.total_accepted_qty) {
+        if (frm.doc.workflow_state === "Partially Completed" && frm.doc.stock_distribution && frm.doc.total_transfer_qty !== frm.doc.total_accepted_qty) {
             frm.add_custom_button(__('Re-Create Stock'),
                 cur_frm.cscript['Re-Create Stock']
 			);
@@ -51,7 +51,6 @@ frappe.ui.form.on('Stock Entry', {
 });
 
 function removeRowsWithZeroQty(frm) {
-    console.log("oooo")
     var items = frm.doc.items || [];
 
     for (var i = items.length - 1; i >= 0; i--) {

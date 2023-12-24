@@ -2,7 +2,7 @@
  {
   "docstatus": 0,
   "doctype": "Workflow Action Master",
-  "modified": "2022-04-10 11:50:17.933145",
+  "modified": "2023-12-13 08:33:25.660809",
   "name": "Approve",
   "parent": null,
   "parentfield": null,
@@ -12,7 +12,7 @@
  {
   "docstatus": 0,
   "doctype": "Workflow Action Master",
-  "modified": "2022-04-10 11:50:17.936258",
+  "modified": "2023-12-13 08:33:25.663767",
   "name": "Reject",
   "parent": null,
   "parentfield": null,
@@ -22,7 +22,7 @@
  {
   "docstatus": 0,
   "doctype": "Workflow Action Master",
-  "modified": "2022-04-10 11:50:17.939104",
+  "modified": "2023-12-13 08:33:25.666410",
   "name": "Review",
   "parent": null,
   "parentfield": null,
