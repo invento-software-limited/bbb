@@ -3,6 +3,42 @@ frappe.ui.form.on('POS Closing Entry', {
     onload:function(frm){
         frm.set_df_property('period_end_date', 'read_only', 0)
     },
+	validate(frm, cdn, cdt){
+
+		let end_date = getCurrentDateTime()
+		frappe.call({
+			method: 'bbb.bbb.pos_closing_entry.get_pos_invoices',
+			args: {
+				start: frappe.datetime.get_datetime_as_string(frm.doc.period_start_date),
+				end: frappe.datetime.get_datetime_as_string(end_date),
+				pos_profile: frm.doc.pos_profile,
+				user: frm.doc.user
+			},
+			callback: (r) => {
+				if(r.message.length !== frm.doc.pos_transactions.length){
+					const d = frappe.msgprint({
+						title: __('Warning!!!'),
+						message: __('Some invoices are missing or not loaded successfully. You must sync to allocate invoices'),
+						primary_action:{
+							'label': 'Sync Now',
+							action(values) {
+								frm.set_value("pos_transactions", []);
+								frm.set_value("period_end_date", end_date);
+								let pos_docs = r.message;
+								set_form_data(pos_docs, frm);
+								refresh_fields(frm);
+								set_html_data(frm);
+								d.hide();
+							}
+						}
+						
+					});
+					frappe.validated = false;
+				}
+				
+			}
+		});
+	},
     pos_opening_entry:function(frm) {
 		if (frm.doc.pos_opening_entry && frm.doc.period_start_date && frm.doc.period_end_date && frm.doc.user) {
 			reset_values(frm);
@@ -84,6 +120,20 @@ frappe.ui.form.on('POS Closing Entry', {
 	
 })
 
+function getCurrentDateTime() {
+	const now = new Date();
+	const year = now.getFullYear();
+	const month = (now.getMonth() + 1).toString().padStart(2, '0');
+	const day = now.getDate().toString().padStart(2, '0');
+	const hours = now.getHours().toString().padStart(2, '0');
+	const minutes = now.getMinutes().toString().padStart(2, '0');
+	const seconds = now.getSeconds().toString().padStart(2, '0');
+  
+	const formattedDateTime = `${year}-${month}-${day} ${hours}:${minutes}:${seconds}`;
+	return formattedDateTime;
+  }
+  
+
 function set_advance_booking_data(data, frm) {
 	data.forEach(d => {
 		add_to_advance_booking(d, frm);
@@ -93,7 +143,6 @@ function set_advance_booking_data(data, frm) {
 }
 
 function add_to_advance_booking(d, frm) {
-	console.log(d.name)
 	frm.add_child("advance_booking_reference", {
 		advance_booking: d.name,
 		posting_date: d.posting_date,

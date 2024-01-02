@@ -99,7 +99,8 @@ class StockDistribution(Document):
                 total = 0
                 row_data = {}
                 for x in row[1:]:
-                    total += x
+                    if x:
+                        total += x
                 for i, value in enumerate(row):
                     label = labels[i]
                     row_data[label] = value
@@ -118,7 +119,7 @@ class StockDistribution(Document):
             for outlet in excell_data:
                 if item.get("item_code") == str(outlet.get("Item Code")):
                     for key,value in outlet.items():
-                        if key != "Item Code" and value > 0:
+                        if key != "Item Code" and value and value > 0:
                             final = ""
                             warehouse = key.lower().replace("_"," ").replace("&","-").title()
                             up = warehouse.split("-")
