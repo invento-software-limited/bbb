@@ -28,7 +28,7 @@ class StockDistribution(Document):
         
     def send_system_notification_to_outlet_manager(self,warehouse):
             outlet_manager = frappe.get_value("User",{"outlet" : warehouse},"name")
-            if outlet_manager:
+            if outlet_manager and self.expected_delivery_date:
                 notification = frappe.new_doc('Notification Log')
                 notification.type = 'Alert'
                 notification.document_type = self.doctype

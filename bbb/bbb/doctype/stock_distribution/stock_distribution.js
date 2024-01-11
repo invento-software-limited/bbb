@@ -62,6 +62,9 @@ frappe.ui.form.on('Stock Distribution', {
 					}
 				}
 			});
+			frappe.db.get_value('Outlet Template', frm.doc.outlet_template, 'total_percentage').then(({ message }) => {
+				frm.set_value("total_percentage",message.total_percentage)
+			});
 		}
 	},
 	outlet_selection_table:function(frm){

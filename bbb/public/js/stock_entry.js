@@ -9,6 +9,14 @@ frappe.ui.form.on('Stock Entry', {
             frm.remove_custom_button('Delivery Note','Get customers from');
             frm.remove_custom_button('Delivery Notes','View');
         }, 10);
+        if ((frappe.user.has_role('Stock User') || frappe.user.has_role('Sales User'))) {
+            setTimeout(() => {
+                frm.remove_custom_button('Material Request','Create');
+                frm.remove_custom_button('Purchase Invoice','Get Items From');
+                frm.remove_custom_button('Material Request','Get Items From');
+                frm.remove_custom_button('Bill of Materials','Get Items From');
+            }, 10);
+        }
     },
 	before_workflow_action : function(frm) {
         let accepted_qty = 0;
@@ -43,10 +51,24 @@ frappe.ui.form.on('Stock Entry', {
         }
         frm.set_value("total_transfer_qty",transfered_qty)
         frm.set_value("total_accepted_qty",accepted_qty)
+
+        if (frm.doc.outgoing_stock_entry) {
+            frm.doc.items.forEach((d) => {
+                console.log("ppp")
+                if (d.qty !== d.transfer_qty_from_stock_distribution) {
+                    frappe.throw(`Cannot Update Accepted QTY For Item <b>${d.item_code}</b>`)
+                }
+            })
+        }
     },
     onload: function(frm) {
         // Call a function to remove rows with qty = 0
         removeRowsWithZeroQty(frm);
+        if(frm.doc.__islocal) {
+            frm.set_value("total_transfer_qty",0)
+            frm.set_value("total_accepted_qty",0)
+        }
+        
     }
 });
 

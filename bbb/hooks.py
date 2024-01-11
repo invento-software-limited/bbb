@@ -55,7 +55,10 @@ doctype_js = {
     ],
     "Stock Entry": [
         'public/js/stock_entry.js'
-    ]
+    ],
+    "Purchase Order": [
+        'public/js/purchase_order.js'
+    ],
 }
 doctype_list_js = {
     "POS Invoice": "public/js/pos_invoice_list.js"
@@ -153,7 +156,11 @@ doc_events = {
     },
     "Stock Ledger Entry":{
         "on_update": "bbb.bbb.controllers.utils.update_woocommerce_stock"
-    }
+    },
+    "Stock Entry":{
+        "on_submit": "bbb.bbb.controllers.stock_entry.update_on_submit"
+    },
+    
 
 }
 override_doctype_class = {
