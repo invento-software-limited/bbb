@@ -63,13 +63,25 @@
   "docstatus": 0,
   "doctype": "Workflow State",
   "icon": "",
-  "modified": "2023-12-10 16:11:46.339957",
+  "modified": "2024-01-08 17:06:38.515455",
   "name": "Partially Completed",
   "parent": null,
   "parentfield": null,
   "parenttype": null,
-  "style": "Success",
+  "style": "Warning",
   "workflow_state_name": "Partially Completed"
+ },
+ {
+  "docstatus": 0,
+  "doctype": "Workflow State",
+  "icon": "",
+  "modified": "2024-01-08 16:31:12.703939",
+  "name": "Partially Accepted",
+  "parent": null,
+  "parentfield": null,
+  "parenttype": null,
+  "style": "",
+  "workflow_state_name": "Partially Accepted"
  },
  {
   "docstatus": 0,
