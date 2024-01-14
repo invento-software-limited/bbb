@@ -266,7 +266,6 @@ erpnext.PointOfSale.Payment = class {
 		const doc = this.events.get_frm().doc;
 
 		const grand_total = cint(frappe.sys_defaults.disable_rounded_total) ? doc.grand_total : doc.rounded_total;
-		// let rounded_data = this.events.get_5_basis_rounded(grand_total)
 		const remaining_amount = grand_total - doc.paid_amount;
 		const current_value = this.selected_mode ? this.selected_mode.get_value() : undefined;
 		if (!current_value && remaining_amount > 0 && this.selected_mode) {

@@ -458,9 +458,6 @@ erpnext.PointOfSale.Controller = class {
                 save_draft_invoice: () => this.save_draft_invoice(),
                 close_pos: () => this.close_pos(),
                 // update_cached_item_data: (args) => this.update_cached_item_data(args),
-                get_5_basis_rounded: (number) => this.get_5_basis_rounded(number),
-                set_5_basis_rounded_total: (number) => this.set_5_basis_rounded_total(number),
-                get_5_basis_rounded_total: () => this.base_rounded_total,
                 update_paid_amount: () => this.update_paid_amount,
                 get_initial_paid_amount: () => this.initial_paid_amount,
                 set_initial_paid_amount: (paid_amount) => this.set_initial_paid_amount(paid_amount),
@@ -543,7 +540,6 @@ erpnext.PointOfSale.Controller = class {
                 get_frm: () => this.frm || {},
 
                 get_customer_details: () => this.customer_details || {},
-                get_5_basis_rounded: (number) => this.get_5_basis_rounded(number),
 
                 toggle_other_sections: (show) => {
                     if (show) {
@@ -572,8 +568,6 @@ erpnext.PointOfSale.Controller = class {
                         ]);
                     }
                 },
-                set_5_basis_rounded_total: (grand_total) => this.set_5_basis_rounded_total(grand_total),
-                get_5_basis_rounded_total: () => this.base_rounded_total,
                 get_initial_paid_amount: () => this.initial_paid_amount,
                 set_initial_paid_amount: (paid_amount) => this.set_initial_paid_amount(paid_amount),
             }
@@ -1214,78 +1208,6 @@ erpnext.PointOfSale.Controller = class {
         });
     }
 
-    async set_5_basis_rounded_total(number) {
-        // rounding : M rounds to 5 basis ( 12.49 will be 10 and 12.5 will  be 15)
-        let data = undefined
-        if (number == undefined || number == null) {
-            this.base_rounded_total = 0
-        } else {
-            let float_number = parseFloat(number);
-            let int_number = parseInt(float_number);
-            let divisible_number = (Math.floor(int_number / 5)) * 5;
-            let adjustment = float_number - divisible_number;
-            let rounded_total = 0;
-            let rounded_adjustment = 0
-            if (adjustment < 2.50) {
-                rounded_total = divisible_number
-                // rounded_adjustment = -(adjustment)
-            } else if (adjustment > 2.49) {
-                rounded_total = divisible_number + 5
-                // rounded_adjustment = rounded_total - float_number
-            }
-            this.base_rounded_total = rounded_total;
-        }
-    }
-
-    get_5_basis_rounded(number) {
-        // rounding : M rounds to 5 basis ( 12.49 will be 10 and 12.5 will  be 15)
-        let data = undefined
-        if (number == undefined || number == null) {
-            data = {
-                'rounded_total': 0,
-                'rounded_adjustment': 0
-            }
-            return 0
-        }
-        else if(number % 5 === 0) {
-            return number
-        }
-        else {
-            let float_number = parseFloat(number);
-            let int_number = parseInt(float_number);
-            let divisible_number = parseInt(int_number / 5) * 5;
-            let adjustment = Math.abs(float_number - divisible_number);
-            let rounded_total = 0;
-            let rounded_adjustment = 0
-            if(number < 0){
-                if (adjustment < 2.50) {
-                    rounded_total = divisible_number
-                    rounded_adjustment = adjustment
-                } else if (adjustment > 2.49) {
-                    rounded_total = divisible_number - 5
-                    rounded_adjustment = -(rounded_total - float_number)
-                }
-            }else{
-                if (adjustment < 2.50) {
-                    rounded_total = divisible_number
-                    rounded_adjustment = -(adjustment)
-                } else if (adjustment > 2.49) {
-                    rounded_total = divisible_number + 5
-                    rounded_adjustment = rounded_total - float_number
-                }
-            }
-
-            data = {
-                'rounded_total': rounded_total,
-                'rounding_adjustment': rounded_adjustment.toFixed(2)
-            }
-            this.initial_paid_amount = rounded_total
-            this.base_rounded_total = rounded_total;
-            return rounded_total
-
-        }
-
-    }
     set_initial_paid_amount(paid_amount){
         this.initial_paid_amount = paid_amount;
     }

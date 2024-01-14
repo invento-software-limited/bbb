@@ -141,8 +141,8 @@ doc_events = {
     },
 
     "POS Invoice": {
-        "on_submit": "bbb.bbb.pos_invoice.after_insert_or_on_submit",
-        "after_insert": "bbb.bbb.pos_invoice.after_insert_or_on_submit",
+        # "on_submit": "bbb.bbb.pos_invoice.after_insert_or_on_submit",
+        # "after_insert": "bbb.bbb.pos_invoice.after_insert_or_on_submit",
         "validate": "bbb.bbb.pos_invoice.validate",
     },
     # "POS Invoice Merge Log": {
