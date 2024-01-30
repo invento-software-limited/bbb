@@ -790,9 +790,6 @@ erpnext.PointOfSale.ItemCart = class {
                     },1000)
 
                     const grand_total = cint(frappe.sys_defaults.disable_rounded_total) ? frm.doc.grand_total : frm.doc.rounded_total;
-                    me.events.set_5_basis_rounded_total(grand_total)
-                    // console.log(me.events.base_rounded_total);
-                    // console.log($('.payment_amount_value').html(format_currency(me.events.base_rounded_total, frm.doc.currency)));
                 },
 
             },
@@ -826,12 +823,7 @@ erpnext.PointOfSale.ItemCart = class {
                 setTimeout(function (){
                     me.update_additional_discount(me, input_, frm, 'discount_amount')
                 },1000)
-                //
-                //     const grand_total = cint(frappe.sys_defaults.disable_rounded_total) ? frm.doc.grand_total : frm.doc.rounded_total;
-                //     me.events.set_5_basis_rounded_total(grand_total)
-                //     console.log(me.events.base_rounded_total);
-                //     console.log($('.payment_amount_value').html(format_currency(me.events.base_rounded_total, frm.doc.currency)));
-                },
+            },
 
             },
             parent: this.$add_discount_amount_elem.find('.add-discount-amount-field'),
@@ -1032,11 +1024,7 @@ erpnext.PointOfSale.ItemCart = class {
 
         this.render_net_total(frm.doc.net_total);
         const grand_total = frm.doc.grand_total;
-        //this.events.set_5_basis_rounded_total(frm.doc.grand_total);
-        //let base_rounded_total = this.events.get_5_basis_rounded_total();
-        //this.events.set_initial_paid_amount(frm.doc.rounded_total);
         this.render_grand_total(grand_total);
-        // this.render_rounded_total(base_rounded_total);
         this.render_taxes(frm.doc.taxes)
         this.update_item_cart_total_section(frm)
         this.render_rounded_total(frm.doc)
@@ -1137,10 +1125,14 @@ erpnext.PointOfSale.ItemCart = class {
     }
 
     update_5_basis_rounded(){
-        // rounded_total : M rounds to 5 basis ( 12.49 will be 10 and 12.5 will  be 15) rabi
         const frm = this.events.get_frm()
         let grand_total = frm.doc.grand_total;
-        let rounded_total = this.events.get_5_basis_rounded(frm.doc.grand_total)
+        let rounded_total = 0
+        if(grand_total < 0){
+            rounded_total = Math.floor(grand_total)
+        }else{
+            rounded_total = Math.ceil(grand_total)
+        }
         frappe.model.set_value(frm.doc.doctype, frm.doc.name, 'rounding_adjustment', rounded_total - grand_total)
         frappe.model.set_value(frm.doc.doctype, frm.doc.name, 'rounded_total', rounded_total)
         frappe.model.set_value(frm.doc.doctype, frm.doc.name, 'base_rounded_total', null)

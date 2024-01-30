@@ -4,6 +4,7 @@
 
 import frappe
 import datetime
+import math
 
 import requests
 from frappe import _
@@ -201,18 +202,22 @@ class CustomPOSInvoice(POSInvoice):
 
     def rounded(self):
         invoice_total = self.grand_total
-        five_basis_total = int(invoice_total / 5) * 5
-        adjustment = flt(abs(invoice_total - five_basis_total), 2)
-        if five_basis_total < 0:
-            if (adjustment > 2.49):
-                return five_basis_total - 5
-            else:
-                return five_basis_total
+        if invoice_total < 0:
+            return math.floor(invoice_total)
         else:
-            if (adjustment > 2.49):
-                return five_basis_total + 5
-            else:
-                return five_basis_total
+            return math.ceil(invoice_total)
+        # five_basis_total = int(invoice_total / 5) * 5
+        # adjustment = flt(abs(invoice_total - five_basis_total), 2)
+        # if five_basis_total < 0:
+        #     if (adjustment > 2.49):
+        #         return five_basis_total - 5
+        #     else:
+        #         return five_basis_total
+        # else:
+        #     if (adjustment > 2.49):
+        #         return five_basis_total + 5
+        #     else:
+        #         return five_basis_total
 
     def set_status(self, update=False, status=None, update_modified=True):
         rounded_total = self.rounded()
