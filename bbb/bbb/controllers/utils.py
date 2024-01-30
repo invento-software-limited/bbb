@@ -1,4 +1,5 @@
 import json
+import math
 
 import frappe
 import datetime
@@ -62,21 +63,14 @@ def pos_invoice_rounded_total(num=None):
             'rounded_adjustment': 0
         }
         return data
-    float_number = float(num)
-    int_number = int(float_number)
-    divisible_number = (int_number // 5) * 5
-    adjustment = float_number - divisible_number
-    rounding_total = 0
-    rounded_adjustment = 0
-    if adjustment < 2.50:
-        rounding_total = divisible_number
-        rounded_adjustment = -(adjustment)
-    elif adjustment > 2.49:
-        rounding_total = divisible_number + 5
-        rounded_adjustment = rounding_total - float_number
+    if num < 0:
+        rounded_total = math.floor(num)
+    else:
+        rounded_total = math.ceil(num)
+    adjustment = rounded_total - num
     data = {
-        'rounded_total': rounding_total,
-        'rounding_adjustment': "%.2f" % rounded_adjustment
+        'rounded_total': rounded_total,
+        'rounding_adjustment': "%.2f" % adjustment
     }
     return data
 
@@ -570,3 +564,14 @@ def make_stock_distribution(source_name, target_doc=None):
 		target_doc,
 	)
 	return doclist
+
+@frappe.whitelist()    
+def get_restaurant_order_list():
+    order_list = []
+    # order_list = frappe.db.get_all(doctype='POS Invoice', filters={'status': 'Ordered'}, fields=['name', 'restaurant_table_number', 'total_qty' ,'rounded_total'])
+    voucher_list = frappe.db.get_list(doctype='POS Invoice', filters={'status': 'Ordered'})
+    for voucher in voucher_list:
+        doc = frappe.get_doc("POS Invoice", voucher)
+        
+        order_list.append(doc)
+    return order_list

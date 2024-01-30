@@ -23,7 +23,7 @@ frappe.ui.form.on('Stock Entry', {
         let transfered_qty = 0;
         if (frm.doc.items) {
             frm.doc.items.forEach((d) => {
-                if (frm.doc.stock_distribution) {
+                if (frm.doc.stock_distribution && !frm.doc.outgoing_stock_entry) {
                     if (d.qty > d.transfer_qty_from_stock_distribution) {
                         frappe.throw(`For Item <b>${d.item_code}</b> Accepted qty cannot greater then transfer qty`)
                     }
@@ -40,7 +40,7 @@ frappe.ui.form.on('Stock Entry', {
         let transfered_qty = 0;
         if (frm.doc.items) {
             frm.doc.items.forEach((d) => {
-                if (frm.doc.stock_distribution) {
+                if (frm.doc.stock_distribution && !frm.doc.outgoing_stock_entry) {
                     if (d.qty > d.transfer_qty_from_stock_distribution) {
                         frappe.throw(`For Item <b>${d.item_code}</b> Accepted qty cannot greater then transfer qty`)
                     }
@@ -53,12 +53,20 @@ frappe.ui.form.on('Stock Entry', {
         frm.set_value("total_accepted_qty",accepted_qty)
 
         if (frm.doc.outgoing_stock_entry) {
+            var items = []
+            var dep = 0
             frm.doc.items.forEach((d) => {
-                console.log("ppp")
                 if (d.qty !== d.transfer_qty_from_stock_distribution) {
-                    frappe.throw(`Cannot Update Accepted QTY For Item <b>${d.item_code}</b>`)
+                    items.push(d.item_code)
+                    dep += 1
                 }
             })
+            if (dep > 0) {
+                frappe.throw({
+                    title: __("Qty Message"),
+                    message: __('In re-create stock, for Item <b>{0}</b> accepted and transfer qty must same.', [items.join(",")])
+                });
+            }
         }
     },
     onload: function(frm) {
