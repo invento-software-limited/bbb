@@ -1045,11 +1045,11 @@ erpnext.PointOfSale.ItemCart = class {
     render_grand_total(value) {
         const currency = this.events.get_frm().doc.currency;
         this.$totals_section.find('.grand-total-container').html(
-            `<div>Grand Total</div><div>${format_currency(value, currency)}</div>`
+            `<div>Grand Total</div><div>${value.toFixed(2)}</div>`
         )
 
         this.$numpad_section.find('.numpad-grand-total').html(
-            `<div>Grand Total: <span>${format_currency(value, currency)}</span></div>`
+            `<div>Grand Total: <span>${value.toFixed(2)}</span></div>`
         );
     }
     // rabi
@@ -1060,7 +1060,7 @@ erpnext.PointOfSale.ItemCart = class {
             `<div>Rounded Total</div><div>${format_currency(doc.rounded_total, currency)}</div>`
         )
         this.$totals_section.find('.rounding-adjustment-container').html(
-            `<div>Rounding Adjustment</div><div>${format_currency(adjustment, currency)}</div>`
+            `<div>Rounding Adjustment</div><div>${adjustment.toFixed(2)}</div>`
         )
         this.$totals_section.find('.special-discount-container').html(
             `<div>Special Discount</div><div>${format_currency(doc.discount_amount, currency)}</div>`
