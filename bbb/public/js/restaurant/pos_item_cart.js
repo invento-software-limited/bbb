@@ -5,6 +5,7 @@ erpnext.PointOfSale.ItemCart = class {
         this.customer_info = undefined;
         this.served_by_info = undefined;
         this.table_no_info = undefined;
+        this.order_type_info = {'order_type': 'Dining'};
         this.ignore_discount = undefined;
         this.ignore_pricing_rule = "No";
         this.hide_images = settings.hide_images;
@@ -19,6 +20,9 @@ erpnext.PointOfSale.ItemCart = class {
         this.init_child_components();
         this.bind_events();
         this.attach_shortcuts();
+        this.update_order_type_section();
+        this.update_pricing_rule_discount_section();
+
     }
 
     prepare_dom() {
@@ -287,7 +291,7 @@ erpnext.PointOfSale.ItemCart = class {
         this.$table_no_section.on('click', '.reset-table-no-btn', function () {
             me.reset_table_no_selector();
         });
-        this.$order_type_section.on('click', '.order-type-btn', function () {
+        this.$order_type_section.on('click', '.reset-order-type-btn', function () {
             me.reset_order_type_selector();
         });
         this.$pricing_rule_discount_section.on('click', '.reset-ignore_pricing-rule-btn', function () {
@@ -540,7 +544,7 @@ erpnext.PointOfSale.ItemCart = class {
                 label: __('Customer'),
                 fieldtype: 'Link',
                 options: 'Customer',
-                placeholder: __('Search by customer name, phone, email.'),
+                placeholder: __('Customer Name, Mobile'),
                 get_query: () => query,
                 onchange: function () {
                     if (this.value) {
@@ -572,14 +576,14 @@ erpnext.PointOfSale.ItemCart = class {
 			<div class="served-by-field"></div>
 		`);
         const me = this;
-        const query = {query: 'bbb.bbb.controllers.queries.served_by_query'};
+        const query = {query: 'bbb.bbb_restaurant.methods.queries.served_by_query'};
 
         this.served_by_field = frappe.ui.form.make_control({
             df: {
                 label: __('Served By'),
                 fieldtype: 'Link',
                 options: 'Served By',
-                placeholder: __('Search by name'),
+                placeholder: __('Served By'),
                 get_query: () => query,
                 onchange: function () {
                     if (this.value) {
@@ -623,13 +627,13 @@ erpnext.PointOfSale.ItemCart = class {
 			<div class="table-no-field"></div>
 		`);
         const me = this;
-        const query = {query: 'bbb.bbb.controllers.queries.table_number_query'};
+        const query = {query: 'bbb.bbb_restaurant.methods.queries.table_number_query'};
         this.table_no_field = frappe.ui.form.make_control({
             df: {
                 label: __('Table No'),
                 fieldtype: 'Link',
                 options: 'Restaurant Table Number',
-                placeholder: __('Search name'),
+                placeholder: __('Table'),
                 get_query: () => query,
                 onchange: function () {
                     if (this.value) {
@@ -662,8 +666,8 @@ erpnext.PointOfSale.ItemCart = class {
         this.order_type_field = frappe.ui.form.make_control({
             df: {
                 label: __('Order Type'),
-                fieldtype: 'Select',
-                options: ['Dining', 'Take Away','Delivery'],
+                fieldtype: 'Link',
+                options: 'Restaurant Order Type',
                 placeholder: __('Order Type'),
                 default: "Dining",
                 onchange: function () {
@@ -671,8 +675,13 @@ erpnext.PointOfSale.ItemCart = class {
                         const frm = me.events.get_frm();
                         frappe.dom.freeze();
                         frappe.model.set_value(frm.doc.doctype, frm.doc.name, 'restaurant_order_type', this.value);
-                        frm.script_manager.trigger('restaurant_order_type', frm.doc.doctype, frm.doc.name)
-                        frappe.dom.unfreeze();
+                        frm.script_manager.trigger('restaurant_order_type', frm.doc.doctype, frm.doc.name).then(()=>{
+                            frappe.run_serially([
+                                () => me.order_type_info = {'order_type': this.value},
+                                () => me.update_order_type_section(),
+                                () => frappe.dom.unfreeze()
+                            ]);
+                        })
                     }
                 },
             },
@@ -772,6 +781,12 @@ erpnext.PointOfSale.ItemCart = class {
                                     <span class="menu-item-label" data-label="Check Item Stock"><span class="alt-underline">V</span>iew Orders</span>
                                 </a>
                             </li>
+                            <li>
+                                <a class="grey-link dropdown-item" href="#" id="view_in_new_tab">
+                                    <span class="menu-item-label" data-label="Check Item Stock"><span class="alt-underline">V</span>iew in New Tab</span>
+                                </a>
+                            </li>
+                            
 <!--                            <li>-->
 <!--                                <a class="grey-link dropdown-item" href="#" id="add_damaged_product">-->
 <!--                                    <span class="menu-item-label" data-label=""><span class="alt-underline">A</span>dd Damaged Product</span>-->
@@ -1120,8 +1135,37 @@ erpnext.PointOfSale.ItemCart = class {
         } else {
             this.reset_table_no_selector();
         }
-
     }
+    update_order_type_section() {
+        // const frm = this.events.get_frm();
+        let style=''
+        // if(frm.doc.is_return){
+        //     style = "display: none;";
+        // }
+
+        const {order_type} = this.order_type_info || {};
+        
+        if (order_type) {
+            // let served_by_name = served_by.split('-')[0]
+            this.$order_type_section.html(
+                `<div class="order-type-details">
+                <div class="order-type-display">
+                    <div class="order-type-desc" style="font-weight:bold">
+                        <div class="order-type-name">${order_type}</div>
+                    </div>
+                    <div class="reset-order-type-btn" reset-order-type-attr="" data-order-type="${escape(order_type)}" >
+                        <svg width="32" height="32" viewBox="0 0 14 14" fill="none">
+                            <path d="M4.93764 4.93759L7.00003 6.99998M9.06243 9.06238L7.00003 6.99998M7.00003 6.99998L4.93764 9.06238L9.06243 4.93759" stroke="#8D99A6"/>
+                        </svg>
+                    </div>
+                </div>
+            </div>`
+            );
+        } else {
+            this.reset_order_type_selector();
+        }
+    }
+
     update_customer_section() {
         const frm = this.events.get_frm();
         let style=''
@@ -1442,7 +1486,7 @@ erpnext.PointOfSale.ItemCart = class {
 
                     if(frm.doc.is_return == 1){
                         // frappe.call({
-                        //     method: "bbb.bbb.controllers.utils.apply_item_pricing_rule",
+                        //     method: "bbb.bbb_restaurant.methods.utils.apply_item_pricing_rule",
                         //     async:false,
                         //     args: {"return_against": frm.doc.return_against, 'item_code': item_code},
                         //     callback: (r) => {
@@ -1504,7 +1548,7 @@ erpnext.PointOfSale.ItemCart = class {
                 let data_item_code = $(this).attr('data-item-code');
 
                 frappe.call({
-                    method: "bbb.bbb.controllers.utils.get_item_rate_discount",
+                    method: "bbb.bbb_restaurant.methods.utils.get_item_rate_discount",
                     args: {"return_against": frm.doc.return_against, 'item_code': data_item_code},
                     callback: (r) => {
                         let item = r.message;
@@ -1936,7 +1980,7 @@ erpnext.PointOfSale.ItemCart = class {
     }
     get_cache_data(){
 		frappe.call({
-			method: 'bbb.bbb.pos_invoice.get_pos_cached_data',
+			method: 'bbb.bbb_restaurant.methods.pos_invoice.get_pos_cached_data',
 			callback: function(r) {
 				if (!r.exc) {
 					// console.log(r.message);
@@ -1945,6 +1989,18 @@ erpnext.PointOfSale.ItemCart = class {
 			}
 		});
 	}
+    update_table_info(table_no){
+        return new Promise((resolve) => {
+            this.table_no_info = {'restaurant_table_number': table_no}
+            resolve();
+        });
+    }
+    update_order_type_info(order_type){
+        return new Promise((resolve) => {
+            this.order_type_info = {'order_type': order_type}
+            resolve();
+        });
+    }
     load_invoice() {
         const me = this;
         const frm = this.events.get_frm();
@@ -1968,6 +2024,13 @@ erpnext.PointOfSale.ItemCart = class {
             this.events.customer_details_updated(this.customer_info);
             this.update_customer_section();
         });
+        this.update_table_info(frm.doc.restaurant_table_number).then(()=>{
+            this.update_table_no_section();
+        })
+        this.update_order_type_info(frm.doc.restaurant_order_type).then(()=>{
+            this.update_order_type_section();
+        })
+        
         // }
         this.$cart_items_wrapper.html('');
         // pos return
@@ -2018,7 +2081,7 @@ erpnext.PointOfSale.ItemCart = class {
         //         frm.doc.items.forEach(item => {
         //             if(item.pricing_rules && item.discount_percentage <= 0){
         //                 frappe.call({
-        //                     method: "bbb.bbb.controllers.utils.get_pricing_rule_discount",
+        //                     method: "bbb.bbb_restaurant.methods.utils.get_pricing_rule_discount",
         //                     args: {"name": item.pricing_rules},
         //                     callback: (r) => {
         //                         frappe.model.set_value(item.doctype, item.name, 'discount_percentage', r.message.discount_percentage)
@@ -2079,7 +2142,7 @@ erpnext.PointOfSale.ItemCart = class {
         const frm = this.events.get_frm();
         if(!frm.doc.pricing_rules.length){
             frappe.call({
-                method: "bbb.bbb.controllers.utils.get_and_apply_item_pricing_rules",
+                method: "bbb.bbb_restaurant.methods.utils.get_and_apply_item_pricing_rules",
                 args: {"return_against": frm.doc.return_against},
                 callback: (r) => {
                     let pricing_rules = r.message
@@ -2228,7 +2291,7 @@ erpnext.PointOfSale.ItemCart = class {
                             .then(function (){
                                 if(frm.doc.is_return){
                                     frappe.call({
-                                        method: "bbb.bbb.controllers.utils.apply_item_pricing_rule",
+                                        method: "bbb.bbb_restaurant.methods.utils.apply_item_pricing_rule",
                                         args: {"return_against": frm.doc.return_against, 'item_code': item.item_code},
                                         callback: (r) => {
                                             frappe.model.set_value("POS Invoice Item", item.name, 'margin_type', r.message.margin_type)
@@ -2252,7 +2315,7 @@ erpnext.PointOfSale.ItemCart = class {
         let items = frm.doc.items;
         if(frm.doc.is_return && items.length){
             frappe.call({
-                method: "bbb.bbb.controllers.utils.apply_all_items_pricing_rules",
+                method: "bbb.bbb_restaurant.methods.utils.apply_all_items_pricing_rules",
                 // async:false,
                 args: {"return_against": frm.doc.return_against},
                 callback: (r) => {
@@ -2284,7 +2347,7 @@ erpnext.PointOfSale.ItemCart = class {
         var discount_amount = 0;
         var discount_percentage = 0;
         frappe.call({
-            method: "bbb.bbb.controllers.utils.get_item_rate_discount",
+            method: "bbb.bbb_restaurant.methods.utils.get_item_rate_discount",
             args: {"return_against": return_against, 'item_code': item_code},
             async: false,
             callback: (r) => {

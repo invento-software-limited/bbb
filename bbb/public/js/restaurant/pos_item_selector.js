@@ -61,7 +61,7 @@ erpnext.PointOfSale.ItemSelector = class {
 		!item_group && (item_group = this.parent_item_group);
 
 		return frappe.call({
-			method: "bbb.bbb.restaurant.get_items",
+			method: "bbb.bbb_restaurant.methods.restaurant.get_items",
 			freeze: true,
 			args: { start, page_length, price_list, item_group, search_term, pos_profile },
 		});
@@ -163,7 +163,7 @@ erpnext.PointOfSale.ItemSelector = class {
 			df: {
 				label: __('Search'),
 				fieldtype: 'Data',
-				placeholder: __('Search by item code, serial number or barcode')
+				placeholder: __('Item Code, Barcode, Name')
 			},
 			parent: this.$component.find('.search-field'),
 			render_input: true,
@@ -173,7 +173,7 @@ erpnext.PointOfSale.ItemSelector = class {
 				label: __('Item Group'),
 				fieldtype: 'Link',
 				options: 'Item Group',
-				placeholder: __('Select item group'),
+				placeholder: __('Item Group'),
 				onchange: function() {
 					me.item_group = this.value;
 					!me.item_group && (me.item_group = me.parent_item_group);
