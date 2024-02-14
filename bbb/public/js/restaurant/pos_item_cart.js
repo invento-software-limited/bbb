@@ -230,10 +230,10 @@ erpnext.PointOfSale.ItemCart = class {
             </div>
             <div class="row">
                 <div class="col-md-6">
-                    <div class="checkout-btn">Checkout</div>
+                    <div class="confirm-order-btn">Confirm Order</div>
                 </div>
                 <div class="col-md-6">
-                    <div class="confirm-order-btn">Confirm Order</div>
+                    <div class="checkout-btn">Checkout</div>
                 </div>
             </div>
 			<div class="edit-cart-btn">Edit Cart</div>`
@@ -336,7 +336,7 @@ erpnext.PointOfSale.ItemCart = class {
 
 
         this.$component.on('click', '.checkout-btn', function () {
-            if ($(this).attr('style').indexOf('--blue-500') == -1) return;
+            if ($(this).attr('style').indexOf('--green-500') == -1) return;
             const frm = me.events.get_frm();
             let rounded_total = frm.doc.rounded_total;
             let payments = frm.doc.payments;
@@ -1633,13 +1633,13 @@ erpnext.PointOfSale.ItemCart = class {
                 'background-color': 'var(--blue-500)'
             });
             this.$cart_container.find('.checkout-btn').css({
-                'background-color': 'var(--blue-500)'
+                'background-color': 'var(--green-500)'
             });
         } else {
             this.$add_discount_elem.css('display', 'none');
             this.$add_discount_amount_elem.css('display', 'none');
             this.$cart_container.find('.checkout-btn').css({
-                'background-color': 'var(--blue-200)'
+                'background-color': 'var(--green-200)'
             });
             this.$cart_container.find('.confirm-order-btn').css({
                 'background-color': 'var(--blue-200)'

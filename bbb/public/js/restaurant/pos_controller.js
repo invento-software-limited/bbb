@@ -933,6 +933,7 @@ erpnext.PointOfSale.Controller = class {
 
     set_pos_profile_status() {
         this.page.set_indicator(this.pos_profile, "blue");
+        this.cart.make_pos_profile();
     }
 
     async on_cart_update(args) {
