@@ -22,7 +22,6 @@ erpnext.PointOfSale.ItemCart = class {
         this.attach_shortcuts();
         this.update_order_type_section();
         this.update_pricing_rule_discount_section();
-
     }
 
     prepare_dom() {
@@ -551,12 +550,14 @@ erpnext.PointOfSale.ItemCart = class {
                         const frm = me.events.get_frm();
                         frappe.dom.freeze();
                         frappe.model.set_value(frm.doc.doctype, frm.doc.name, 'customer', this.value);
+
                         frm.script_manager.trigger('customer', frm.doc.doctype, frm.doc.name).then(() => {
                             frappe.run_serially([
                                 () => me.fetch_customer_details(this.value),
                                 () => me.events.customer_details_updated(me.customer_info),
                                 () => me.update_customer_section(),
                                 () => me.update_totals_section(),
+                                () => me.set_default_order_type(frm),
                                 // () => me.events.set_cache_data({'pos_customer': this.value}),
                                 // () => me.check_out_validation(true),
                                 () => frappe.dom.unfreeze()
@@ -569,6 +570,13 @@ erpnext.PointOfSale.ItemCart = class {
             render_input: true,
         });
         this.customer_field.toggle_label(false);
+    }
+    set_default_order_type(frm){
+        /* Set default order type */
+        if(!frm.doc.restaurant_order_type){
+            let {order_type} = this.order_type_info || {}; 
+            frappe.model.set_value(frm.doc.doctype, frm.doc.name, 'restaurant_order_type', order_type);
+        }
     }
 
     make_served_by_selector() {
@@ -865,26 +873,26 @@ erpnext.PointOfSale.ItemCart = class {
     fetch_customer_details(customer) {
         if (customer) {
             return new Promise((resolve) => {
-                frappe.db.get_value('Customer', customer, ["email_id", "mobile_no", "image", "loyalty_program", "customer_name"]).then(({message}) => {
-                    const {loyalty_program} = message;
-                    // if loyalty program then fetch loyalty points too
-                    if (loyalty_program) {
-                        frappe.call({
-                            method: "erpnext.accounts.doctype.loyalty_program.loyalty_program.get_loyalty_program_details_with_points",
-                            args: {customer, loyalty_program, "silent": true},
-                            callback: (r) => {
-                                const {loyalty_points, conversion_factor} = r.message;
-                                if (!r.exc) {
-                                    this.customer_info = {...message, customer, loyalty_points, conversion_factor};
+                frappe.db.get_value('Customer', customer, ["customer_name"]).then(({message}) => {
+                    // const {loyalty_program} = message;
+                    // // if loyalty program then fetch loyalty points too
+                    // if (loyalty_program) {
+                    //     frappe.call({
+                    //         method: "erpnext.accounts.doctype.loyalty_program.loyalty_program.get_loyalty_program_details_with_points",
+                    //         args: {customer, loyalty_program, "silent": true},
+                    //         callback: (r) => {
+                    //             const {loyalty_points, conversion_factor} = r.message;
+                    //             if (!r.exc) {
+                    //                 this.customer_info = {...message, customer, loyalty_points, conversion_factor};
 
-                                    resolve();
-                                }
-                            }
-                        });
-                    } else {
+                    //                 resolve();
+                    //             }
+                    //         }
+                    //     });
+                    // } else {
                         this.customer_info = {...message, customer};
                         resolve();
-                    }
+                    // }
                 });
             });
         } else {
@@ -2006,14 +2014,8 @@ erpnext.PointOfSale.ItemCart = class {
         const frm = this.events.get_frm();
         frm.events.item_list = [];
         this.attach_refresh_field_event(frm);
-        // const cached_data = this.events.get_cache_data();
-        // if(cached_data){
-        //     this.update_cached_data(cached_data)
-        // }
-        // else {
-        // this.fetch_served_by_details(frm.doc.served_by).then(() => {
-        //     this.update_served_by_section();
-        // });
+        
+
         this.fetch_served_by_details(frm.doc.served_by).then(() => {
             this.update_served_by_section();
         });
@@ -2031,79 +2033,22 @@ erpnext.PointOfSale.ItemCart = class {
             this.update_order_type_section();
         })
         
-        // }
         this.$cart_items_wrapper.html('');
-        // pos return
-        // if(frm.doc.is_return == 1) {
-        // frappe.model.set_value(frm.doc.doctype, frm.doc.name, 'ignore_pricing_rule', 0);
-        // }
-
-        // pos return
-        // if(frm.doc.is_return){
-        //     const item_data = frm.doc.items;
-        //     frm.doc.items = [];
-        //     frm.refresh_field('ignore_pricing_rule');
-        //     item_data.forEach(item => {
-        //         frappe.db.get_value('Item', {'item_code': item.item_code}, ['start_date', 'end_date', 'discount_amount']).then(res=>{
-        //             let new_item = {'item_code':item.item_code, 'batch_no': item.batch_no, 'rate':item.item_code, 'item_actual_qty': item.qty, 'mrp': item.price_list_rate, 'title': item.item_name, 'discount_amount': res.message.discount_amount, 'start_date': new Date(res.message.start_date), 'end_date': new Date(res.message.end_date), update_rules: 0}
-        //             var args = {
-        //             'field': "qty",
-        //             'item': new_item,
-        //             'value': item.qty
-        //             }
-        //             me.events.on_cart_update(args);
-        //         })
-        //     });
-        // }else{
-        //     if (frm.doc.items.length) {
-        //         frm.doc.items.forEach(item => {
-        //             this.update_item_html(item);
-        //         });
-        //     } else {
-        //         this.make_no_items_placeholder();
-        //         this.highlight_checkout_btn(false);
-        //     }
-        // }
 
         if (frm.doc.items.length) {
             frm.doc.items.forEach(item => {
                 this.update_item_html(item);
             });
-        } else {
+        }else {
             this.make_no_items_placeholder();
             this.highlight_checkout_btn(false);
         }
+
          me.update_totals_section(frm);
 
-
-        // setTimeout(function (){
-        //     if (frm.doc.items.length) {
-        //         frm.doc.items.forEach(item => {
-        //             if(item.pricing_rules && item.discount_percentage <= 0){
-        //                 frappe.call({
-        //                     method: "bbb.bbb_restaurant.methods.utils.get_pricing_rule_discount",
-        //                     args: {"name": item.pricing_rules},
-        //                     callback: (r) => {
-        //                         frappe.model.set_value(item.doctype, item.name, 'discount_percentage', r.message.discount_percentage)
-        //                         me.update_item_html(item);
-        //                     }
-        //                 })
-        //             }else{
-        //                 me.update_item_html(item);
-        //             }
-        //         })
-        //     } else {
-        //         me.make_no_items_placeholder();
-        //         me.highlight_checkout_btn(false);
-        //     }
-        //
-        //     me.update_totals_section(frm);
-        // }, 5000);
-
-
+        this.$totals_section.find('.edit-cart-btn').css('display', 'none');
         if (frm.doc.docstatus === 1) {
             this.$totals_section.find('.checkout-btn').css('display', 'none');
-            this.$totals_section.find('.edit-cart-btn').css('display', 'none');
         }
         // else if(frm.doc.status == "Ordered" || frm.doc.__islocal == 1){
         //     this.$totals_section.find('.checkout-btn').css('display', 'none');
@@ -2112,7 +2057,7 @@ erpnext.PointOfSale.ItemCart = class {
         // }
         else {
             this.$totals_section.find('.checkout-btn').css('display', 'flex');
-            this.$totals_section.find('.edit-cart-btn').css('display', 'none');
+            this.$totals_section.find('.confirm-order-btn').css('display', 'flex');
         }
         this.make_pos_profile();
         this.toggle_component(true);

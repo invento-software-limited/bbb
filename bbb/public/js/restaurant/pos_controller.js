@@ -275,7 +275,7 @@ erpnext.PointOfSale.Controller = class {
                                             {{ d.total_qty }}</a>
                                     </div>
                                     <div class="col-sm-1" style="margin-top: 8px; ">
-                                        <button class="btn btn-primary edit_order" name={{ d.name }} style="float:right"> Edit</button>
+                                        <button class="btn btn-primary edit_order_" name={{ d.name }} style="float:right"> Edit</button>
                                     </div>
                                     <div class="col-sm-2" style="margin-top: 8px;">
                                         <button class="btn btn-success checkout_order text-right" name={{ d.name }}> View</button>
@@ -292,10 +292,12 @@ erpnext.PointOfSale.Controller = class {
             
             var table_data = frappe.render_template(html, {'data': data});
             d.fields_dict.orders.$wrapper.html(table_data);
-            $('.edit_order').on('click', function(){
+            $('.edit_order_').on('click', function(e){
+                e.preventDefault();
                 let name = $(this).attr('name');
                 frappe.db.get_doc('POS Invoice', name)
                 .then(doc => {
+                    console.log('doc', doc)
                     frappe.run_serially([
                         // () => me.frm.refresh($(this).attr('name')),
                         () => me.frm.refresh(doc.name),
@@ -306,7 +308,8 @@ erpnext.PointOfSale.Controller = class {
                 })
 
             });
-            $('.checkout_order').on('click', function(){
+            $('.checkout_order').on('click', function(e){
+                e.preventDefault();
                 let name = $(this).attr('name');
                 frappe.db.get_doc('POS Invoice', name)
                 .then(doc => {
@@ -975,8 +978,8 @@ erpnext.PointOfSale.Controller = class {
 				if (!this.frm.doc.customer)
 					return this.raise_customer_selection_alert();
 
-				if (!this.frm.doc.served_by)
-					return this.raise_served_by_selection_alert();
+				// if (!this.frm.doc.served_by)
+				// 	return this.raise_served_by_selection_alert();
 
 
 				if (!item_code)
