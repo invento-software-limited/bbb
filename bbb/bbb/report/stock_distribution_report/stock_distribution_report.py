@@ -22,7 +22,8 @@ def get_columns(filters):
     ]
     if filters.get("view") == "Summary":
         columns.append({"label": _("Purchase Receipt"), "fieldname": "against_purchase_receipt", "fieldtype": "Link","options" : "Purchase Receipt", "width": 150})
-        columns.append({"label": _("Total QTY"), "fieldname": "total_qty", "fieldtype": "Float", "width": 120})
+        columns.append({"label": _("Planned Qty"), "fieldname": "total_qty", "fieldtype": "Float", "width": 120})
+        columns.append({"label": _("Actual Qty"), "fieldname": "actual_distribute_qty", "fieldtype": "Float", "width": 120})
         columns.append({"label": _("Status"), "fieldname": "status", "fieldtype": "Data", "width": 120})
     else:
         columns.append({"label": _("Item Code"), "fieldname": "item_code", "fieldtype": "Link","options" : "Item", "width": 120})
@@ -47,9 +48,10 @@ def get_data(filters):
     conditions = get_conditions(filters)
     if filters.get("view") == "Summary":
         query = frappe.db.sql("""select sd.name as name, sd.purchase_order,sd.against_purchase_receipt,
-                                sd.posting_date,sd.supplier,sd.total_qty,se.workflow_state as status
-                                        from `tabStock Distribution` as sd left join `tabStock Entry` as se on se.stock_distribution = sd.name
-                                            where sd.docstatus = 1 {} group by sd.name order by sd.creation desc""".format(conditions),as_dict=1)
+                                sd.posting_date,sd.supplier,sd.total_qty,sd.actual_distribute_qty,sd.total_qty,
+                                case when sd.docstatus = 0 then 'Draft' when sd.docstatus = 1 then 'Submitted' else 'Cancelled' end as status
+                                    from `tabStock Distribution` as sd
+                                        where sd.name is not null {} group by sd.name order by sd.creation desc""".format(conditions),as_dict=1)
         return query
     else:
         data = []
@@ -58,7 +60,10 @@ def get_data(filters):
                                         from `tabStock Distribution` as sd where sd.docstatus > -1 {} order by sd.creation desc""".format(conditions),as_dict=1)
         for x in query:
             sd = frappe.get_doc("Stock Distribution" , x.get("name"))
-            calculate_items = caluclate_warehouse_percentage_wise_distribution(sd.purchase_distribution_items,sd.outlet_selection_table,"Yes")
+            code_name = ""
+            if filters.get("item_code"):
+                code_name = filters.get("item_code")
+            calculate_items = caluclate_warehouse_percentage_wise_distribution(sd.purchase_distribution_items,sd.outlet_selection_table,"Yes",code_name)
             for y in calculate_items:
                 y["name"] = sd.name
                 y["purchase_order"] = sd.purchase_order
@@ -86,4 +91,5 @@ def get_conditions(filters):
         conditions += " and sd.supplier = '{}'".format(filters.get("supplier"))
     if filters.get("stock_distribution"):
         conditions += " and sd.name = '{}'".format(filters.get("stock_distribution"))
+
     return conditions

@@ -158,7 +158,8 @@ doc_events = {
         "on_update": "bbb.bbb.controllers.utils.update_woocommerce_stock"
     },
     "Stock Entry":{
-        "on_submit": "bbb.bbb.controllers.stock_entry.update_on_submit"
+        "on_submit": "bbb.bbb.controllers.stock_entry.update_on_submit",
+        "validate" : "bbb.bbb.controllers.stock_entry.update_validate"
     },
     
 
@@ -228,7 +229,7 @@ jenv = {
 
 # User Data Protection
 # --------------------
-boot_session = "bbb.startup.boot.boot_session"
+# boot_session = "bbb.startup.boot.boot_session"
 user_data_fields = [
     {
         "doctype": "{doctype_1}",

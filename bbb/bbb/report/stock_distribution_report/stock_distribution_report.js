@@ -21,13 +21,12 @@ frappe.query_reports["Stock Distribution Report"] = {
 			"width": "60px"
 		},
 		{
-			"fieldname": "view",
-			"label": __("View"),
-			"fieldtype": "Select",
+			"fieldname": "item_code",
+			"label": __("Item Code"),
+			"fieldtype": "Link",
 			"width": "80",
-			"reqd" : 1,
-			"options": ["Summary","Details"],
-			"default" : "Summary"
+			"options": "Item",
+			"depends_on": "eval: doc.view == 'Details'",
 		},
 		{
 			"fieldname": "stock_distribution",
@@ -59,12 +58,21 @@ frappe.query_reports["Stock Distribution Report"] = {
 			"options": "Supplier"
 		},
 		{
+			"fieldname": "view",
+			"label": __("View"),
+			"fieldtype": "Select",
+			"width": "80",
+			"reqd" : 1,
+			"options": ["Summary","Details"],
+			"default" : "Summary"
+		},
+		{
 			"fieldname": "company",
 			"label": __("Company"),
 			"fieldtype": "Link",
 			"width": "80",
 			"options": "Company",
 			"default": frappe.defaults.get_user_default("Company"),
-		}
+		},
 	]
 };
