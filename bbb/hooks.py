@@ -136,7 +136,7 @@ doc_events = {
         "on_update": "bbb.bbb.item_price_list.after_insert_or_on_update",
     },
     "Sales Invoice": {
-        "on_submit": "bbb.bbb.sales_invoice.on_submit",
+        # "on_submit": "bbb.bbb.sales_invoice.on_submit",
         # "before_submit": "bbb.bbb.sales_invoice.before_submit",
     },
 
