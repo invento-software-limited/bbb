@@ -139,19 +139,24 @@ class StockDistribution(Document):
                             data_dict["reference_purchase_receipt"] = purchase_receipt_reference if purchase_receipt_reference else ""
                             items.append(data_dict)
         
-        # frappe.msgprint((str(items)))
         for x in set(warehouses):
             update_items = []
+            source_warehouse = []
             for y in items:
                 if x == y.get("t_warehouse"):
                     update_items.append(y)
-                    
+                    source_warehouse.append(y.get("s_warehouse"))
+
+            unique_stores = list(set(source_warehouse))
+            stores_str = ', '.join(unique_stores)
+            
             stock_entry = frappe.get_doc({
                 "doctype": "Stock Entry",
                 "stock_entry_type": "Material Transfer",  # You can set the purpose as per your use case
                 "stock_distribution" : sd,
                 "company": company,  # Replace with the actual company name
                 "to_warehouse" : x,
+                "from_warehouse" : stores_str,
                 "items": update_items
             })
             stock_entry.save(ignore_permissions=True)
@@ -209,42 +214,79 @@ def distribution_excell_generate(doc):
     
     return "Ok"
     
-def caluclate_warehouse_percentage_wise_distribution(items,warehouse_list,source=None):
+def caluclate_warehouse_percentage_wise_distribution(items,warehouse_list,source=None,item_code=None):
     data = []
     for item in items:
-        data_dict = {}
-        single_data = {}
-        total_wr_wise = 0
-        if source:
-            data_dict["source"] = item.warehouse
-        data_dict["item_code"] = item.get("item_code")
-        max_percentage = -1  # Assuming all percentages are non-negative
-        warehouse_with_max_percentage = None
-        
-        # loop throw outlet percentage
-        for percentage in warehouse_list:
-            warehouse = percentage.get("warehouse").lower().replace(" ","_").replace("-","&")
-            out_percentage = percentage.get("percentage")
-            round_am = round((float(out_percentage) / 100) * float(item.get("qty")))
-            single_data[warehouse] = round_am
-            total_wr_wise += round_am
+        if item_code:
+            if item.get("item_code") == item_code:
+                frappe.msgprint(str(item.get("item_code")))
+                data_dict = {}
+                single_data = {}
+                total_wr_wise = 0
+                if source:
+                    data_dict["source"] = item.warehouse
+                data_dict["item_code"] = item.get("item_code")
+                max_percentage = -1  # Assuming all percentages are non-negative
+                warehouse_with_max_percentage = None
+                
+                # loop throw outlet percentage
+                for percentage in warehouse_list:
+                    warehouse = percentage.get("warehouse").lower().replace(" ","_").replace("-","&")
+                    out_percentage = percentage.get("percentage")
+                    round_am = round((float(out_percentage) / 100) * float(item.get("qty")))
+                    single_data[warehouse] = round_am
+                    total_wr_wise += round_am
+                    
+                    # get max percentage warehouse
+                    if percentage.get("percentage") > max_percentage:
+                        max_percentage = percentage.get("percentage")
+                        warehouse_with_max_percentage = percentage.get("warehouse")
+                
+                
+                for key,value in single_data.items():
+                    data_dict[key] = value
+                    
+                if total_wr_wise != item.get("qty"):
+                    diff = item.get("qty") - total_wr_wise
+                    max_percentage_warehouse = warehouse_with_max_percentage.lower().replace(" ","_").replace("-","&")
+                    max_percentage_warehouse_value = data_dict.get(max_percentage_warehouse) + diff
+                    data_dict[max_percentage_warehouse] = max_percentage_warehouse_value
+                
+                data.append(data_dict)
+        else:
+            data_dict = {}
+            single_data = {}
+            total_wr_wise = 0
+            if source:
+                data_dict["source"] = item.warehouse
+            data_dict["item_code"] = item.get("item_code")
+            max_percentage = -1  # Assuming all percentages are non-negative
+            warehouse_with_max_percentage = None
             
-            # get max percentage warehouse
-            if percentage.get("percentage") > max_percentage:
-                max_percentage = percentage.get("percentage")
-                warehouse_with_max_percentage = percentage.get("warehouse")
-        
-        
-        for key,value in single_data.items():
-            data_dict[key] = value
+            # loop throw outlet percentage
+            for percentage in warehouse_list:
+                warehouse = percentage.get("warehouse").lower().replace(" ","_").replace("-","&")
+                out_percentage = percentage.get("percentage")
+                round_am = round((float(out_percentage) / 100) * float(item.get("qty")))
+                single_data[warehouse] = round_am
+                total_wr_wise += round_am
+                
+                # get max percentage warehouse
+                if percentage.get("percentage") > max_percentage:
+                    max_percentage = percentage.get("percentage")
+                    warehouse_with_max_percentage = percentage.get("warehouse")
             
-        if total_wr_wise != item.get("qty"):
-            diff = item.get("qty") - total_wr_wise
-            max_percentage_warehouse = warehouse_with_max_percentage.lower().replace(" ","_").replace("-","&")
-            max_percentage_warehouse_value = data_dict.get(max_percentage_warehouse) + diff
-            data_dict[max_percentage_warehouse] = max_percentage_warehouse_value
-        
-        data.append(data_dict)
+            
+            for key,value in single_data.items():
+                data_dict[key] = value
+                
+            if total_wr_wise != item.get("qty"):
+                diff = item.get("qty") - total_wr_wise
+                max_percentage_warehouse = warehouse_with_max_percentage.lower().replace(" ","_").replace("-","&")
+                max_percentage_warehouse_value = data_dict.get(max_percentage_warehouse) + diff
+                data_dict[max_percentage_warehouse] = max_percentage_warehouse_value
+            
+            data.append(data_dict)    
         
     return data
         

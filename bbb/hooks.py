@@ -136,12 +136,12 @@ doc_events = {
         "on_update": "bbb.bbb.item_price_list.after_insert_or_on_update",
     },
     "Sales Invoice": {
-        "on_submit": "bbb.bbb.sales_invoice.on_submit",
+        # "on_submit": "bbb.bbb.sales_invoice.on_submit",
         # "before_submit": "bbb.bbb.sales_invoice.before_submit",
     },
 
     "POS Invoice": {
-        # "on_submit": "bbb.bbb.pos_invoice.after_insert_or_on_submit",
+        "on_submit": "bbb.bbb.pos_invoice.after_insert_or_on_submit",
         # "after_insert": "bbb.bbb.pos_invoice.after_insert_or_on_submit",
         "validate": "bbb.bbb.pos_invoice.validate",
     },
@@ -158,7 +158,8 @@ doc_events = {
         "on_update": "bbb.bbb.controllers.utils.update_woocommerce_stock"
     },
     "Stock Entry":{
-        "on_submit": "bbb.bbb.controllers.stock_entry.update_on_submit"
+        "on_submit": "bbb.bbb.controllers.stock_entry.update_on_submit",
+        "validate" : "bbb.bbb.controllers.stock_entry.update_validate"
     },
     
 
