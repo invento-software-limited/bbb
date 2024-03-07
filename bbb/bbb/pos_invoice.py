@@ -292,11 +292,50 @@ def get_past_order_list(search_term, status, limit=3):
 
 
 def validate(doc, method):
-    if not doc.customer:
-        frappe.throw(_("You must select a customer before submit"), CustomerValidationError, title="Missing")
-    if doc.company == 'BBB Restaurant' and doc.docstatus == 0:
-        doc.status = 'Ordered'
+    # if not doc.customer:
+    #     frappe.throw(_("You must select a customer before submit"), CustomerValidationError, title="Missing")
+    # if doc.company == 'BBB Restaurant' and doc.docstatus == 0:
+    #     doc.status = 'Ordered'
+    #     if doc.restaurant_order_item_html:
+    #         # pass
+    #         data = 'Rice * 2 <br> Burger * 3'
+    #         data = data.split('<br>')
+    #         print(data)
+    #     else:
+    #         new_item = restaurant_order_item(doc)
+    #         doc.status = 'Ordered'
 
+
+    # Define the old and new item lists
+    old_item = ['Bread * 1', '<br>', 'Burger * 1']
+    new_item = ['Bread * 1', 'Burger * 2 ', 'Rice * 2']
+
+    item = get_new_order_item(old_item, doc)
+
+def restaurant_order_item(doc):
+    items_html = ''
+    for item in doc.items:
+        items_html += (item.item_name + " * " + str(item.qty) + "<br>")
+def get_new_order_item(old_item, doc):
+    # Create a dictionary to store items from old_item for easy lookup
+    old_dict = []
+    for item in old_item:
+        if item  not in ['<br>', '<hr>']:
+            old_split_item = split_item(item)
+
+
+    # Find the differences
+    differences = []
+    for item in doc.items:
+        new_name, new_value = item.item_name, item.qty
+
+    return differences
+
+# Function to split each item into its name and integer value
+def split_item(item):
+    # print(item)
+    name, value = item.split(' * ')
+    return name, int(value)
 
 def get_tag_conditions(values):
     today = datetime.datetime.today().date()

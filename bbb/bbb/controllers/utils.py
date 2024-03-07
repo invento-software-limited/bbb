@@ -491,33 +491,34 @@ def update_customers_dob():
 
 
 def update_woocommerce_stock(doc, method):
-    from woocommerce import API
-    woocommerce_settings = frappe.get_doc("Woocommerce Settings")
-    bbb_settings = frappe.get_doc("BBB Settings")
-    
-    if doc.voucher_type != 'Woocommerce Order' and bbb_settings.woocommerce_status == "Enabled":
-        bin = frappe.db.get_value("Bin", {'item_code': doc.item_code, 'warehouse': doc.warehouse}, 'actual_qty', as_dict=1)
-
-        if woocommerce_settings.warehouse == doc.warehouse:
-            pre_qty = bin.get('actual_qty') if bin else 0
-            incoming_value = doc.actual_qty
-            woocommerce_id = frappe.db.get_value('Item', doc.item_code, 'woocommerce_id')
-
-            if woocommerce_id:
-                wcapi = API(
-                    url=woocommerce_settings.woocommerce_server_url,
-                    consumer_key=woocommerce_settings.api_consumer_key,
-                    consumer_secret=woocommerce_settings.api_consumer_secret,
-                    wp_api=True,
-                    version="wc/v3",
-                    query_string_auth=True,
-                )
-                data = {
-                    "stock_quantity": flt(pre_qty) + flt(incoming_value) if incoming_value else flt(doc.qty_after_transaction),
-                    "manage_stock": True
-                }
-                url = "products/" + str(woocommerce_id)
-                wcapi.put(url, data).json()
+    pass
+    # from woocommerce import API
+    # woocommerce_settings = frappe.get_doc("Woocommerce Settings")
+    # bbb_settings = frappe.get_doc("BBB Settings")
+    #
+    # if doc.voucher_type != 'Woocommerce Order' and bbb_settings.woocommerce_status == "Enabled":
+    #     bin = frappe.db.get_value("Bin", {'item_code': doc.item_code, 'warehouse': doc.warehouse}, 'actual_qty', as_dict=1)
+    #
+    #     if woocommerce_settings.warehouse == doc.warehouse:
+    #         pre_qty = bin.get('actual_qty') if bin else 0
+    #         incoming_value = doc.actual_qty
+    #         woocommerce_id = frappe.db.get_value('Item', doc.item_code, 'woocommerce_id')
+    #
+    #         if woocommerce_id:
+    #             wcapi = API(
+    #                 url=woocommerce_settings.woocommerce_server_url,
+    #                 consumer_key=woocommerce_settings.api_consumer_key,
+    #                 consumer_secret=woocommerce_settings.api_consumer_secret,
+    #                 wp_api=True,
+    #                 version="wc/v3",
+    #                 query_string_auth=True,
+    #             )
+    #             data = {
+    #                 "stock_quantity": flt(pre_qty) + flt(incoming_value) if incoming_value else flt(doc.qty_after_transaction),
+    #                 "manage_stock": True
+    #             }
+    #             url = "products/" + str(woocommerce_id)
+    #             wcapi.put(url, data).json()
         
         
 @frappe.whitelist()    

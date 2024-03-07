@@ -571,14 +571,54 @@ def make_stock_distribution(source_name, target_doc=None):
 @frappe.whitelist()    
 def get_restaurant_order_list():
     data = frappe.db.sql(""" SELECT 
-                            p.name, p.restaurant_table_number, p.total_qty, p.rounded_total,
-                            CONCAT(GROUP_CONCAT(CONCAT(c.item_name, '*', cast(c.qty as int)) SEPARATOR ', ')) AS child_items
+                            p.name, p.restaurant_table_number, p.total_qty, p.rounded_total, status, 
+                            CONCAT(GROUP_CONCAT(CONCAT(c.item_name, '*', cast(c.qty as int)) SEPARATOR '<br>')) AS child_items
                             FROM 
                                 `tabPOS Invoice` p
                             LEFT JOIN 
-                                `tabPOS Invoice Item` c ON p.name = c.parent WHERE p.status='Ordered'
+                                `tabPOS Invoice Item` c ON p.name = c.parent WHERE p.status in ('Ordered', 'Processing', 'Ready')
                             GROUP BY 
                                 p.name;
                             """, as_dict=True)
-
     return data
+
+@frappe.whitelist()
+def get_restaurant_order_new_list(filters):
+    try:
+        filters = json.loads(filters)
+    except:
+        pass
+    docname = filters.get('docname')
+    sql = f""" SELECT p.name, p.status, p.docstatus, CONCAT(GROUP_CONCAT(CONCAT(c.item_name, '*', cast(c.qty as int)) SEPARATOR '<br>')) AS child_items
+                            FROM 
+                                `tabPOS Invoice` p
+                            LEFT JOIN 
+                                `tabPOS Invoice Item` c ON p.name = c.parent WHERE p.status in ('Ordered', 'Processing', 'Ready') and p.name = '{docname}'
+                            GROUP BY 
+                                p.name;
+                            """
+
+    data = frappe.db.sql(sql, as_dict=True)
+    if len(data) > 0:
+        return data[0]
+    return {}
+
+
+@frappe.whitelist()
+def update_pos_status(filters):
+    try:
+        filters = json.loads(filters)
+    except:
+        pass
+
+    docname = filters.get('docname')
+    doc = frappe.get_doc("POS Invoice", docname)
+    if doc.status == 'Ordered':
+        frappe.db.set_value("POS Invoice", docname, 'status', 'Processing')
+        return 'Processing'
+    elif doc.status == 'Processing':
+        frappe.db.set_value("POS Invoice", docname, 'status', 'Ready')
+        return 'Ready'
+    else:
+        # frappe.db.set_value("POS Invoice", docname, 'status', 'Ordered')
+        return ''

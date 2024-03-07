@@ -1,0 +1,26 @@
+{
+ "content": null,
+ "creation": "2024-03-06 16:47:46.939424",
+ "docstatus": 0,
+ "doctype": "Page",
+ "idx": 0,
+ "modified": "2024-03-06 16:47:46.939424",
+ "modified_by": "Administrator",
+ "module": "BBB Restaurant",
+ "name": "restaurant-order-lis-1",
+ "owner": "Administrator",
+ "page_name": "restaurant-order-lis-1",
+ "roles": [
+  {
+   "role": "System Manager"
+  },
+  {
+   "role": "BBB Admin"
+  }
+ ],
+ "script": null,
+ "standard": "Yes",
+ "style": null,
+ "system_page": 0,
+ "title": "Restaurant Order List For Kitchen"
+}
