@@ -292,25 +292,37 @@ def get_past_order_list(search_term, status, limit=3):
 
 
 def validate(doc, method):
-    # if not doc.customer:
-    #     frappe.throw(_("You must select a customer before submit"), CustomerValidationError, title="Missing")
-    # if doc.company == 'BBB Restaurant' and doc.docstatus == 0:
-    #     doc.status = 'Ordered'
-    #     if doc.restaurant_order_item_html:
-    #         # pass
-    #         data = 'Rice * 2 <br> Burger * 3'
-    #         data = data.split('<br>')
-    #         print(data)
-    #     else:
-    #         new_item = restaurant_order_item(doc)
-    #         doc.status = 'Ordered'
+    if not doc.customer:
+        frappe.throw(_("You must select a customer before submit"), CustomerValidationError, title="Missing")
+    if doc.company == 'BBB Restaurant' and doc.docstatus == 0:
+        doc.status = 'Ordered'
+        items = doc.items
+        restaurant_old_order_list = []
+        restaurant_new_order_list = []
 
+        for index, item in enumerate(items):
+            if item.restaurant_new_qty > 0 or (item.restaurant_old_qty > 0 and item.qty > item.restaurant_old_qty and item.restaurant_new_qty == 0):
+                item.restaurant_new_qty = item.qty - item.restaurant_old_qty
+            elif restaurant_old_order_list and item.restaurant_old_qty == 0:
+                item.restaurant_new_qty = item.qty
+            else:
+                item.restaurant_old_qty = item.qty
+                item.restaurant_new_qty = 0
 
-    # Define the old and new item lists
-    old_item = ['Bread * 1', '<br>', 'Burger * 1']
-    new_item = ['Bread * 1', 'Burger * 2 ', 'Rice * 2']
+            if item.restaurant_new_qty > 0 and item.restaurant_old_qty > 0:
+                restaurant_old_order_list.append(f'{item.item_name} * {item.restaurant_old_qty}')
+                restaurant_new_order_list.append(f'{item.item_name} * {item.restaurant_new_qty}')
+            elif item.restaurant_new_qty > 0:
+                restaurant_new_order_list.append(f'{item.item_name} * {item.restaurant_new_qty}')
+            elif item.restaurant_old_qty > 0:
+                restaurant_old_order_list.append(f'{item.item_name} * {item.restaurant_old_qty}')
 
-    item = get_new_order_item(old_item, doc)
+        restaurant_old_order_item_html = '<br>'.join(restaurant_old_order_list)
+        restaurant_new_order_item_html = '<br>'.join(restaurant_new_order_list)
+        if restaurant_new_order_list:
+            doc.restaurant_order_item_html = restaurant_old_order_item_html + '<hr>' + restaurant_new_order_item_html
+        else:
+            doc.restaurant_order_item_html = restaurant_old_order_item_html
 
 def restaurant_order_item(doc):
     items_html = ''

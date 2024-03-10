@@ -1,7 +1,7 @@
 frappe.pages['restaurant-order-lis-1'].on_page_load = function(wrapper) {
 	var page = frappe.ui.make_app_page({
 		parent: wrapper,
-		title: __('Restaurant Order List'),
+		title: __('Restaurant Order List For Kitchen'),
 		single_column: true
 	});
 	$('.page-body').css('background', '#FFFFFF');
@@ -12,6 +12,7 @@ frappe.pages['restaurant-order-lis-1'].on_page_load = function(wrapper) {
 	frappe.realtime.on("list_update", (data) => {
 		let doctype = data.doctype;
 		if(doctype === 'POS Invoice'){
+			frappe.utils.play_sound("submit");
 			restaurant.update_item_or_status(data)
 		}
 	});
@@ -23,57 +24,26 @@ frappe.Restaurant = class RestaturantOrderList {
 			var items_td = $(`[docname=${data.docname}]`)[0];
 			var items = items_td.innerHTML
 			if(items !== undefined){
-				frappe.db.get_value(data.doctype, data.docname, 'docstatus').then((r) => {
+				frappe.db.get_value(data.doctype, data.docname, ['docstatus', 'restaurant_order_item_html']).then((r) => {
 					let values = r.message;
 					if(values.docstatus === 0){
-						let old_item = items.split(', ')
-						let new_item = ['Bread*1', 'Burger*2', 'Rice*6']
-						frappe.call('bbb.bbb_restaurant.methods.utils.get_restaurant_order_new_list', {
-							filters: {
-								docname: data.docname,
-							},
-							freeze: true,
-						}).then(r => {
-							let new_item = r.message.child_items;
-							let new_items = me.get_new_item(old_item, new_item)
-							items_td.innerHTML = old_item + '\n' + new_items
-						});
+						let child_items = diff[key].child_items || ""
+						child_items = child_items.split("<hr>")
+						let html=''
+						if(child_items.length === 2){
+							html+= `<div class="old_item" style="font-weight: : 600"> ${child_items[0] || ''} </div><hr><div class="new_item font-weight-bold text-danger"> ${child_items[1] || ''} </div>`
+						}else if (child_items.length === 1){
+							html+= '<div class="old_item" style="font-weight: : 600">' + child_items[0] || '' + '</div>'
+						}else{
+							html+= '<div class="old_item" style="font-weight: : 600">' + child_items || '' + '</div>'
+						}
+						items_td.innerHTML = html
 					}
 				})
 			}
 
 		}
 
-		get_new_item(old_item, new_item){
-			function splitItem(item) {
-				let parts = item.split('*');
-				return {
-					name: parts[0],
-					value: parseInt(parts[1])
-				};
-			}
-
-			// Find the differences
-			let differences = [];
-			$.each(new_item, function(index, newItem) {
-				let newItemInfo = splitItem(newItem);
-				let found = false;
-				$.each(old_item, function(index, oldItem) {
-					let oldItemInfo = splitItem(oldItem);
-					if (newItemInfo.name === oldItemInfo.name) {
-						if (newItemInfo.value !== oldItemInfo.value) {
-							differences.push(oldItem);
-						}
-						found = true;
-						return false; // Exit the loop early since a match is found
-					}
-				});
-				if (!found) {
-					differences.push(newItem);
-				}
-			});
-			return differences;
-		}
 		constructor(page) {
 			this.page = page;
 			this.make_form();
@@ -122,7 +92,7 @@ frappe.Restaurant = class RestaturantOrderList {
 										me.removeClass('btn-warning')
 										me.addClass('btn-primary')
 										let status_td = me.parent().siblings('td.doc_status')
-										status_td.html("Ready")
+										status_td.html("Processing")
 										status_td.removeClass('text-warning')
 										status_td.addClass('text-primary')
 									}
@@ -149,22 +119,6 @@ frappe.Restaurant = class RestaturantOrderList {
 			let table_header = this.table_header();
 			let table_body = this.table_body(diff);
 			this.form.get_field('preview').html(`<table class="table table-bordered" id="export_excel">${table_header}${table_body}</table>`);
-
-
-			var docname = 'ACC-PSINV-2024030439995';
-			var items_td = $(`[docname=${docname}]`)[0];
-			let items = 'Rice * 2 <br> Burger * 3 <hr class="text-warning"> <span class="text-danger text-bold"> Rice * 1</span>'
-			items_td.innerHTML = items
-			// var items = $(`[docname=${docname}]`)[0].innerHTML;
-			// frappe.call('bbb.bbb_restaurant.methods.utils.get_restaurant_order_new_list', {
-			// 	filters: {
-			// 		docname: docname,
-            // 	},
-			// 	freeze: true,
-			// }).then(r => {
-			// 	let new_item = r.message.child_items;
-			//
-			// });
 		}
 		table_header = () =>{
 			let table_header ='<thead>\n' +
@@ -186,10 +140,20 @@ frappe.Restaurant = class RestaturantOrderList {
 				let status_color = diff[key].status === 'Ordered' ? 'text-warning': diff[key].status === 'Processing' ? 'text-primary' : diff[key].status === 'Ready' ? 'text-success' : ''
 				let btn_color = diff[key].status === 'Ordered' ? 'btn-warning': diff[key].status === 'Processing' ? 'btn-primary' : diff[key].status === 'Ready' ? 'btn-success' : '';
 				let status = diff[key].status === 'Ordered' ? 'Start Processing': diff[key].status === 'Processing' ? 'Press to complete' : diff[key].status === 'Ready' ? 'Ready' : ''
+
+				let child_items = diff[key].child_items || ""
+				child_items = child_items.split("<hr>")
 				html+='<tr class="tr_body">'
 				html+= '<td class="name">' + diff[key].name || '' + '</td>'
 				html+= '<td class="">' + diff[key].restaurant_table_number || '' + '</td>'
-				html+= '<td class="child_items" docname="'+ diff[key].name +'">' + diff[key].child_items || '' + '</td>'
+				if(child_items.length === 2){
+					html+= `<td class="child_items" docname="${diff[key].name || ''}"><div class="old_item" style="font-weight: : 600"> ${child_items[0] || ''} </div><hr><div class="new_item font-weight-bold text-danger"> ${child_items[1] || ''} </div></td>`
+				}else if (child_items.length === 1){
+					html+= '<td class="child_items" docname="'+ diff[key].name +'"><div class="old_item" style="font-weight: : 600">' + child_items[0] || '' + '</div></td>'
+				}else{
+					html+= '<td class="child_items" docname="'+ diff[key].name +'"><div class="old_item" style="font-weight: : 600">' + child_items || '' + '</div></td>'
+				}
+
 				html+= '<td class="">' + diff[key].total_qty || '' + '</td>'
 				html+= '<td class="text '+ status_color +' doc_status">' + diff[key].status || '' + '</td>'
 				html+= '<td class="">' + format_currency(diff[key].rounded_total, 'BDT') || '' + '</td>'

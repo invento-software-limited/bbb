@@ -231,7 +231,12 @@ erpnext.PointOfSale.Controller = class {
 
     view_order_list() {
         const me = this;
+        let status_color = (status) => {
+            let color = status === 'Ordered' ? 'text-warning': status === 'Processing' ? 'text-primary' : status === 'Ready' ? 'text-success' : ''
+            return color
+        }
         function get_items_template(me, d, data){
+
             var html = `<div class="card mb-12">
                 {% if data %}
                     <div class="dashboard-list-item" style="padding: 5px">
@@ -242,22 +247,26 @@ erpnext.PointOfSale.Controller = class {
                             <div class="col-sm-1 text-muted" style="margin-top: 8px;">
                                 Table
                             </div>
-                            <div class="col-sm-4 text-muted" style="margin-top: 8px;">
+                            <div class="col-sm-3 text-muted" style="margin-top: 8px;">
                                 Items
                             </div>
                             <div class="col-sm-1 text-muted" style="margin-top: 8px;">
                                 Qty
                             </div>
+                
+                            <div class="col-sm-2 text-muted" style="margin-top: 8px;">
+                                Status
+                            </div>
                             <div class="col-sm-1 text-muted" style="margin-top: 8px;">
                                 Modify
                             </div>
-                            <div class="col-sm-2 text-muted" style="margin-top: 8px;">
+                            <div class="col-sm-1 text-muted" style="margin-top: 8px;">
                                 Final Bill
                             </div>
                         </div>
                     </div>
                     {% for d in data %}
-                        <div class="dashboard-list-item" style="padding: 5px">
+                    <div class="dashboard-list-item" style="padding: 5px">
                             <div class="row col-md-12">
                                 <div class="col-sm-3" style="margin-top: 8px;">
                                     <a data-type="name" data-name="{{ d.name }}">
@@ -267,17 +276,35 @@ erpnext.PointOfSale.Controller = class {
                                         <a data-type="item" data-name="{{ d.restaurant_table_number }}}">
                                         {% if d.name %}{{ d.restaurant_table_number  }}{% endif %}</a>
                                     </div>
-                                    <div class="col-sm-4" style="margin-top: 8px; ">
+                                    <div class="col-sm-3" style="margin-top: 8px; ">
                                         <a data-type="item" data-name="">{{ d.child_items }}</a>
                                     </div>
                                     <div class="col-sm-1" style="margin-top: 8px; ">
                                         <a data-type="item" data-name="{{ d.total_qty }}">
                                             {{ d.total_qty }}</a>
                                     </div>
+                                    {% if d.status == 'Ordered' %}
+                                        <div class="col-sm-2 text-warning" style="margin-top: 8px; ">
+                                            <a data-type="item" data-name="{{ d.total_qty }}">
+                                                {{ d.status }}</a>
+                                        </div>
+                                    {% endif %}
+                                    {% if d.status == 'Processing' %}
+                                        <div class="col-sm-2 text-primary" style="margin-top: 8px; ">
+                                            <a data-type="item" data-name="{{ d.total_qty }}">
+                                                {{ d.status }}</a>
+                                        </div>
+                                    {% endif %}
+                                    {% if d.status == 'Ready' %}
+                                        <div class="col-sm-2 text-success" style="margin-top: 8px; ">
+                                            <a data-type="item" data-name="{{ d.total_qty }}">
+                                                {{ d.status }}</a>
+                                        </div>
+                                    {% endif %}
                                     <div class="col-sm-1" style="margin-top: 8px; ">
                                         <button class="btn btn-primary edit_order_" name={{ d.name }} style="float:right"> Edit</button>
                                     </div>
-                                    <div class="col-sm-2" style="margin-top: 8px;">
+                                    <div class="col-sm-1" style="margin-top: 8px;">
                                         <button class="btn btn-success checkout_order text-right" name={{ d.name }}> View</button>
                                     </div>
                                 </div>
@@ -352,7 +379,7 @@ erpnext.PointOfSale.Controller = class {
             ],
         });
         d.show();
-        d.$wrapper.find('.modal-dialog').css("max-width", "1000px");
+        d.$wrapper.find('.modal-dialog').css("max-width", "1150px");
         get_items(me, d)
     }
     view_in_new_tab(){

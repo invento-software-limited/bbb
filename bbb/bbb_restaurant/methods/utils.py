@@ -568,15 +568,28 @@ def make_stock_distribution(source_name, target_doc=None):
 	)
 	return doclist
 
-@frappe.whitelist()    
+# @frappe.whitelist()
+# def get_restaurant_order_list():
+#     data = frappe.db.sql(""" SELECT
+#                             p.name, p.restaurant_table_number, p.total_qty, p.rounded_total, status,
+#                             CONCAT(GROUP_CONCAT(CONCAT(c.item_name, '*', cast(c.qty as int)) SEPARATOR '<br>')) AS child_items
+#                             FROM
+#                                 `tabPOS Invoice` p
+#                             LEFT JOIN
+#                                 `tabPOS Invoice Item` c ON p.name = c.parent WHERE p.status in ('Ordered', 'Processing', 'Ready')
+#                             GROUP BY
+#                                 p.name;
+#                             """, as_dict=True)
+#     return data
+
+@frappe.whitelist()
 def get_restaurant_order_list():
     data = frappe.db.sql(""" SELECT 
-                            p.name, p.restaurant_table_number, p.total_qty, p.rounded_total, status, 
-                            CONCAT(GROUP_CONCAT(CONCAT(c.item_name, '*', cast(c.qty as int)) SEPARATOR '<br>')) AS child_items
+                            p.name, p.restaurant_table_number, p.total_qty, p.rounded_total, p.status, p.restaurant_order_item_html AS child_items
                             FROM 
                                 `tabPOS Invoice` p
                             LEFT JOIN 
-                                `tabPOS Invoice Item` c ON p.name = c.parent WHERE p.status in ('Ordered', 'Processing', 'Ready')
+                                `tabPOS Invoice Item` c ON p.name = c.parent WHERE p.status in ('Ordered', 'Processing', 'Ready') and p.docstatus = 0
                             GROUP BY 
                                 p.name;
                             """, as_dict=True)
