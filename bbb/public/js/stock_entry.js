@@ -1,9 +1,43 @@
 frappe.ui.form.on('Stock Entry', {
+
+    onload: function(frm) {
+        if (frm.doc.__islocal && frm.doc.stock_created_from){
+            frappe.call ({
+                method: "bbb.bbb.controllers.stock_entry.make_stock_entry",
+                args : {
+                    'name' : frm.doc.stock_created_from
+                },
+                freeze: true,
+				freeze_message: __('Creating Stock Entry...'),
+                callback: function(r){
+                    r.message.forEach(function(row){
+                        let tb_row = frm.add_child("items")
+                        tb_row.item_code = row.item_code;
+                        tb_row.transfer_qty_from_stock_distribution = row.transfer_qty_from_stock_distribution;
+                        tb_row.qty = row.qty
+                        tb_row.s_warehouse = row.s_warehouse
+                        tb_row.t_warehouse = row.t_warehouse
+                        tb_row.conversion_factor = row.conversion_factor
+                        tb_row.uom = row.uom
+                        tb_row.transfer_qty = row.transfer_qty
+                    })
+                    frm.refresh_field("items")
+                }
+            })
+        }
+    },
     refresh: function(frm){
         if (frm.doc.workflow_state === "Partially Completed" && frm.doc.stock_distribution && frm.doc.total_transfer_qty !== frm.doc.total_accepted_qty) {
-            frm.add_custom_button(__('Re-Create Stock'),
-                cur_frm.cscript['Re-Create Stock']
-			);
+            frm.add_custom_button(__("Re-Create Stock"), function(){
+				frappe.model.with_doctype("Stock Entry", function() {
+                    let stock_entry = frappe.model.get_new_doc("Stock Entry");
+                    stock_entry.stock_created_from = frm.doc.name
+                    stock_entry.stock_entry_type = frm.doc.stock_entry_type
+                    stock_entry.from_warehouse = frm.doc.from_warehouse
+                    stock_entry.to_warehouse = frm.doc.to_warehouse
+                    frappe.set_route("Form", "Stock Entry", stock_entry.name);
+                });
+			});
 		}
         setTimeout(() => {
             frm.remove_custom_button('Delivery Note','Get customers from');
@@ -69,32 +103,13 @@ frappe.ui.form.on('Stock Entry', {
             }
         }
     },
-    onload: function(frm) {
-        // Call a function to remove rows with qty = 0
-        removeRowsWithZeroQty(frm);
-        if(frm.doc.__islocal) {
-            frm.set_value("total_transfer_qty",0)
-            frm.set_value("total_accepted_qty",0)
-        }
+    // onload: function(frm) {
+    //     // Call a function to remove rows with qty = 0
+    //     removeRowsWithZeroQty(frm);
+    //     if(frm.doc.__islocal) {
+    //         frm.set_value("total_transfer_qty",0)
+    //         frm.set_value("total_accepted_qty",0)
+    //     }
         
-    }
+    // }
 });
-
-function removeRowsWithZeroQty(frm) {
-    var items = frm.doc.items || [];
-
-    for (var i = items.length - 1; i >= 0; i--) {
-        var qty = flt(items[i].qty);
-        if (qty === 0) {
-            frm.get_field('items').grid.grid_rows[i].remove();
-            frm.refresh_field("items");
-        }
-    }
-}
-
-cur_frm.cscript['Re-Create Stock'] = function() {
-	frappe.model.open_mapped_doc({
-		method: "bbb.bbb.controllers.utils.make_stock_entry",
-		frm: cur_frm
-	})
-}
