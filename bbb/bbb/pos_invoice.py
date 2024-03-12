@@ -4,8 +4,12 @@ import datetime
 import math
 from frappe.utils import money_in_words, flt, cint
 from frappe import _
-
 from erpnext.accounts.doctype.pricing_rule.utils import filter_pricing_rules_for_qty_amount
+from frappe.utils import today, flt, now, cstr, cint
+from frappe.defaults import get_defaults
+from erpnext.accounts.utils import get_fiscal_year
+from erpnext.stock.stock_ledger import make_sl_entries
+from erpnext.controllers.stock_controller import StockController
 
 class CustomerValidationError(frappe.ValidationError): pass
 
@@ -48,6 +52,120 @@ def after_insert_or_on_submit(doc, method):
         if search_items:
             frappe.db.set_value("Product Search Log", search_items[0].get('name'), 'is_sale', 1)
 
+
+    if doc.company == 'BBB Restaurant':
+        for item in doc.items:
+            update_stock_ledger(doc, item)
+
+def on_cancel(doc, method):
+    if doc.company == 'BBB Restaurant':
+        for item in doc.items:
+            update_stock_ledger(doc, item, cancelled=1)
+
+def get_item_list(doc, item):
+    item_code = frappe.get_doc('Item', item.item_code)
+    warehouse = frappe.db.get_value('POS Profile', doc.pos_profile, 'warehouse')
+    if len(item_code.consumable_items) == 0:
+        return []
+
+    il = []
+    for d in item_code.consumable_items:
+        if d.qty is None:
+            frappe.throw(_("Row {0}: Qty is mandatory").format(d.idx))
+        else:
+            il.append(
+                frappe._dict(
+                    {
+                        "warehouse": '',
+                        "item_code": d.item_code,
+                        "qty": float(d.qty) * float(item.qty),
+                        "uom": d.uom,
+                        "stock_uom": d.uom,
+                        "conversion_factor": 1,
+                        "batch_no": cstr(d.get("batch_no")).strip(),
+                        "serial_no": cstr(d.get("serial_no")).strip(),
+                        "name": d.name,
+                        "target_warehouse": warehouse,
+                        "company": doc.company,
+                        "voucher_type": doc.doctype,
+                        "allow_zero_valuation": 0,
+                        "consumable_item": d.item_code,
+                        "incoming_rate": 0,
+                    }
+                )
+            )
+
+    return il
+
+def update_stock_ledger(doc, item, submitted=0, cancelled=0):
+    # self.update_reserved_qty()
+
+    sl_entries = []
+    # Loop over items and packed items table
+    for d in get_item_list(doc, item):
+        # if submitted:
+        sl_entries.append(get_sle_for_source_warehouse(doc, d, cancelled = cancelled))
+        # elif cancelled:
+        #     sl_entries.append(self.get_sle_for_target_warehouse(d, cancelled = cancelled))
+    if sl_entries:
+        make_sl_entries(sl_entries, allow_negative_stock=True)
+
+def get_sle_for_source_warehouse(doc, item_row, cancelled):
+    sle = get_sl_entries(
+        doc, item_row,{
+                "actual_qty": -1 * flt(item_row.qty),
+                "incoming_rate": item_row.incoming_rate,
+                "recalculate_rate":cancelled,
+                "is_cancelled": cancelled
+        },
+    )
+    return sle
+
+def get_sle_for_target_warehouse(self, item_row, cancelled):
+    sle = self.get_sl_entries(
+        doc, item_row, {"actual_qty": -1 * flt(item_row.qty), "warehouse": item_row.target_warehouse, 'is_cancelled': cancelled}
+    )
+
+    if self.docstatus == 1:
+        if not cint(self.is_return):
+            sle.update({"incoming_rate": item_row.incoming_rate, "recalculate_rate": 1})
+        else:
+            sle.update({"outgoing_rate": item_row.incoming_rate})
+            if item_row.warehouse:
+                sle.dependant_sle_voucher_detail_no = item_row.name
+
+    return sle
+
+def get_sl_entries(doc, d, args):
+    valuation_rate = frappe.db.get_value('Item', d.get('item_code'), 'valuation_rate')
+    warehouse = frappe.db.get_value('POS Profile', doc.pos_profile, 'warehouse')
+
+    sl_dict = frappe._dict(
+        {
+            "item_code": d.get("item_code", None),
+            "warehouse": warehouse,
+            "posting_date": today(),
+            "posting_time": frappe.utils.nowtime(),
+            "fiscal_year": get_fiscal_year(today(), company=doc.company)[0],
+            "voucher_type": doc.doctype,
+            "voucher_no": doc.name,
+            "voucher_detail_no": d.name,
+            # "actual_qty": (self.docstatus == 1 and 1 or -1) * flt(d.get("stock_qty")),
+            # "actual_qty": (-1 if self.docstatus == 2 else 1) * flt(d.get("qty")),
+            "stock_uom": frappe.db.get_value(
+                "Item", args.get("item_code") or d.get("item_code"), "stock_uom"
+            ),
+            "incoming_rate": 0,
+            "valuation_rate": valuation_rate,
+            "company": doc.company,
+            "batch_no": cstr(d.get("batch_no")).strip(),
+            "serial_no": d.get("serial_no"),
+            "project": d.get("project", None) or doc.get("project", None),
+
+        }
+    )
+    sl_dict.update(args)
+    return sl_dict
 @frappe.whitelist()
 def set_pos_cached_data(invoice_data=None):
     invoice_data = json.loads(invoice_data)
