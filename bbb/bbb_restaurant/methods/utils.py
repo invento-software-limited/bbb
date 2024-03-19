@@ -7,7 +7,6 @@ from frappe.permissions import get_doctypes_with_read
 from frappe.utils import cint, cstr, now
 from frappe.utils import cint, flt, fmt_money, get_link_to_form, getdate, today, cstr
 from frappe.model.naming import set_name_from_naming_options
-from frappe.model.mapper import get_mapped_doc
 
 from erpnext.accounts.doctype.pricing_rule.utils import filter_pricing_rules_for_qty_amount
 
@@ -492,41 +491,67 @@ def update_customers_dob():
 
 
 def update_woocommerce_stock(doc, method):
-    pass
-    # from woocommerce import API
-    # woocommerce_settings = frappe.get_doc("Woocommerce Settings")
-    # bbb_settings = frappe.get_doc("BBB Settings")
-    #
-    # if doc.voucher_type != 'Woocommerce Order' and bbb_settings.woocommerce_status == "Enabled":
-    #     bin = frappe.db.get_value("Bin", {'item_code': doc.item_code, 'warehouse': doc.warehouse}, 'actual_qty', as_dict=1)
-    #
-    #     if woocommerce_settings.warehouse == doc.warehouse:
-    #         pre_qty = bin.get('actual_qty') if bin else 0
-    #         incoming_value = doc.actual_qty
-    #         woocommerce_id = frappe.db.get_value('Item', doc.item_code, 'woocommerce_id')
-    #
-    #         if woocommerce_id:
-    #             wcapi = API(
-    #                 url=woocommerce_settings.woocommerce_server_url,
-    #                 consumer_key=woocommerce_settings.api_consumer_key,
-    #                 consumer_secret=woocommerce_settings.api_consumer_secret,
-    #                 wp_api=True,
-    #                 version="wc/v3",
-    #                 query_string_auth=True,
-    #             )
-    #             data = {
-    #                 "stock_quantity": flt(pre_qty) + flt(incoming_value) if incoming_value else flt(doc.qty_after_transaction),
-    #                 "manage_stock": True
-    #             }
-    #             url = "products/" + str(woocommerce_id)
-    #             wcapi.put(url, data).json()
+    from woocommerce import API
+    woocommerce_settings = frappe.get_doc("Woocommerce Settings")
+    bbb_settings = frappe.get_doc("BBB Settings")
+    
+    if doc.voucher_type != 'Woocommerce Order' and bbb_settings.woocommerce_status == "Enabled":
+        bin = frappe.db.get_value("Bin", {'item_code': doc.item_code, 'warehouse': doc.warehouse}, 'actual_qty', as_dict=1)
+
+        if woocommerce_settings.warehouse == doc.warehouse:
+            pre_qty = bin.get('actual_qty') if bin else 0
+            incoming_value = doc.actual_qty
+            woocommerce_id = frappe.db.get_value('Item', doc.item_code, 'woocommerce_id')
+
+            if woocommerce_id:
+                wcapi = API(
+                    url=woocommerce_settings.woocommerce_server_url,
+                    consumer_key=woocommerce_settings.api_consumer_key,
+                    consumer_secret=woocommerce_settings.api_consumer_secret,
+                    wp_api=True,
+                    version="wc/v3",
+                    query_string_auth=True,
+                )
+                data = {
+                    "stock_quantity": flt(pre_qty) + flt(incoming_value) if incoming_value else flt(doc.qty_after_transaction),
+                    "manage_stock": True
+                }
+                url = "products/" + str(woocommerce_id)
+                wcapi.put(url, data).json()
         
         
-@frappe.whitelist()    
-def get_restaurant_order_list():
-    order_list = []
-    order_list = frappe.db.get_all(doctype='POS Invoice', filters={'status': 'Ordered'}, fields=['name', 'restaurant_table_number', 'total_qty', 'rounded_total'])
-    return order_list
+# @frappe.whitelist()    
+# def get_restaurant_order_list():
+#     order_list = []
+#     # order_list = frappe.db.get_list(doctype='POS Invoice', filters={'status': 'Ordered'}, fields=['name', 'restaurant_table_number', 'total_qty', 'rounded_total'])
+#     # order_list = frappe.db.get_all(doctype='POS Invoice', filters={'status': 'Ordered'}, fields=['name', 'restaurant_table_number', 'total_qty', 'rounded_total'])
+#     order_list = frappe.db.sql("""SELECT 'name', 'restaurant_table_number', 'total_qty', 'rounded_total' FROM `tabPOS Invoice` WHERE idx <= 10""")
+
+#     return order_list
+
+
+from frappe.model.mapper import get_mapped_doc
+@frappe.whitelist()
+def make_stock_entry(source_name, target_doc=None):
+
+    def update_item(source_doc, target_doc, source_parent):
+        target_doc.qty = flt(source_doc.transfer_qty_from_stock_distribution) - flt(source_doc.qty)
+        target_doc.transfer_qty_from_stock_distribution = flt(source_doc.transfer_qty_from_stock_distribution) - flt(source_doc.qty)
+
+    doclist = get_mapped_doc(
+        "Stock Entry",
+        source_name,
+        {
+            "Stock Entry": {"doctype": "Stock Entry", "validation": {"docstatus": ["=", 1]}},
+            "Stock Entry Detail": {
+                "doctype": "Stock Entry Detail",
+                "postprocess": update_item,
+                "condition": lambda doc: doc.qty > 0,
+            },
+        },
+        target_doc
+    )
+    return doclist
 
 @frappe.whitelist()
 def make_stock_distribution(source_name, target_doc=None):
@@ -543,13 +568,70 @@ def make_stock_distribution(source_name, target_doc=None):
 	)
 	return doclist
 
-@frappe.whitelist()    
+# @frappe.whitelist()
+# def get_restaurant_order_list():
+#     data = frappe.db.sql(""" SELECT
+#                             p.name, p.restaurant_table_number, p.total_qty, p.rounded_total, status,
+#                             CONCAT(GROUP_CONCAT(CONCAT(c.item_name, '*', cast(c.qty as int)) SEPARATOR '<br>')) AS child_items
+#                             FROM
+#                                 `tabPOS Invoice` p
+#                             LEFT JOIN
+#                                 `tabPOS Invoice Item` c ON p.name = c.parent WHERE p.status in ('Ordered', 'Processing', 'Ready')
+#                             GROUP BY
+#                                 p.name;
+#                             """, as_dict=True)
+#     return data
+
+@frappe.whitelist()
 def get_restaurant_order_list():
-    order_list = []
-    # order_list = frappe.db.get_all(doctype='POS Invoice', filters={'status': 'Ordered'}, fields=['name', 'restaurant_table_number', 'total_qty' ,'rounded_total'])
-    voucher_list = frappe.db.get_list(doctype='POS Invoice', filters={'status': 'Ordered'})
-    for voucher in voucher_list:
-        doc = frappe.get_doc("POS Invoice", voucher)
-        
-        order_list.append(doc)
-    return order_list
+    data = frappe.db.sql(""" SELECT 
+                            p.name, p.restaurant_table_number, p.total_qty, p.rounded_total, p.status, p.restaurant_order_item_html AS child_items
+                            FROM 
+                                `tabPOS Invoice` p
+                            LEFT JOIN 
+                                `tabPOS Invoice Item` c ON p.name = c.parent WHERE p.status in ('Ordered', 'Processing', 'Ready') and p.docstatus = 0
+                            GROUP BY 
+                                p.name;
+                            """, as_dict=True)
+    return data
+
+@frappe.whitelist()
+def get_restaurant_order_new_list(filters):
+    try:
+        filters = json.loads(filters)
+    except:
+        pass
+    docname = filters.get('docname')
+    sql = f""" SELECT p.name, p.status, p.docstatus, CONCAT(GROUP_CONCAT(CONCAT(c.item_name, '*', cast(c.qty as int)) SEPARATOR '<br>')) AS child_items
+                            FROM 
+                                `tabPOS Invoice` p
+                            LEFT JOIN 
+                                `tabPOS Invoice Item` c ON p.name = c.parent WHERE p.status in ('Ordered', 'Processing', 'Ready') and p.name = '{docname}'
+                            GROUP BY 
+                                p.name;
+                            """
+
+    data = frappe.db.sql(sql, as_dict=True)
+    if len(data) > 0:
+        return data[0]
+    return {}
+
+
+@frappe.whitelist()
+def update_pos_status(filters):
+    try:
+        filters = json.loads(filters)
+    except:
+        pass
+
+    docname = filters.get('docname')
+    doc = frappe.get_doc("POS Invoice", docname)
+    if doc.status == 'Ordered':
+        frappe.db.set_value("POS Invoice", docname, 'status', 'Processing')
+        return 'Processing'
+    elif doc.status == 'Processing':
+        frappe.db.set_value("POS Invoice", docname, 'status', 'Ready')
+        return 'Ready'
+    else:
+        # frappe.db.set_value("POS Invoice", docname, 'status', 'Ordered')
+        return ''

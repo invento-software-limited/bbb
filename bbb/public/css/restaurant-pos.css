@@ -1131,7 +1131,7 @@
     flex-direction: column;
   }
   .point-of-sale-app > .customer-cart-container > .cart-container > .abs-cart-container > .cart-totals-section > .row > .col-md-6 > .checkout-btn {
-    background-color: var(--blue-200);
+    background-color: var(--green-200);
     color: white;
   }
   .point-of-sale-app > .customer-cart-container > .cart-container > .abs-cart-container > .cart-totals-section > .row > .col-md-6 {
@@ -1197,7 +1197,7 @@
   .point-of-sale-app > .customer-cart-container > .cart-container > .abs-cart-container > .numpad-section > .checkout-btn {
     margin: 0px;
     margin-bottom: var(--margin-sm);
-    background-color: var(--blue-200);
+    background-color: var(--green-200);
     color: white;
   }
   .point-of-sale-app .invoice-wrapper {
