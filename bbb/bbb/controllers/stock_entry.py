@@ -17,6 +17,11 @@ def update_validate(doc,method=None):
             
     doc.total_transfer_qty = tqy
     doc.total_accepted_qty = aqy
+
+def update_on_cancel(doc,method=None):
+    if doc.stock_created_from:
+        stock_entry = frappe.get_doc("Stock Entry", doc.stock_created_from)
+        stock_entry.db_set("workflow_state", "Partially Completed")
     
 @frappe.whitelist()
 def make_stock_entry(name):
