@@ -2,8 +2,8 @@ import frappe
 from frappe.utils import flt
 
 def update_on_submit(doc,method=None):
-    if doc.outgoing_stock_entry:
-        stock_entry = frappe.get_doc("Stock Entry",doc.outgoing_stock_entry)
+    if doc.stock_created_from and doc.total_transfer_qty == doc.total_accepted_qty:
+        stock_entry = frappe.get_doc("Stock Entry",doc.stock_created_from)
         stock_entry.db_set("workflow_state","Completed")
         
 def update_validate(doc,method=None):
@@ -17,6 +17,11 @@ def update_validate(doc,method=None):
             
     doc.total_transfer_qty = tqy
     doc.total_accepted_qty = aqy
+
+def update_on_cancel(doc,method=None):
+    if doc.stock_created_from:
+        stock_entry = frappe.get_doc("Stock Entry", doc.stock_created_from)
+        stock_entry.db_set("workflow_state", "Partially Completed")
     
 @frappe.whitelist()
 def make_stock_entry(name):

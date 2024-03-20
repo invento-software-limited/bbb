@@ -160,7 +160,8 @@ doc_events = {
     },
     "Stock Entry":{
         "on_submit": "bbb.bbb.controllers.stock_entry.update_on_submit",
-        "validate" : "bbb.bbb.controllers.stock_entry.update_validate"
+        "validate" : "bbb.bbb.controllers.stock_entry.update_validate",
+        "on_cancel" : "bbb.bbb.controllers.stock_entry.update_on_cancel"
     },
     
 
