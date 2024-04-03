@@ -329,7 +329,10 @@ erpnext.PointOfSale.ItemCart = class {
         this.$component.on('click', '.confirm-order-btn', function () {
             if ($(this).attr('style').indexOf('--blue-500') == -1) return;
             const frm = me.events.get_frm();
-            frappe.model.set_value(frm.doc.doctype, frm.doc.name, 'status', 'Ordered')
+            console.log(frm)
+            frappe.model.set_value(frm.doc.doctype, frm.doc.name, 'status', 'Ordered' )
+            frappe.model.set_value(frm.doc.doctype, frm.doc.name,'company',frappe.defaults.get_user_default("Company") )
+            frappe.model.set_value(frm.doc.doctype, frm.doc.name,'taxes_and_charges','' )
             me.events.save_ordered_invoice()
         });
 

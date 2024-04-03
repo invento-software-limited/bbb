@@ -10,10 +10,11 @@ frappe.pages['restaurant-order-lis'].on_page_load = function(wrapper) {
 	const restaurant = new frappe.Restaurant(page);
 
 	frappe.realtime.on("list_update", (data) => {
-		frappe.utils.play_sound("submit");
 		let doctype = data.doctype;
 		if(doctype === 'POS Invoice'){
+			frappe.utils.play_sound("submit");
 			restaurant.update_item_or_status(data)
+
 		}
 	});
 }
@@ -56,9 +57,65 @@ frappe.Restaurant = class RestaturantOrderList {
 			this.form = new frappe.ui.FieldGroup({
 				fields: [
 					{
-						fieldtype: 'HTML',
-						fieldname: 'preview'
-					}
+
+                    fieldname: 'from_date',
+                    label: __('From Date'),
+                    fieldtype: 'Date',
+                    default: frappe.datetime.get_today(),
+                    change: () => this.fetch_and_render(),
+                    reqd: 1,
+                },
+                {
+                    fieldtype: 'Column Break'
+                },
+                {
+                    fieldname: 'to_date',
+                    label: __('To Date'),
+                    fieldtype: 'Date',
+                    default: frappe.datetime.get_today(),
+                    change: () => this.fetch_and_render(),
+                },
+                {
+                    fieldtype: 'Column Break'
+                },
+                {
+                    fieldname: 'pos_profile',
+                    label: __('Outlet'),
+                    fieldtype: 'Link',
+                    change: () => this.fetch_and_render(),
+                    options: 'POS Profile',
+                },
+                {
+                    fieldtype: 'Column Break'
+                },
+                {
+                    fieldname: 'invoice',
+                    label: __('Invoice'),
+                    fieldtype: 'Link',
+                    options: 'POS Invoice',
+                    change: () => this.fetch_and_render(),
+                },
+                {
+                    fieldtype: 'Column Break'
+                },
+                {
+                    fieldname: 'company',
+                    label: __('Company'),
+                    fieldtype: 'Link',
+                    options: 'Company',
+                    default: frappe.defaults.get_user_default("Company") ,
+                    change: () => this.fetch_and_render(),
+                },
+                {
+                    fieldtype: 'Column Break'
+                },
+                {
+                    fieldtype: 'Section Break'
+                },
+                {
+                    fieldtype: 'HTML',
+                    fieldname: 'preview'
+                }
 				],
 				body: this.page.body
 			});
@@ -66,7 +123,15 @@ frappe.Restaurant = class RestaturantOrderList {
 		}
 	
 		 fetch_and_render = () => {
-			frappe.call('bbb.bbb_restaurant.methods.utils.get_restaurant_order_list', {
+			let {from_date, to_date, pos_profile, invoice,company} = this.form.get_values();
+			frappe.call('bbb.bbb_restaurant.methods.utils.get_restaurant_order_list_update', {
+				filters: {
+					from_date: from_date,
+					to_date: to_date,
+					pos_profile: pos_profile,
+					invoice: invoice,
+					company: company,
+				},
 				freeze: true
 			}).then(r => {
 				let diff = r.message;
@@ -116,17 +181,16 @@ frappe.Restaurant = class RestaturantOrderList {
 				let status_color = diff[key].status === 'Ordered' ? 'text-warning': diff[key].status === 'Processing' ? 'text-primary' : diff[key].status === 'Ready' ? 'text-success' : ''
 				let child_items = diff[key].child_items || ""
 
-				child_items = child_items.split("<hr>")
 				html+='<tr class="tr_body">'
 				html+= '<td class="name">' + diff[key].name || '' + '</td>'
 				html+= '<td class="">' + diff[key].restaurant_table_number || '' + '</td>'
-				if(child_items.length === 2){
-					html+= `<td class="child_items" docname="${diff[key].name || ''}"><div class="old_item" style="font-weight: : 600"> ${child_items[0] || ''} </div><hr><div class="new_item font-weight-bold text-danger"> ${child_items[1] || ''} </div></td>`
-				}else if (child_items.length === 1){
-					html+= '<td class="child_items" docname="'+ diff[key].name +'"><div class="old_item" style="font-weight: : 600">' + child_items[0] || '' + '</div></td>'
-				}else{
-					html+= '<td class="child_items" docname="'+ diff[key].name +'"><div class="old_item" style="font-weight: : 600">' + child_items || '' + '</div></td>'
-				}
+				
+				let items = ''
+				diff[key].items.forEach(r => {
+					console.log(r)
+					items += `<p> ${r["item_name"]} --- ${r["qty"]}</p>`
+				})
+				html+= '<td class="">' + items + '</td>'
 				html+= '<td class="">' + diff[key].total_qty || '' + '</td>'
 				html+= '<td class="text '+ status_color +'">' + diff[key].status || '' + '</td>'
 				html+= '<td class="">' + format_currency(diff[key].rounded_total, 'BDT') || '' + '</td>'

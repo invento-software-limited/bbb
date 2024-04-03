@@ -583,7 +583,26 @@ def make_stock_distribution(source_name, target_doc=None):
 #     return data
 
 @frappe.whitelist()
-def get_restaurant_order_list():
+def get_restaurant_order_list(filters):
+    try:
+        filters = json.loads(filters)
+    except:
+        pass
+    
+    conditions = get_conditions(filters)
+    data = frappe.db.sql(""" SELECT 
+                            p.name, p.restaurant_table_number, p.total_qty, p.rounded_total, p.status, p.restaurant_order_item_html AS child_items
+                            FROM 
+                                `tabPOS Invoice` p
+                            LEFT JOIN 
+                                `tabPOS Invoice Item` c ON p.name = c.parent WHERE p.status in ('Ordered', 'Processing', 'Ready') and p.docstatus = 0 and {}
+                            GROUP BY 
+                                p.name;
+                            """.format(conditions), as_dict=True)
+    return data
+
+@frappe.whitelist()
+def get_restaurant_order_list_():
     data = frappe.db.sql(""" SELECT 
                             p.name, p.restaurant_table_number, p.total_qty, p.rounded_total, p.status, p.restaurant_order_item_html AS child_items
                             FROM 
@@ -595,6 +614,57 @@ def get_restaurant_order_list():
                             """, as_dict=True)
     return data
 
+@frappe.whitelist()
+def get_restaurant_order_list_update(filters):
+    try:
+        filters = json.loads(filters)
+    except:
+        pass
+
+    consitions = get_conditions(filters)
+    result = []
+    data = frappe.db.sql(""" SELECT 
+                            p.name, p.restaurant_table_number, p.rounded_total, p.status,p.creation,p.total_qty
+                            FROM 
+                                `tabPOS Invoice` p 
+                            WHERE p.status in ('Ordered', 'Processing', 'Ready') and p.docstatus = 0 and {}
+                            """.format(consitions), as_dict=True)
+    for pos_inv in data:
+        items = frappe.db.get_list("POS Invoice Item",{"parent" : pos_inv.get("name")},["item_name","qty"])
+        data_dict = {
+            "name": pos_inv.get("name"),
+            "restaurant_table_number" : pos_inv.get("restaurant_table_number") or "",
+            "rounded_total": pos_inv.get("rounded_total"),
+            "status": pos_inv.get("status"),
+            "items" : items,
+            "total_qty" : pos_inv.get("total_qty")
+        }
+        result.append(data_dict)
+
+    return result
+
+def get_conditions(filters):
+    conditions = []
+
+    if filters.get("from_date"):
+        conditions.append("p.posting_date >= '%s'" % filters.get("from_date"))
+
+    if filters.get("to_date"):
+        conditions.append("p.posting_date <= '%s'" % filters.get("to_date"))
+
+    if filters.get("pos_profile"):
+        conditions.append("p.pos_profile = '%s'" % filters.get("pos_profile"))
+
+    if filters.get("invoice"):
+        conditions.append("p.pos_profile = '%s'" % filters.get("invoice"))
+
+    if filters.get("company"):
+        conditions.append("p.company = '%s'" % filters.get("company"))
+
+    if conditions:
+        conditions = " and ".join(conditions)
+
+    return conditions
 @frappe.whitelist()
 def get_restaurant_order_new_list(filters):
     try:

@@ -417,30 +417,45 @@ def validate(doc, method):
         items = doc.items
         restaurant_old_order_list = []
         restaurant_new_order_list = []
-
-        for index, item in enumerate(items):
-            if item.restaurant_new_qty > 0 or (item.restaurant_old_qty > 0 and item.qty > item.restaurant_old_qty and item.restaurant_new_qty == 0):
-                item.restaurant_new_qty = item.qty - item.restaurant_old_qty
-            elif restaurant_old_order_list and item.restaurant_old_qty == 0:
-                item.restaurant_new_qty = item.qty
+        item_str = ""
+        old_str = ""
+        for item in items:
+            if not item.get("in_new"):
+                str_app = "{item} --- {qty}<br>".format(item=item.get("item_name"),qty=item.get("qty"))
+                item_str += str_app
+                item.in_new = 1
             else:
-                item.restaurant_old_qty = item.qty
-                item.restaurant_new_qty = 0
-
-            if item.restaurant_new_qty > 0 and item.restaurant_old_qty > 0:
-                restaurant_old_order_list.append(f'{item.item_name} * {item.restaurant_old_qty}')
-                restaurant_new_order_list.append(f'{item.item_name} * {item.restaurant_new_qty}')
-            elif item.restaurant_new_qty > 0:
-                restaurant_new_order_list.append(f'{item.item_name} * {item.restaurant_new_qty}')
-            elif item.restaurant_old_qty > 0:
-                restaurant_old_order_list.append(f'{item.item_name} * {item.restaurant_old_qty}')
-
-        restaurant_old_order_item_html = '<br>'.join(restaurant_old_order_list)
-        restaurant_new_order_item_html = '<br>'.join(restaurant_new_order_list)
-        if restaurant_new_order_list:
-            doc.restaurant_order_item_html = restaurant_old_order_item_html + '<hr>' + restaurant_new_order_item_html
+                str_app = "{item} --- {qty}<br>".format(item=item.get("item_name"),qty=item.get("qty"))
+                old_str += str_app
+        if len(old_str) > 0:
+            all =  old_str + "<hr>" + item_str
         else:
-            doc.restaurant_order_item_html = restaurant_old_order_item_html
+            all = item_str
+        doc.restaurant_order_item_html = all
+
+        # for index, item in enumerate(items):
+        #     if item.restaurant_new_qty > 0 or (item.restaurant_old_qty > 0 and item.qty > item.restaurant_old_qty and item.restaurant_new_qty == 0):
+        #         item.restaurant_new_qty = item.qty - item.restaurant_old_qty
+        #     elif restaurant_old_order_list and item.restaurant_old_qty == 0:
+        #         item.restaurant_new_qty = item.qty
+        #     else:
+        #         item.restaurant_old_qty = item.qty
+        #         item.restaurant_new_qty = 0
+
+        #     if item.restaurant_new_qty > 0 and item.restaurant_old_qty > 0:
+        #         restaurant_old_order_list.append(f'{item.item_name} * {item.restaurant_old_qty}')
+        #         restaurant_new_order_list.append(f'{item.item_name} * {item.restaurant_new_qty}')
+        #     elif item.restaurant_new_qty > 0:
+        #         restaurant_new_order_list.append(f'{item.item_name} * {item.restaurant_new_qty}')
+        #     elif item.restaurant_old_qty > 0:
+        #         restaurant_old_order_list.append(f'{item.item_name} * {item.restaurant_old_qty}')
+
+        # restaurant_old_order_item_html = '<br>'.join(restaurant_old_order_list)
+        # restaurant_new_order_item_html = '<br>'.join(restaurant_new_order_list)
+        # if restaurant_new_order_list:
+        #     doc.restaurant_order_item_html = restaurant_old_order_item_html + '<hr>' + restaurant_new_order_item_html
+        # else:
+        #     doc.restaurant_order_item_html = restaurant_old_order_item_html
 
 def restaurant_order_item(doc):
     items_html = ''

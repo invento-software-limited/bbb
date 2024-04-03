@@ -54,10 +54,66 @@ frappe.Restaurant = class RestaturantOrderList {
 		make_form = () => {
 			this.form = new frappe.ui.FieldGroup({
 				fields: [
-					{
-						fieldtype: 'HTML',
-						fieldname: 'preview'
-					}
+				{
+
+                    fieldname: 'from_date',
+                    label: __('From Date'),
+                    fieldtype: 'Date',
+                    default: frappe.datetime.get_today(),
+                    change: () => this.fetch_and_render(),
+                    reqd: 1,
+                },
+                {
+                    fieldtype: 'Column Break'
+                },
+                {
+                    fieldname: 'to_date',
+                    label: __('To Date'),
+                    fieldtype: 'Date',
+                    default: frappe.datetime.get_today(),
+                    change: () => this.fetch_and_render(),
+                },
+                {
+                    fieldtype: 'Column Break'
+                },
+                {
+                    fieldname: 'pos_profile',
+                    label: __('Outlet'),
+                    fieldtype: 'Link',
+                    change: () => this.fetch_and_render(),
+                    options: 'POS Profile',
+                },
+                {
+                    fieldtype: 'Column Break'
+                },
+                {
+                    fieldname: 'invoice',
+                    label: __('Invoice'),
+                    fieldtype: 'Link',
+                    options: 'POS Invoice',
+                    change: () => this.fetch_and_render(),
+                },
+                {
+                    fieldtype: 'Column Break'
+                },
+                {
+                    fieldname: 'company',
+                    label: __('Company'),
+                    fieldtype: 'Link',
+                    options: 'Company',
+                    default: frappe.defaults.get_user_default("Company") ,
+                    change: () => this.fetch_and_render(),
+                },
+                {
+                    fieldtype: 'Column Break'
+                },
+                {
+                    fieldtype: 'Section Break'
+                },
+                {
+                    fieldtype: 'HTML',
+                    fieldname: 'preview'
+                }
 				],
 				body: this.page.body
 			});
@@ -65,7 +121,15 @@ frappe.Restaurant = class RestaturantOrderList {
 		}
 
 		 fetch_and_render = () => {
+			let {from_date, to_date, pos_profile, invoice,company} = this.form.get_values();
 			frappe.call('bbb.bbb_restaurant.methods.utils.get_restaurant_order_list', {
+				filters: {
+					from_date: from_date,
+					to_date: to_date,
+					pos_profile: pos_profile,
+					invoice: invoice,
+					company: company,
+				},
 				freeze: true
 			}).then(r => {
 				let diff = r.message;
@@ -126,10 +190,8 @@ frappe.Restaurant = class RestaturantOrderList {
 				'      <th scope="col" width="17%">Voucher</th>\n' +
 				'      <th scope="col" width="10%">Table</th>\n' +
 				'      <th scope="col" width="33%">Items</th>\n' +
-				'      <th scope="col" width="10%">Qty</th>\n' +
+				'      <th scope="col" width="10%">Total Qty</th>\n' +
 				'      <th scope="col" width="10%">Status</th>\n' +
-				'      <th scope="col" width="10%">Amount</th>\n' +
-				'      <th scope="col" width="10%">Action</th>\n' +
 				'    </tr>\n' +
 				'  </thead>\n';
 			return table_header;
@@ -137,6 +199,7 @@ frappe.Restaurant = class RestaturantOrderList {
 		table_body = (diff) =>{
 			var html = "<tbody class='restaurant_order'>";
 			for (var key in diff) {
+				console.log(key)
 				let status_color = diff[key].status === 'Ordered' ? 'text-warning': diff[key].status === 'Processing' ? 'text-primary' : diff[key].status === 'Ready' ? 'text-success' : ''
 				let btn_color = diff[key].status === 'Ordered' ? 'btn-warning': diff[key].status === 'Processing' ? 'btn-primary' : diff[key].status === 'Ready' ? 'btn-success' : '';
 				let status = diff[key].status === 'Ordered' ? 'Start Processing': diff[key].status === 'Processing' ? 'Press to complete' : diff[key].status === 'Ready' ? 'Ready' : ''
@@ -156,7 +219,6 @@ frappe.Restaurant = class RestaturantOrderList {
 
 				html+= '<td class="">' + diff[key].total_qty || '' + '</td>'
 				html+= '<td class="text '+ status_color +' doc_status">' + diff[key].status || '' + '</td>'
-				html+= '<td class="">' + format_currency(diff[key].rounded_total, 'BDT') || '' + '</td>'
 				html+= '<td><button type="button" class="btn ' + btn_color + ' start_processsing" status="'+ diff[key].status +'" name="'+ diff[key].name +'">'+status+'</button></td>'
 				html+='</tr>'
 			}

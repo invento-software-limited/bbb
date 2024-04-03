@@ -354,7 +354,7 @@ erpnext.PointOfSale.Controller = class {
 
         function get_items(me, d){
             frappe.call({
-                method: 'bbb.bbb_restaurant.methods.utils.get_restaurant_order_list',
+                method: 'bbb.bbb_restaurant.methods.utils.get_restaurant_order_list_',
                 callback: function(r) {
                     if (!r.exc) {
                         // code snippet
