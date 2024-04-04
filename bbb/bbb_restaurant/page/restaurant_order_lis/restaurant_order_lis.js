@@ -164,13 +164,13 @@ frappe.Restaurant = class RestaturantOrderList {
 			let table_header ='<thead>\n' +
 				'    <tr>\n' +
 				'      <th scope="col" width="17%">Voucher</th>\n' +
-				'      <th scope="col" width="7%">Table</th>\n' +
-				'      <th scope="col" width="33%">Items</th>\n' +
-				'      <th scope="col" width="7%">Qty</th>\n' +
-				'      <th scope="col" width="6%">Status</th>\n' +
+				'      <th scope="col" width="8%">Table</th>\n' +
+				'      <th scope="col" width="50%">Items</th>\n' +
+				'      <th scope="col" width="3%">Qty</th>\n' +
+				'      <th scope="col" width="8%">Status</th>\n' +
 				'      <th scope="col" width="10%">Amount</th>\n' +
-				'      <th scope="col" width="10%">Modify</th>\n' +
-				'      <th scope="col" width="10%">Final Bill</th>\n' +
+				'      <th scope="col" width="5%">Modify</th>\n' +
+				'      <th scope="col" width="5%">Final Bill</th>\n' +
 				'    </tr>\n' +
 				'  </thead>\n';
 			return table_header;
