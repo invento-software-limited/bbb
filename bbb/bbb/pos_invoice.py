@@ -435,8 +435,6 @@ def validate(doc, method):
             all =  old_str + "<hr>" + item_str
         else:
             all = item_str
-        frappe.msgprint(str(doc.previous_qty))
-        frappe.msgprint(str(doc.total_qty))
         if doc.previous_qty != doc.total_qty:
             doc.restaurant_order_item_html = all
         doc.previous_qty = previous_qty
