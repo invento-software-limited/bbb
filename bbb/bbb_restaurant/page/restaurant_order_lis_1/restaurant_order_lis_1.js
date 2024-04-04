@@ -210,7 +210,7 @@ frappe.Restaurant = class RestaturantOrderList {
 				html+= '<td class="name">' + diff[key].name || '' + '</td>'
 				html+= '<td class="">' + diff[key].restaurant_table_number || '' + '</td>'
 				if(child_items.length === 2){
-					html+= `<td class="child_items" docname="${diff[key].name || ''}"><div class="old_item" style="font-weight: : 600"> ${child_items[0] || ''} </div><hr><div class="new_item font-weight-bold text-danger"> ${child_items[1] || ''} </div></td>`
+					html+= `<td class="child_items" docname="${diff[key].name || ''}"><div class="old_item" style="font-weight: : 600"> ${child_items[0] || ''} </div><hr class="m-2"><div class="new_item font-weight-bold text-danger"> ${child_items[1] || ''} </div></td>`
 				}else if (child_items.length === 1){
 					html+= '<td class="child_items" docname="'+ diff[key].name +'"><div class="old_item" style="font-weight: : 600">' + child_items[0] || '' + '</div></td>'
 				}else{

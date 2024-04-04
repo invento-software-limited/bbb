@@ -419,19 +419,27 @@ def validate(doc, method):
         restaurant_new_order_list = []
         item_str = ""
         old_str = ""
+        previous_qty = 0
         for item in items:
             if not item.get("in_new"):
                 str_app = "{item} --- {qty}<br>".format(item=item.get("item_name"),qty=item.get("qty"))
                 item_str += str_app
                 item.in_new = 1
+                previous_qty += item.get("qty")
             else:
                 str_app = "{item} --- {qty}<br>".format(item=item.get("item_name"),qty=item.get("qty"))
                 old_str += str_app
+                previous_qty += item.get("qty")
+            
         if len(old_str) > 0:
             all =  old_str + "<hr>" + item_str
         else:
             all = item_str
-        doc.restaurant_order_item_html = all
+        frappe.msgprint(str(doc.previous_qty))
+        frappe.msgprint(str(doc.total_qty))
+        if doc.previous_qty != doc.total_qty:
+            doc.restaurant_order_item_html = all
+        doc.previous_qty = previous_qty
 
         # for index, item in enumerate(items):
         #     if item.restaurant_new_qty > 0 or (item.restaurant_old_qty > 0 and item.qty > item.restaurant_old_qty and item.restaurant_new_qty == 0):
