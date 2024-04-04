@@ -421,11 +421,11 @@ def validate(doc, method):
         old_str = ""
         previous_qty = 0
         for item in items:
-            if not item.get("in_new"):
+            if item.get("type") == "New":
                 frappe.msgprint(str("vvvv"))
                 str_app = "{item} --- {qty}<br>".format(item=item.get("item_name"),qty=item.get("qty"))
                 item_str += str_app
-                item.in_new = 1
+                item.type = "Old"
                 previous_qty += item.get("qty")
             else:
                 frappe.msgprint(str("ppp"))
