@@ -199,28 +199,32 @@ frappe.Restaurant = class RestaturantOrderList {
 		table_body = (diff) =>{
 			var html = "<tbody class='restaurant_order'>";
 			for (var key in diff) {
-				console.log(key)
-				let status_color = diff[key].status === 'Ordered' ? 'text-warning': diff[key].status === 'Processing' ? 'text-primary' : diff[key].status === 'Ready' ? 'text-success' : ''
-				let btn_color = diff[key].status === 'Ordered' ? 'btn-warning': diff[key].status === 'Processing' ? 'btn-primary' : diff[key].status === 'Ready' ? 'btn-success' : '';
-				let status = diff[key].status === 'Ordered' ? 'Start Processing': diff[key].status === 'Processing' ? 'Press to complete' : diff[key].status === 'Ready' ? 'Ready' : ''
+				if (diff[key].status !== "Ready") {
+					let status_color = diff[key].status === 'Ordered' ? 'text-warning': diff[key].status === 'Processing' ? 'text-primary' : diff[key].status === 'Ready' ? 'text-success' : ''
+					let btn_color = diff[key].status === 'Ordered' ? 'btn-warning': diff[key].status === 'Processing' ? 'btn-primary' : diff[key].status === 'Ready' ? 'btn-success' : '';
+					let status = diff[key].status === 'Ordered' ? 'Process': diff[key].status === 'Processing' ? 'Press to complete' : diff[key].status === 'Ready' ? 'Ready' : ''
 
-				let child_items = diff[key].child_items || ""
-				child_items = child_items.split("<hr>")
-				html+='<tr class="tr_body">'
-				html+= '<td class="name">' + diff[key].name || '' + '</td>'
-				html+= '<td class="">' + diff[key].restaurant_table_number || '' + '</td>'
-				if(child_items.length === 2){
-					html+= `<td class="child_items" docname="${diff[key].name || ''}"><div class="old_item" style="font-weight: : 600"> ${child_items[0] || ''} </div><hr class="m-2"><div class="new_item font-weight-bold text-danger"> ${child_items[1] || ''} </div></td>`
-				}else if (child_items.length === 1){
-					html+= '<td class="child_items" docname="'+ diff[key].name +'"><div class="old_item" style="font-weight: : 600">' + child_items[0] || '' + '</div></td>'
-				}else{
-					html+= '<td class="child_items" docname="'+ diff[key].name +'"><div class="old_item" style="font-weight: : 600">' + child_items || '' + '</div></td>'
+					let child_items = diff[key].child_items || ""
+					child_items = child_items.split("<hr>")
+					console.log(child_items)
+					html+='<tr class="tr_body">'
+					html+= '<td class="name">' + diff[key].name || '' + '</td>'
+					html+= '<td class="">' + diff[key].restaurant_table_number || '' + '</td>'
+					if(child_items.length === 2){
+						console.log("pp")
+						html+= `<td class="child_items" docname="${diff[key].name || ''}"><div class="old_item" style="font-weight: : 600"> ${child_items[0] || ''} </div><hr class="m-2"><div class="new_item font-weight-bold text-danger"> ${child_items[1] || ''} </div></td>`
+					}else if (child_items.length === 1){
+						console.log("eee")
+						html+= '<td class="child_items" docname="'+ diff[key].name +'"><div class="old_item" style="font-weight: : 600">' + child_items[0] || '' + '</div></td>'
+					}else{
+						console.log("bbbb")
+						html+= '<td class="child_items" docname="'+ diff[key].name +'"><div class="old_item" style="font-weight: : 600">' + child_items || '' + '</div></td>'
+					}
+					html+= '<td class="">' + diff[key].total_qty || '' + '</td>'
+					html+= '<td class="text '+ status_color +' doc_status">' + diff[key].status || '' + '</td>'
+					html+= '<td><button type="button" class="btn ' + btn_color + ' start_processsing" status="'+ diff[key].status +'" name="'+ diff[key].name +'">'+status+'</button></td>'
+					html+='</tr>'
 				}
-
-				html+= '<td class="">' + diff[key].total_qty || '' + '</td>'
-				html+= '<td class="text '+ status_color +' doc_status">' + diff[key].status || '' + '</td>'
-				html+= '<td><button type="button" class="btn ' + btn_color + ' start_processsing" status="'+ diff[key].status +'" name="'+ diff[key].name +'">'+status+'</button></td>'
-				html+='</tr>'
 			}
 			html+="</tbody>";
 			return html

@@ -412,26 +412,37 @@ def get_past_order_list(search_term, status, limit=3):
 def validate(doc, method):
     if not doc.customer:
         frappe.throw(_("You must select a customer before submit"), CustomerValidationError, title="Missing")
+    if doc.status == "Ordered":
+        if frappe.db.exists("POS Invoice",{"status" : "Ordered","restaurant_table_number" : doc.restaurant_table_number}):
+            frappe.throw("Already Ordered a Order in Table {}".format(doc.restaurant_table_number))
     if doc.company == 'BBB Restaurant' and doc.docstatus == 0:
         doc.status = 'Ordered'
         items = doc.items
-        restaurant_old_order_list = []
-        restaurant_new_order_list = []
         item_str = ""
         old_str = ""
         previous_qty = 0
         for item in items:
             if item.get("type") == "New":
-                frappe.msgprint(str("vvvv"))
-                str_app = "{item} --- {qty}<br>".format(item=item.get("item_name"),qty=item.get("qty"))
-                item_str += str_app
                 item.type = "Old"
                 previous_qty += item.get("qty")
-            else:
-                frappe.msgprint(str("ppp"))
+                item.restaurant_new_qty = item.get("qty") - item.get("restaurant_old_qty")
+                item.restaurant_old_qty = item.get("qty")
+                if item.get("restaurant_new_qty") > 0:
+                    additional_qty = "+ <span style='color:red';>{}</span>".format(item.get("restaurant_new_qty"))
+                else:
+                    additional_qty = ""
                 str_app = "{item} --- {qty}<br>".format(item=item.get("item_name"),qty=item.get("qty"))
-                old_str += str_app
+                item_str += str_app
+            else:
                 previous_qty += item.get("qty")
+                item.restaurant_new_qty = item.get("qty") - item.get("restaurant_old_qty")
+                item.restaurant_old_qty = item.get("qty")
+                if item.get("restaurant_new_qty") > 0:
+                    additional_qty = "+ <span style='color:red';>{}</span>".format(item.get("restaurant_new_qty"))
+                else:
+                    additional_qty = ""
+                str_app = "{item} --- {qty} {new_qty}<br>".format(item=item.get("item_name"),qty=(item.get("qty")-item.get("restaurant_new_qty")),new_qty = additional_qty)
+                old_str += str_app
             
         if len(old_str) > 0:
             all =  old_str + "<hr>" + item_str
