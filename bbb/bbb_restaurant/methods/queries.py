@@ -811,7 +811,12 @@ def served_by_query(doctype, txt, searchfield, start, page_len, filters):
                              'page_len': page_len
                          })
 
-
+@frappe.whitelist()
+def check_duplicate_table_number(table_number):
+    if frappe.db.exists("POS Invoice",{"status" : "Ordered","restaurant_table_number" : table_number}):
+        return "yes"
+    else:
+        return "no"
 @frappe.whitelist()
 @frappe.validate_and_sanitize_search_inputs
 def table_number_query(doctype, txt, searchfield, start, page_len, filters):

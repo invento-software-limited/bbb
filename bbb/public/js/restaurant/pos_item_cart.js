@@ -327,9 +327,8 @@ erpnext.PointOfSale.ItemCart = class {
 
 
         this.$component.on('click', '.confirm-order-btn', function () {
-            if ($(this).attr('style').indexOf('--blue-500') == -1) return;
             const frm = me.events.get_frm();
-            console.log(frm)
+            if ($(this).attr('style').indexOf('--blue-500') == -1) return;
             frappe.model.set_value(frm.doc.doctype, frm.doc.name, 'status', 'Ordered' )
             frappe.model.set_value(frm.doc.doctype, frm.doc.name,'company',frappe.defaults.get_user_default("Company") )
             frappe.model.set_value(frm.doc.doctype, frm.doc.name,'taxes_and_charges','' )
@@ -647,6 +646,17 @@ erpnext.PointOfSale.ItemCart = class {
                 placeholder: __('Table'),
                 get_query: () => query,
                 onchange: function () {
+                    frappe.call({
+                        "method": "bbb.bbb_restaurant.methods.queries.check_duplicate_table_number",
+                        "args": {
+                            "table_number": this.value 
+                        },
+                        callback: function(r) {
+                            if (r.message == "yes") {
+                                frappe.throw({message: __("Already have order in table"), title: __("Table Booked")});
+                            }
+                        }
+                    });
                     if (this.value) {
                         const frm = me.events.get_frm();
                         frappe.dom.freeze();
