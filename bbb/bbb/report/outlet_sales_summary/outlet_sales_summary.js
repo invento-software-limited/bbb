@@ -23,6 +23,7 @@ frappe.query_reports["Outlet Sales Summary"] = {
 			"label": __("Outlet"),
 			"fieldtype": "Link",
 			"options": "POS Profile",
+      "reqd": 1,
       "get_query": () => {
 				var company = frappe.query_report.get_filter_value('company');
 				return {

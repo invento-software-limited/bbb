@@ -50,9 +50,17 @@ def get_conditions(filters):
 def get_data(filters):
     conditions = get_conditions(filters)
     invoice_type = filters.get('switch_invoice')
-    query_result = frappe.db.sql(
-        """SELECT voucher.posting_date, voucher.name, voucher.customer, voucher.total_qty, voucher.net_total, voucher.total_taxes_and_charges,
-        voucher.pos_profile, voucher.rounded_total FROM `tab%s` voucher WHERE voucher.docstatus=1 and %s""" % (invoice_type, conditions),
-        as_dict=1, debug=1)
+    # query_result = frappe.db.sql(
+    #     """SELECT voucher.posting_date, voucher.name, voucher.customer, voucher.total_qty, voucher.net_total, voucher.total_taxes_and_charges,
+    #     voucher.pos_profile, voucher.rounded_total FROM `tab%s` voucher WHERE voucher.docstatus=1 and %s""" % (invoice_type, conditions),
+    #     as_dict=1, debug=1)
+
+
+    query_result = frappe.db.get_list(invoice_type,
+    fields=['posting_date', 'name', 'customer', 'total_qty', 'net_total', 'total_taxes_and_charges',
+        'pos_profile', 'rounded_total'],
+    filters=[['posting_date', 'between', [filters.get('from_date'), filters.get('to_date')]], ['pos_profile', '=', filters.get("outlet")],
+    ['company', '=', filters.get("company")]])
+    
 
     return query_result
