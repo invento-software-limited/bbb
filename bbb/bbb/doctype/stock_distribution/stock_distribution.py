@@ -40,6 +40,8 @@ class StockDistribution(Document):
                 notification.insert(ignore_permissions=True)
             
     def on_submit(self):
+        if self.actual_distribute_qty and self.actual_distribute_qty > self.total_qty:
+            frappe.throw("Palnned qty cannot greater than distribute qty",title="Qty Mismatched")
         if self.ignore_validation:
             self.stock_entry()
         else:
@@ -391,7 +393,7 @@ def get_total_from_upload_excell(excell):
         sheet = workbook.active
         exclude_column_name = "Item Code"
         total_sum = 0
-        for row in sheet.iter_rows(min_row=2, max_row=sheet.max_row, min_col=1, max_col=sheet.max_column):
+        for row in sheet.iter_rows(min_row=2, max_row=sheet.max_row, min_col=2, max_col=sheet.max_column):
             for cell in row:
                 if sheet.cell(1, cell.column).value != exclude_column_name:
                     total_sum += cell.value if cell.value is not None else 0
