@@ -17,6 +17,14 @@ frappe.ui.form.on('Stock Distribution', {
             });
         }
 		frm.set_value("total_percentage",total_percentage)
+
+		var total_items = 0;
+        if (frm.doc.purchase_distribution_items){
+            $.each(frm.doc.purchase_distribution_items, function(index, row){
+                total_items += row.qty || 0;
+            });
+        }
+		frm.set_value("total_qty",total_items)
 	},
 	get_items_to_distribute: function(frm){
 		if (frm.doc.purchase_order){
