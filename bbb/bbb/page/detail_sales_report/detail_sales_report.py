@@ -31,8 +31,12 @@ def get_conditions(filters):
     if filters.get("outlet"):
         conditions.append("sales_invoice.pos_profile = '%s'" % filters.get("outlet"))
 
+    if filters.get("company"):
+        conditions.append("sales_invoice.company = '%s'" % filters.get("company"))
+
     if conditions:
         conditions = " and ".join(conditions)
+
     return conditions
 
 

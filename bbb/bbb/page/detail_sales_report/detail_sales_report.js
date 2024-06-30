@@ -128,6 +128,14 @@ erpnext.DetailSalesReport = class DetailSalesReport {
                     fieldtype: 'Column Break'
                 },
                 {
+                    fieldname: 'company',
+                    label: __('Company'),
+                    fieldtype: 'Link',
+                    options: 'Company',
+                    default: frappe.defaults.get_user_default("Company") ,
+                    change: () => this.fetch_and_render(),
+                },
+                {
                     fieldtype: 'Column Break'
                 },
                 {
@@ -144,7 +152,7 @@ erpnext.DetailSalesReport = class DetailSalesReport {
     }
 
     fetch_and_render = () => {
-        let {from_date, to_date, outlet, switch_invoice} = this.form.get_values();
+        let {from_date, to_date, outlet, switch_invoice,company} = this.form.get_values();
         if (!from_date) {
             this.form.get_field('preview').html('');
             return;
@@ -159,7 +167,8 @@ erpnext.DetailSalesReport = class DetailSalesReport {
                 from_date: from_date,
                 to_date: to_date,
                 outlet: outlet,
-                switch_invoice: switch_invoice
+                switch_invoice: switch_invoice,
+                company: company,
             },
             freeze: true
         }).then(r => {

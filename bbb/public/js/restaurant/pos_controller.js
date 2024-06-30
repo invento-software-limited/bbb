@@ -176,6 +176,11 @@ erpnext.PointOfSale.Controller = class {
             e.preventDefault();
             me.view_order_list();
         });
+
+        $('#view_in_new_tab').bind('click', function (e) {
+            e.preventDefault();
+            me.view_in_new_tab();
+        });
         $('#add_damaged_product').bind('click', function (e) {
             e.preventDefault();
             if(me.frm.doc.is_return){
@@ -226,48 +231,81 @@ erpnext.PointOfSale.Controller = class {
 
     view_order_list() {
         const me = this;
+        let status_color = (status) => {
+            let color = status === 'Ordered' ? 'text-warning': status === 'Processing' ? 'text-primary' : status === 'Ready' ? 'text-success' : ''
+            return color
+        }
         function get_items_template(me, d, data){
-            var html = `<div class="card mb-4">
+
+            var html = `<div class="card mb-12">
                 {% if data %}
-                    <div class="dashboard-list-item" style="padding: 12px 15px;">
+                    <div class="dashboard-list-item" style="padding: 5px">
                         <div class="row col-md-12">
                             <div class="col-sm-3 text-muted" style="margin-top: 8px;">
                                 Voucher No
                             </div>
-                            <div class="col-sm-3 text-muted" style="margin-top: 8px;">
-                                Table No
+                            <div class="col-sm-1 text-muted" style="margin-top: 8px;">
+                                Table
                             </div>
-                            <div class="col-sm-2 text-muted" style="margin-top: 8px;">
+                            <div class="col-sm-3 text-muted" style="margin-top: 8px;">
+                                Items
+                            </div>
+                            <div class="col-sm-1 text-muted" style="margin-top: 8px;">
                                 Qty
                             </div>
+                
                             <div class="col-sm-2 text-muted" style="margin-top: 8px;">
-                                
+                                Status
                             </div>
-                            <div class="col-sm-2 text-muted" style="margin-top: 8px;">
-                                
+                            <div class="col-sm-1 text-muted" style="margin-top: 8px;">
+                                Modify
+                            </div>
+                            <div class="col-sm-1 text-muted" style="margin-top: 8px;">
+                                Final Bill
                             </div>
                         </div>
                     </div>
                     {% for d in data %}
-                        <div class="dashboard-list-item" style="padding: 7px 15px;">
+                    <div class="dashboard-list-item" style="padding: 5px">
                             <div class="row col-md-12">
                                 <div class="col-sm-3" style="margin-top: 8px;">
                                     <a data-type="name" data-name="{{ d.name }}">
                                         {{ d.name }}</a>
                                     </div>
-                                    <div class="col-sm-3" style="margin-top: 8px; ">
-                                        <a data-type="item" data-name="{{ d.table_number }}">
-                                            {{ d.table_number }}</a>
+                                    <div class="col-sm-1" style="margin-top: 8px; ">
+                                        <a data-type="item" data-name="{{ d.restaurant_table_number }}}">
+                                        {% if d.name %}{{ d.restaurant_table_number  }}{% endif %}</a>
                                     </div>
-                                    <div class="col-sm-2" style="margin-top: 8px; ">
-                                        <a data-type="item" data-name="{{ d.table_number }}">
+                                    <div class="col-sm-3" style="margin-top: 8px; ">
+                                        <a data-type="item" data-name="">{{ d.child_items }}</a>
+                                    </div>
+                                    <div class="col-sm-1" style="margin-top: 8px; ">
+                                        <a data-type="item" data-name="{{ d.total_qty }}">
                                             {{ d.total_qty }}</a>
                                     </div>
-                                    <div class="col-sm-2" style="margin-top: 8px; ">
-                                        <button class="btn btn-primary edit_order" name={{ d.name }} style="float:right"> Edit</button>
+                                    {% if d.status == 'Ordered' %}
+                                        <div class="col-sm-2 text-warning" style="margin-top: 8px; ">
+                                            <a data-type="item" data-name="{{ d.total_qty }}">
+                                                {{ d.status }}</a>
+                                        </div>
+                                    {% endif %}
+                                    {% if d.status == 'Processing' %}
+                                        <div class="col-sm-2 text-primary" style="margin-top: 8px; ">
+                                            <a data-type="item" data-name="{{ d.total_qty }}">
+                                                {{ d.status }}</a>
+                                        </div>
+                                    {% endif %}
+                                    {% if d.status == 'Ready' %}
+                                        <div class="col-sm-2 text-success" style="margin-top: 8px; ">
+                                            <a data-type="item" data-name="{{ d.total_qty }}">
+                                                {{ d.status }}</a>
+                                        </div>
+                                    {% endif %}
+                                    <div class="col-sm-1" style="margin-top: 8px; ">
+                                        <button class="btn btn-primary edit_order_" name={{ d.name }} style="float:right"> Edit</button>
                                     </div>
-                                    <div class="col-sm-2" style="margin-top: 8px;">
-                                        <button class="btn btn-success checkout_order text-right" name={{ d.name }}> Checkout</button>
+                                    <div class="col-sm-1" style="margin-top: 8px;">
+                                        <button class="btn btn-success checkout_order text-right" name={{ d.name }}> View</button>
                                     </div>
                                 </div>
                             </div>
@@ -281,10 +319,12 @@ erpnext.PointOfSale.Controller = class {
             
             var table_data = frappe.render_template(html, {'data': data});
             d.fields_dict.orders.$wrapper.html(table_data);
-            $('.edit_order').on('click', function(){
+            $('.edit_order_').on('click', function(e){
+                e.preventDefault();
                 let name = $(this).attr('name');
                 frappe.db.get_doc('POS Invoice', name)
                 .then(doc => {
+                    console.log('doc', doc)
                     frappe.run_serially([
                         // () => me.frm.refresh($(this).attr('name')),
                         () => me.frm.refresh(doc.name),
@@ -295,7 +335,8 @@ erpnext.PointOfSale.Controller = class {
                 })
 
             });
-            $('.checkout_order').on('click', function(){
+            $('.checkout_order').on('click', function(e){
+                e.preventDefault();
                 let name = $(this).attr('name');
                 frappe.db.get_doc('POS Invoice', name)
                 .then(doc => {
@@ -313,7 +354,7 @@ erpnext.PointOfSale.Controller = class {
 
         function get_items(me, d){
             frappe.call({
-                method: 'bbb.bbb.controllers.utils.get_restaurant_order_list',
+                method: 'bbb.bbb_restaurant.methods.utils.get_restaurant_order_list_',
                 callback: function(r) {
                     if (!r.exc) {
                         // code snippet
@@ -338,10 +379,13 @@ erpnext.PointOfSale.Controller = class {
             ],
         });
         d.show();
-        d.$wrapper.find('.modal-dialog').css("max-width", "800px");
+        d.$wrapper.find('.modal-dialog').css("max-width", "1150px");
         get_items(me, d)
     }
-
+    view_in_new_tab(){
+    //    return  frappe.set_route("app", "restaurant-order-lis");
+    return window.open('/app/restaurant-order-lis', '_blank');
+    }
     add_damaged_product(){
         const me = this;
         let d = new frappe.ui.Dialog({
@@ -777,18 +821,50 @@ erpnext.PointOfSale.Controller = class {
     }
 
     make_new_invoice() {
+        const urlParams = new URLSearchParams(window.location.search);
+        const name = urlParams.get('name');
         return frappe.run_serially([
             () => frappe.dom.freeze(),
             () => this.make_sales_invoice_frm(),
             () => this.set_pricing_rule(),
             () => this.set_pos_profile_data(),
             () => this.set_pos_profile_status(),
-            () => this.cart.load_invoice(),
+            // () => this.cart.load_invoice(),
+            () => name !== undefined ? this.load_invoice_form_order_list() : this.cart.load_invoice(),
+            () => this.removed_query_string(),
             () => frappe.dom.unfreeze()
         ]);
     }
+    load_invoice_form_order_list(){
+        const me = this;
+        const urlParams = new URLSearchParams(window.location.search);
+        const name = urlParams.get('name');
+        const type = urlParams.get('type');
+        const status = 'Ordered'
+        frappe.db.get_value("POS Invoice", name, 'status', (r) => {
+            if(r.status == status){
+                frappe.db.get_doc('POS Invoice', name)
+                .then(doc => {
+                    frappe.run_serially([
+                        // () => me.frm.refresh($(this).attr('name')),
+                        () => me.frm.refresh(doc.name),
+                        () => me.frm.call('reset_mode_of_payments'),
+                        () => me.cart.load_invoice(),
+                        () => type == 'view' ? me.cart.$component.find(".checkout-btn").click() : ''
+                    ]);
+                })
+            }
+
+        });
+
+    }
+    removed_query_string(){
+        var urlWithoutQueryString = window.location.protocol + "//" + window.location.host + window.location.pathname;
+        history.replaceState({}, document.title, urlWithoutQueryString);
+    }
     set_pricing_rule(){
         frappe.model.set_value(this.frm.doc.doctype, this.frm.doc.name, 'ignore_pricing_rule', 1);
+        
     }
     make_sales_invoice_frm() {
         const doctype = 'POS Invoice';
@@ -887,6 +963,7 @@ erpnext.PointOfSale.Controller = class {
 
     set_pos_profile_status() {
         this.page.set_indicator(this.pos_profile, "blue");
+        this.cart.make_pos_profile();
     }
 
     async on_cart_update(args) {
@@ -928,8 +1005,8 @@ erpnext.PointOfSale.Controller = class {
 				if (!this.frm.doc.customer)
 					return this.raise_customer_selection_alert();
 
-				if (!this.frm.doc.served_by)
-					return this.raise_served_by_selection_alert();
+				// if (!this.frm.doc.served_by)
+				// 	return this.raise_served_by_selection_alert();
 
 
 				if (!item_code)
@@ -1011,7 +1088,7 @@ erpnext.PointOfSale.Controller = class {
 
     apply_pricing_rule_in_return(item){
         frappe.call({
-            method: "bbb.bbb.controllers.utils.get_pricing_rule_discount",
+            method: "bbb.bbb_restaurant.methods.utils.get_pricing_rule_discount",
             args: {"name": item.pricing_rules},
             callback: (r) => {
                 frappe.model.set_value(item.doctype, item.name, 'discount_percentage', r.message.discount_percentage)
@@ -1230,7 +1307,7 @@ erpnext.PointOfSale.Controller = class {
 
     set_cache_data(data) {
         frappe.call({
-            method: 'bbb.bbb.pos_invoice.set_pos_cached_data',
+            method: 'bbb.bbb_restaurant.methods.pos_invoice.set_pos_cached_data',
             args: {
                 "invoice_data": data,
             },
@@ -1244,7 +1321,7 @@ erpnext.PointOfSale.Controller = class {
 
     get_cache_data(me) {
         frappe.call({
-            method: 'bbb.bbb.pos_invoice.get_pos_cached_data',
+            method: 'bbb.bbb_restaurant.methods.pos_invoice.get_pos_cached_data',
             callback: function (r) {
                 if (!r.exc) {
                     me.cached_data = r.message;
@@ -1256,7 +1333,7 @@ erpnext.PointOfSale.Controller = class {
 
     async remove_single_item_from_cached(me){
         frappe.call({
-            method: 'bbb.bbb.pos_invoice.get_pos_cached_data',
+            method: 'bbb.bbb_restaurant.methods.pos_invoice.get_pos_cached_data',
             callback: function (r) {
                 if (!r.exc) {
                     me.cached_data = r.message;
@@ -1374,7 +1451,7 @@ erpnext.PointOfSale.Controller = class {
         var tag_name_list = undefined
         var rules_name_list = undefined
         frappe.call({
-                method: 'bbb.bbb.pos_invoice.apply_pricing_rule_on_tag',
+                method: 'bbb.bbb_restaurant.methods.pos_invoice.apply_pricing_rule_on_tag',
                 async:false,
                 args: {
                     "doc": doc,

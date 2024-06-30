@@ -31,7 +31,8 @@ erpnext.PointOfSale.ItemSelector = class {
 					<div class="item-group-field"></div>
 				</div>
 				<div class="items-container"></div>
-			</section>`
+			</section>
+			`
 		);
 
 		this.$component = this.wrapper.find('.items-selector');
@@ -61,7 +62,7 @@ erpnext.PointOfSale.ItemSelector = class {
 		!item_group && (item_group = this.parent_item_group);
 
 		return frappe.call({
-			method: "bbb.bbb.restaurant.get_items",
+			method: "bbb.bbb_restaurant.methods.restaurant.get_items",
 			freeze: true,
 			args: { start, page_length, price_list, item_group, search_term, pos_profile },
 		});
@@ -92,34 +93,35 @@ erpnext.PointOfSale.ItemSelector = class {
 		}
 
 		function get_item_image_html() {
-			// if (!me.hide_images && item_image) {
-			// 	return `<div class="item-qty-pill">
-			// 				<span class="indicator-pill whitespace-nowrap ${indicator_color}">${qty_to_display}</span>
-			// 			</div>
-			// 			<div class="flex items-center justify-center h-32 border-b-grey text-6xl text-grey-100">
-			// 				<img
-			// 					onerror="cur_pos.item_selector.handle_broken_image(this)"
-			// 					class="h-full" src="${item_image}"
-			// 					alt="${frappe.get_abbr(item.item_name)}"
-			// 					style="object-fit: cover;">
-			// 			</div>`;
-			// } else {
-			// 	return `<div class="item-qty-pill">
-			// 				<span class="indicator-pill whitespace-nowrap ${indicator_color}">${qty_to_display}</span>
-			// 			</div>
-			// 			<div class="item-display abbr">${frappe.get_abbr(item.item_name)}</div>`;
-			// }
+			if (!me.hide_images && item_image) {
+				return `
+						<div class="flex items-center justify-center h-32 border-b-grey text-6xl text-grey-100 item_image_div" style="height:78%;">
+							<img
+								onerror="cur_pos.item_selector.handle_broken_image(this)"
+								class="h-full" src="${item_image}"
+								alt="${frappe.get_abbr(item.item_name)}"
+								style="object-fit: cover; height:95%; width: 100%;padding: 4px !important; border-radius: 8px !important;">
+						</div>`;
+			} else {
+				return `<div class="flex items-center justify-center h-32 border-b-grey text-6xl text-grey-100 item_image_div" style="height:78%;">
+							<img
+								onerror="cur_pos.item_selector.handle_broken_image(this)"
+								class="h-full" src="${item_image}"
+								alt="${frappe.get_abbr(item.item_name)}"
+								style="object-fit: cover; height:95%; width: 100%;padding: 4px !important; border-radius: 8px !important;">
+						</div>`;
+			}
 
-					return `
-							<div class="item-display">
-								<div class="item-name">
-									${frappe.ellipsis(item.item_name, 500)}
-								</div>
-							</div>
-							<div class="item-qty-pill">
-<!--									<span class="indicator-pill whitespace-nowrap ${indicator_color}">${qty_to_display}</span>-->
-								<span class="indicator-pill whitespace-nowrap ${indicator_color}" style="height:17px"></span>
-							</div>`;
+// 					return `
+// 							<div class="item-display">
+// 								<div class="item-name">
+// 									${frappe.ellipsis(item.item_name, 500)}
+// 								</div>
+// 							</div>
+// 							<div class="item-qty-pill">
+// <!--									<span class="indicator-pill whitespace-nowrap ${indicator_color}">${qty_to_display}</span>-->
+// 								<span class="indicator-pill whitespace-nowrap ${indicator_color}" style="height:17px"></span>
+// 							</div>`;
 
 		}
 		let tag = null
@@ -128,7 +130,7 @@ erpnext.PointOfSale.ItemSelector = class {
 		}
 
 		return (
-			`<div class="item-wrapper"
+			`<div class="item-wrapper" style="height: 12rem !important;"
 				data-item-code="${escape(item.item_code)}" data-serial-no="${escape(serial_no)}"
 				data-batch-no="${escape(batch_no)}" data-uom="${escape(stock_uom)}" data-start-date="${escape(item.start_date)}"
 				data-end-date="${escape(item.end_date)}" data-discount-amount="${escape(item.discount_amount)}"
@@ -138,11 +140,17 @@ erpnext.PointOfSale.ItemSelector = class {
 				${get_item_image_html()}
 
 				<div class="item-detail">
-				<!--
-					<div class="item-name">
+					<div class="item-name" style="margin: 4px 0; padding: 10px 0; font-size:15px">
 						${frappe.ellipsis(item.item_name, 18)}
-					</div>-->
-					<div class="item-rate">${format_currency(price_list_rate, item.currency, precision) || 0}</div>
+					</div>
+					<div class="item-rate" style="display:flex;">
+						<div class="rate-" style="display: flex; flex:1">${format_currency(price_list_rate, item.currency, precision) || 0}</div
+						<div class="zoom-view" data-name="Burger">
+							<svg class="icon  icon-xs" style="">
+								<use class="" href="#icon-expand"></use>
+							</svg>
+						</div>
+					</div>
 				</div>
 			</div>`
 		);
@@ -150,7 +158,7 @@ erpnext.PointOfSale.ItemSelector = class {
 
 	handle_broken_image($img) {
 		const item_abbr = $($img).attr('alt');
-		$($img).parent().replaceWith(`<div class="item-display abbr">${item_abbr}</div>`);
+		$($img).parent().replaceWith(`<div class="item-display abbr" style="height: 75%">${item_abbr}</div>`);
 	}
 
 	make_search_bar() {
@@ -163,7 +171,7 @@ erpnext.PointOfSale.ItemSelector = class {
 			df: {
 				label: __('Search'),
 				fieldtype: 'Data',
-				placeholder: __('Search by item code, serial number or barcode')
+				placeholder: __('Item Code, Barcode, Name')
 			},
 			parent: this.$component.find('.search-field'),
 			render_input: true,
@@ -173,7 +181,7 @@ erpnext.PointOfSale.ItemSelector = class {
 				label: __('Item Group'),
 				fieldtype: 'Link',
 				options: 'Item Group',
-				placeholder: __('Select item group'),
+				placeholder: __('Item Group'),
 				onchange: function() {
 					me.item_group = this.value;
 					!me.item_group && (me.item_group = me.parent_item_group);
@@ -239,8 +247,43 @@ erpnext.PointOfSale.ItemSelector = class {
 			}
 		});
 
-		this.$component.on('click', '.item-wrapper', function() {
+		this.$component.on('click', '.image_close', function(event) {
+			$("#image_modal").css("display", "none");
+		});
+
+		this.$component.on('click', '.item-wrapper', function(event) {
 			const $item = $(this);
+			var divOffset = $item.offset();
+			var divHeight = $item.height();
+			var clickY = event.pageY - divOffset.top;
+			let item_src = $item.find('img').attr('src')
+
+			if (clickY >= divHeight * 0.9) {
+				if(item_src === undefined || item_src === null){
+					return
+				}
+				function get_items_template(d, item_src){
+					var html = `<img src="${item_src}">`;
+					var table_data = frappe.render_template(html, item_src);
+					d.fields_dict.orders.$wrapper.html(table_data);
+				}
+				var d = new frappe.ui.Dialog({
+					title: "",
+					fields: [
+						{
+							fieldname: 'orders',
+							fieldtype: 'HTML',
+						},
+					],
+				});
+				d.show();
+				d.$wrapper.find('.modal-dialog').css("max-width", "1150px");
+				get_items_template(d, item_src)
+				return
+
+			}
+
+
 			const item_code = unescape($item.attr('data-item-code'));
 			let batch_no = unescape($item.attr('data-batch-no'));
 			let serial_no = unescape($item.attr('data-serial-no'));

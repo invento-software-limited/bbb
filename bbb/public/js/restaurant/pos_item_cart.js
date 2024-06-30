@@ -5,6 +5,7 @@ erpnext.PointOfSale.ItemCart = class {
         this.customer_info = undefined;
         this.served_by_info = undefined;
         this.table_no_info = undefined;
+        this.order_type_info = {'order_type': 'Dining'};
         this.ignore_discount = undefined;
         this.ignore_pricing_rule = "No";
         this.hide_images = settings.hide_images;
@@ -19,6 +20,8 @@ erpnext.PointOfSale.ItemCart = class {
         this.init_child_components();
         this.bind_events();
         this.attach_shortcuts();
+        this.update_order_type_section();
+        this.update_pricing_rule_discount_section();
     }
 
     prepare_dom() {
@@ -226,10 +229,10 @@ erpnext.PointOfSale.ItemCart = class {
             </div>
             <div class="row">
                 <div class="col-md-6">
-                    <div class="checkout-btn">Checkout</div>
+                    <div class="confirm-order-btn">Confirm Order</div>
                 </div>
                 <div class="col-md-6">
-                    <div class="confirm-order-btn">Confirm Order</div>
+                    <div class="checkout-btn">Checkout</div>
                 </div>
             </div>
 			<div class="edit-cart-btn">Edit Cart</div>`
@@ -287,7 +290,7 @@ erpnext.PointOfSale.ItemCart = class {
         this.$table_no_section.on('click', '.reset-table-no-btn', function () {
             me.reset_table_no_selector();
         });
-        this.$order_type_section.on('click', '.order-type-btn', function () {
+        this.$order_type_section.on('click', '.reset-order-type-btn', function () {
             me.reset_order_type_selector();
         });
         this.$pricing_rule_discount_section.on('click', '.reset-ignore_pricing-rule-btn', function () {
@@ -324,15 +327,17 @@ erpnext.PointOfSale.ItemCart = class {
 
 
         this.$component.on('click', '.confirm-order-btn', function () {
-            if ($(this).attr('style').indexOf('--blue-500') == -1) return;
             const frm = me.events.get_frm();
-            frappe.model.set_value(frm.doc.doctype, frm.doc.name, 'status', 'Ordered')
+            if ($(this).attr('style').indexOf('--blue-500') == -1) return;
+            frappe.model.set_value(frm.doc.doctype, frm.doc.name, 'status', 'Ordered' )
+            frappe.model.set_value(frm.doc.doctype, frm.doc.name,'company',frappe.defaults.get_user_default("Company") )
+            frappe.model.set_value(frm.doc.doctype, frm.doc.name,'taxes_and_charges','' )
             me.events.save_ordered_invoice()
         });
 
 
         this.$component.on('click', '.checkout-btn', function () {
-            if ($(this).attr('style').indexOf('--blue-500') == -1) return;
+            if ($(this).attr('style').indexOf('--green-500') == -1) return;
             const frm = me.events.get_frm();
             let rounded_total = frm.doc.rounded_total;
             let payments = frm.doc.payments;
@@ -540,19 +545,21 @@ erpnext.PointOfSale.ItemCart = class {
                 label: __('Customer'),
                 fieldtype: 'Link',
                 options: 'Customer',
-                placeholder: __('Search by customer name, phone, email.'),
+                placeholder: __('Customer Name, Mobile'),
                 get_query: () => query,
                 onchange: function () {
                     if (this.value) {
                         const frm = me.events.get_frm();
                         frappe.dom.freeze();
                         frappe.model.set_value(frm.doc.doctype, frm.doc.name, 'customer', this.value);
+
                         frm.script_manager.trigger('customer', frm.doc.doctype, frm.doc.name).then(() => {
                             frappe.run_serially([
                                 () => me.fetch_customer_details(this.value),
                                 () => me.events.customer_details_updated(me.customer_info),
                                 () => me.update_customer_section(),
                                 () => me.update_totals_section(),
+                                () => me.set_default_order_type(frm),
                                 // () => me.events.set_cache_data({'pos_customer': this.value}),
                                 // () => me.check_out_validation(true),
                                 () => frappe.dom.unfreeze()
@@ -566,20 +573,27 @@ erpnext.PointOfSale.ItemCart = class {
         });
         this.customer_field.toggle_label(false);
     }
+    set_default_order_type(frm){
+        /* Set default order type */
+        if(!frm.doc.restaurant_order_type){
+            let {order_type} = this.order_type_info || {}; 
+            frappe.model.set_value(frm.doc.doctype, frm.doc.name, 'restaurant_order_type', order_type);
+        }
+    }
 
     make_served_by_selector() {
         this.$served_by_section.html(`
 			<div class="served-by-field"></div>
 		`);
         const me = this;
-        const query = {query: 'bbb.bbb.controllers.queries.served_by_query'};
+        const query = {query: 'bbb.bbb_restaurant.methods.queries.served_by_query'};
 
         this.served_by_field = frappe.ui.form.make_control({
             df: {
                 label: __('Served By'),
                 fieldtype: 'Link',
                 options: 'Served By',
-                placeholder: __('Search by name'),
+                placeholder: __('Served By'),
                 get_query: () => query,
                 onchange: function () {
                     if (this.value) {
@@ -623,15 +637,26 @@ erpnext.PointOfSale.ItemCart = class {
 			<div class="table-no-field"></div>
 		`);
         const me = this;
-        const query = {query: 'bbb.bbb.controllers.queries.table_number_query'};
+        const query = {query: 'bbb.bbb_restaurant.methods.queries.table_number_query'};
         this.table_no_field = frappe.ui.form.make_control({
             df: {
                 label: __('Table No'),
                 fieldtype: 'Link',
                 options: 'Restaurant Table Number',
-                placeholder: __('Search name'),
+                placeholder: __('Table'),
                 get_query: () => query,
                 onchange: function () {
+                    frappe.call({
+                        "method": "bbb.bbb_restaurant.methods.queries.check_duplicate_table_number",
+                        "args": {
+                            "table_number": this.value 
+                        },
+                        callback: function(r) {
+                            if (r.message == "yes") {
+                                frappe.throw({message: __("Already have order in table"), title: __("Table Booked")});
+                            }
+                        }
+                    });
                     if (this.value) {
                         const frm = me.events.get_frm();
                         frappe.dom.freeze();
@@ -662,8 +687,8 @@ erpnext.PointOfSale.ItemCart = class {
         this.order_type_field = frappe.ui.form.make_control({
             df: {
                 label: __('Order Type'),
-                fieldtype: 'Select',
-                options: ['Dining', 'Take Away','Delivery'],
+                fieldtype: 'Link',
+                options: 'Restaurant Order Type',
                 placeholder: __('Order Type'),
                 default: "Dining",
                 onchange: function () {
@@ -671,8 +696,13 @@ erpnext.PointOfSale.ItemCart = class {
                         const frm = me.events.get_frm();
                         frappe.dom.freeze();
                         frappe.model.set_value(frm.doc.doctype, frm.doc.name, 'restaurant_order_type', this.value);
-                        frm.script_manager.trigger('restaurant_order_type', frm.doc.doctype, frm.doc.name)
-                        frappe.dom.unfreeze();
+                        frm.script_manager.trigger('restaurant_order_type', frm.doc.doctype, frm.doc.name).then(()=>{
+                            frappe.run_serially([
+                                () => me.order_type_info = {'order_type': this.value},
+                                () => me.update_order_type_section(),
+                                () => frappe.dom.unfreeze()
+                            ]);
+                        })
                     }
                 },
             },
@@ -772,6 +802,12 @@ erpnext.PointOfSale.ItemCart = class {
                                     <span class="menu-item-label" data-label="Check Item Stock"><span class="alt-underline">V</span>iew Orders</span>
                                 </a>
                             </li>
+                            <li>
+                                <a class="grey-link dropdown-item" href="#" id="view_in_new_tab">
+                                    <span class="menu-item-label" data-label="Check Item Stock"><span class="alt-underline">V</span>iew in New Tab</span>
+                                </a>
+                            </li>
+                            
 <!--                            <li>-->
 <!--                                <a class="grey-link dropdown-item" href="#" id="add_damaged_product">-->
 <!--                                    <span class="menu-item-label" data-label=""><span class="alt-underline">A</span>dd Damaged Product</span>-->
@@ -850,26 +886,26 @@ erpnext.PointOfSale.ItemCart = class {
     fetch_customer_details(customer) {
         if (customer) {
             return new Promise((resolve) => {
-                frappe.db.get_value('Customer', customer, ["email_id", "mobile_no", "image", "loyalty_program", "customer_name"]).then(({message}) => {
-                    const {loyalty_program} = message;
-                    // if loyalty program then fetch loyalty points too
-                    if (loyalty_program) {
-                        frappe.call({
-                            method: "erpnext.accounts.doctype.loyalty_program.loyalty_program.get_loyalty_program_details_with_points",
-                            args: {customer, loyalty_program, "silent": true},
-                            callback: (r) => {
-                                const {loyalty_points, conversion_factor} = r.message;
-                                if (!r.exc) {
-                                    this.customer_info = {...message, customer, loyalty_points, conversion_factor};
+                frappe.db.get_value('Customer', customer, ["customer_name"]).then(({message}) => {
+                    // const {loyalty_program} = message;
+                    // // if loyalty program then fetch loyalty points too
+                    // if (loyalty_program) {
+                    //     frappe.call({
+                    //         method: "erpnext.accounts.doctype.loyalty_program.loyalty_program.get_loyalty_program_details_with_points",
+                    //         args: {customer, loyalty_program, "silent": true},
+                    //         callback: (r) => {
+                    //             const {loyalty_points, conversion_factor} = r.message;
+                    //             if (!r.exc) {
+                    //                 this.customer_info = {...message, customer, loyalty_points, conversion_factor};
 
-                                    resolve();
-                                }
-                            }
-                        });
-                    } else {
+                    //                 resolve();
+                    //             }
+                    //         }
+                    //     });
+                    // } else {
                         this.customer_info = {...message, customer};
                         resolve();
-                    }
+                    // }
                 });
             });
         } else {
@@ -1120,8 +1156,37 @@ erpnext.PointOfSale.ItemCart = class {
         } else {
             this.reset_table_no_selector();
         }
-
     }
+    update_order_type_section() {
+        // const frm = this.events.get_frm();
+        let style=''
+        // if(frm.doc.is_return){
+        //     style = "display: none;";
+        // }
+
+        const {order_type} = this.order_type_info || {};
+        
+        if (order_type) {
+            // let served_by_name = served_by.split('-')[0]
+            this.$order_type_section.html(
+                `<div class="order-type-details">
+                <div class="order-type-display">
+                    <div class="order-type-desc" style="font-weight:bold">
+                        <div class="order-type-name">${order_type}</div>
+                    </div>
+                    <div class="reset-order-type-btn" reset-order-type-attr="" data-order-type="${escape(order_type)}" >
+                        <svg width="32" height="32" viewBox="0 0 14 14" fill="none">
+                            <path d="M4.93764 4.93759L7.00003 6.99998M9.06243 9.06238L7.00003 6.99998M7.00003 6.99998L4.93764 9.06238L9.06243 4.93759" stroke="#8D99A6"/>
+                        </svg>
+                    </div>
+                </div>
+            </div>`
+            );
+        } else {
+            this.reset_order_type_selector();
+        }
+    }
+
     update_customer_section() {
         const frm = this.events.get_frm();
         let style=''
@@ -1442,7 +1507,7 @@ erpnext.PointOfSale.ItemCart = class {
 
                     if(frm.doc.is_return == 1){
                         // frappe.call({
-                        //     method: "bbb.bbb.controllers.utils.apply_item_pricing_rule",
+                        //     method: "bbb.bbb_restaurant.methods.utils.apply_item_pricing_rule",
                         //     async:false,
                         //     args: {"return_against": frm.doc.return_against, 'item_code': item_code},
                         //     callback: (r) => {
@@ -1504,7 +1569,7 @@ erpnext.PointOfSale.ItemCart = class {
                 let data_item_code = $(this).attr('data-item-code');
 
                 frappe.call({
-                    method: "bbb.bbb.controllers.utils.get_item_rate_discount",
+                    method: "bbb.bbb_restaurant.methods.utils.get_item_rate_discount",
                     args: {"return_against": frm.doc.return_against, 'item_code': data_item_code},
                     callback: (r) => {
                         let item = r.message;
@@ -1589,13 +1654,13 @@ erpnext.PointOfSale.ItemCart = class {
                 'background-color': 'var(--blue-500)'
             });
             this.$cart_container.find('.checkout-btn').css({
-                'background-color': 'var(--blue-500)'
+                'background-color': 'var(--green-500)'
             });
         } else {
             this.$add_discount_elem.css('display', 'none');
             this.$add_discount_amount_elem.css('display', 'none');
             this.$cart_container.find('.checkout-btn').css({
-                'background-color': 'var(--blue-200)'
+                'background-color': 'var(--green-200)'
             });
             this.$cart_container.find('.confirm-order-btn').css({
                 'background-color': 'var(--blue-200)'
@@ -1936,7 +2001,7 @@ erpnext.PointOfSale.ItemCart = class {
     }
     get_cache_data(){
 		frappe.call({
-			method: 'bbb.bbb.pos_invoice.get_pos_cached_data',
+			method: 'bbb.bbb_restaurant.methods.pos_invoice.get_pos_cached_data',
 			callback: function(r) {
 				if (!r.exc) {
 					// console.log(r.message);
@@ -1945,19 +2010,25 @@ erpnext.PointOfSale.ItemCart = class {
 			}
 		});
 	}
+    update_table_info(table_no){
+        return new Promise((resolve) => {
+            this.table_no_info = {'restaurant_table_number': table_no}
+            resolve();
+        });
+    }
+    update_order_type_info(order_type){
+        return new Promise((resolve) => {
+            this.order_type_info = {'order_type': order_type}
+            resolve();
+        });
+    }
     load_invoice() {
         const me = this;
         const frm = this.events.get_frm();
         frm.events.item_list = [];
         this.attach_refresh_field_event(frm);
-        // const cached_data = this.events.get_cache_data();
-        // if(cached_data){
-        //     this.update_cached_data(cached_data)
-        // }
-        // else {
-        // this.fetch_served_by_details(frm.doc.served_by).then(() => {
-        //     this.update_served_by_section();
-        // });
+        
+
         this.fetch_served_by_details(frm.doc.served_by).then(() => {
             this.update_served_by_section();
         });
@@ -1968,79 +2039,29 @@ erpnext.PointOfSale.ItemCart = class {
             this.events.customer_details_updated(this.customer_info);
             this.update_customer_section();
         });
-        // }
+        this.update_table_info(frm.doc.restaurant_table_number).then(()=>{
+            this.update_table_no_section();
+        })
+        this.update_order_type_info(frm.doc.restaurant_order_type).then(()=>{
+            this.update_order_type_section();
+        })
+        
         this.$cart_items_wrapper.html('');
-        // pos return
-        // if(frm.doc.is_return == 1) {
-        // frappe.model.set_value(frm.doc.doctype, frm.doc.name, 'ignore_pricing_rule', 0);
-        // }
-
-        // pos return
-        // if(frm.doc.is_return){
-        //     const item_data = frm.doc.items;
-        //     frm.doc.items = [];
-        //     frm.refresh_field('ignore_pricing_rule');
-        //     item_data.forEach(item => {
-        //         frappe.db.get_value('Item', {'item_code': item.item_code}, ['start_date', 'end_date', 'discount_amount']).then(res=>{
-        //             let new_item = {'item_code':item.item_code, 'batch_no': item.batch_no, 'rate':item.item_code, 'item_actual_qty': item.qty, 'mrp': item.price_list_rate, 'title': item.item_name, 'discount_amount': res.message.discount_amount, 'start_date': new Date(res.message.start_date), 'end_date': new Date(res.message.end_date), update_rules: 0}
-        //             var args = {
-        //             'field': "qty",
-        //             'item': new_item,
-        //             'value': item.qty
-        //             }
-        //             me.events.on_cart_update(args);
-        //         })
-        //     });
-        // }else{
-        //     if (frm.doc.items.length) {
-        //         frm.doc.items.forEach(item => {
-        //             this.update_item_html(item);
-        //         });
-        //     } else {
-        //         this.make_no_items_placeholder();
-        //         this.highlight_checkout_btn(false);
-        //     }
-        // }
 
         if (frm.doc.items.length) {
             frm.doc.items.forEach(item => {
                 this.update_item_html(item);
             });
-        } else {
+        }else {
             this.make_no_items_placeholder();
             this.highlight_checkout_btn(false);
         }
+
          me.update_totals_section(frm);
 
-
-        // setTimeout(function (){
-        //     if (frm.doc.items.length) {
-        //         frm.doc.items.forEach(item => {
-        //             if(item.pricing_rules && item.discount_percentage <= 0){
-        //                 frappe.call({
-        //                     method: "bbb.bbb.controllers.utils.get_pricing_rule_discount",
-        //                     args: {"name": item.pricing_rules},
-        //                     callback: (r) => {
-        //                         frappe.model.set_value(item.doctype, item.name, 'discount_percentage', r.message.discount_percentage)
-        //                         me.update_item_html(item);
-        //                     }
-        //                 })
-        //             }else{
-        //                 me.update_item_html(item);
-        //             }
-        //         })
-        //     } else {
-        //         me.make_no_items_placeholder();
-        //         me.highlight_checkout_btn(false);
-        //     }
-        //
-        //     me.update_totals_section(frm);
-        // }, 5000);
-
-
+        this.$totals_section.find('.edit-cart-btn').css('display', 'none');
         if (frm.doc.docstatus === 1) {
             this.$totals_section.find('.checkout-btn').css('display', 'none');
-            this.$totals_section.find('.edit-cart-btn').css('display', 'none');
         }
         // else if(frm.doc.status == "Ordered" || frm.doc.__islocal == 1){
         //     this.$totals_section.find('.checkout-btn').css('display', 'none');
@@ -2049,7 +2070,7 @@ erpnext.PointOfSale.ItemCart = class {
         // }
         else {
             this.$totals_section.find('.checkout-btn').css('display', 'flex');
-            this.$totals_section.find('.edit-cart-btn').css('display', 'none');
+            this.$totals_section.find('.confirm-order-btn').css('display', 'flex');
         }
         this.make_pos_profile();
         this.toggle_component(true);
@@ -2079,7 +2100,7 @@ erpnext.PointOfSale.ItemCart = class {
         const frm = this.events.get_frm();
         if(!frm.doc.pricing_rules.length){
             frappe.call({
-                method: "bbb.bbb.controllers.utils.get_and_apply_item_pricing_rules",
+                method: "bbb.bbb_restaurant.methods.utils.get_and_apply_item_pricing_rules",
                 args: {"return_against": frm.doc.return_against},
                 callback: (r) => {
                     let pricing_rules = r.message
@@ -2228,7 +2249,7 @@ erpnext.PointOfSale.ItemCart = class {
                             .then(function (){
                                 if(frm.doc.is_return){
                                     frappe.call({
-                                        method: "bbb.bbb.controllers.utils.apply_item_pricing_rule",
+                                        method: "bbb.bbb_restaurant.methods.utils.apply_item_pricing_rule",
                                         args: {"return_against": frm.doc.return_against, 'item_code': item.item_code},
                                         callback: (r) => {
                                             frappe.model.set_value("POS Invoice Item", item.name, 'margin_type', r.message.margin_type)
@@ -2252,7 +2273,7 @@ erpnext.PointOfSale.ItemCart = class {
         let items = frm.doc.items;
         if(frm.doc.is_return && items.length){
             frappe.call({
-                method: "bbb.bbb.controllers.utils.apply_all_items_pricing_rules",
+                method: "bbb.bbb_restaurant.methods.utils.apply_all_items_pricing_rules",
                 // async:false,
                 args: {"return_against": frm.doc.return_against},
                 callback: (r) => {
@@ -2284,7 +2305,7 @@ erpnext.PointOfSale.ItemCart = class {
         var discount_amount = 0;
         var discount_percentage = 0;
         frappe.call({
-            method: "bbb.bbb.controllers.utils.get_item_rate_discount",
+            method: "bbb.bbb_restaurant.methods.utils.get_item_rate_discount",
             args: {"return_against": return_against, 'item_code': item_code},
             async: false,
             callback: (r) => {
