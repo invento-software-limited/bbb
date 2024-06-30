@@ -188,7 +188,7 @@ frappe.Restaurant = class RestaturantOrderList {
 			let table_header ='<thead>\n' +
 				'    <tr>\n' +
 				'      <th scope="col" width="17%">Voucher</th>\n' +
-				'      <th scope="col" width="6%">Table</th>\n' +
+				'      <th scope="col" width="8%">Table</th>\n' +
 				'      <th scope="col" width="50%">Items</th>\n' +
 				'      <th scope="col" width="7%">Total Qty</th>\n' +
 				'      <th scope="col" width="10%">Status</th>\n' +
@@ -211,13 +211,10 @@ frappe.Restaurant = class RestaturantOrderList {
 					html+= '<td class="name">' + diff[key].name || '' + '</td>'
 					html+= '<td class="">' + diff[key].restaurant_table_number || '' + '</td>'
 					if(child_items.length === 2){
-						console.log("pp")
 						html+= `<td class="child_items" docname="${diff[key].name || ''}"><div class="old_item" style="font-weight: : 600"> ${child_items[0] || ''} </div><hr class="m-2"><div class="new_item font-weight-bold text-danger"> ${child_items[1] || ''} </div></td>`
 					}else if (child_items.length === 1){
-						console.log("eee")
 						html+= '<td class="child_items" docname="'+ diff[key].name +'"><div class="old_item" style="font-weight: : 600">' + child_items[0] || '' + '</div></td>'
 					}else{
-						console.log("bbbb")
 						html+= '<td class="child_items" docname="'+ diff[key].name +'"><div class="old_item" style="font-weight: : 600">' + child_items || '' + '</div></td>'
 					}
 					html+= '<td class="">' + diff[key].total_qty || '' + '</td>'

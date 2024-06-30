@@ -441,8 +441,9 @@ def validate(doc, method):
                     additional_qty = "+ <span style='color:red';>{}</span>".format(item.get("restaurant_new_qty"))
                 else:
                     additional_qty = ""
-                str_app = "{item} --- {qty} {new_qty}<br>".format(item=item.get("item_name"),qty=(item.get("qty")-item.get("restaurant_new_qty")),new_qty = additional_qty)
+                str_app = "{item} --- {qty} {new_qty}<br>".format(item=item.get("item_name"),qty=(item.get("qty")- item.get("restaurant_new_qty")),new_qty = additional_qty)
                 old_str += str_app
+                
             
         if len(old_str) > 0:
             all =  old_str + "<hr>" + item_str

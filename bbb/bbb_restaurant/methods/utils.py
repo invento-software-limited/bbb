@@ -656,7 +656,7 @@ def get_conditions(filters):
         conditions.append("p.pos_profile = '%s'" % filters.get("pos_profile"))
 
     if filters.get("invoice"):
-        conditions.append("p.pos_profile = '%s'" % filters.get("invoice"))
+        conditions.append("p.name = '%s'" % filters.get("invoice"))
 
     if filters.get("company"):
         conditions.append("p.company = '%s'" % filters.get("company"))
