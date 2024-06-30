@@ -27,32 +27,54 @@ def get_columns():
     return columns
 
 
-def get_conditions(filters):
-    conditions = ["voucher.is_sales = 1"]
+# def get_conditions(filters):
+#     conditions = ["voucher.is_sales = 1"]
 
-    if filters.get("from_date"):
-        conditions.append("voucher.posting_date >= '%s'" % filters.get("from_date"))
+#     if filters.get("from_date"):
+#         conditions.append("voucher.posting_date >= '%s'" % filters.get("from_date"))
 
-    if filters.get("to_date"):
-        conditions.append("voucher.posting_date <= '%s'" % filters.get("to_date"))
+#     if filters.get("to_date"):
+#         conditions.append("voucher.posting_date <= '%s'" % filters.get("to_date"))
 
-    if filters.get("outlet"):
-        conditions.append("voucher.pos_profile = '%s'" % filters.get("outlet"))
+#     if filters.get("outlet"):
+#         conditions.append("voucher.pos_profile = '%s'" % filters.get("outlet"))
 
-    if filters.get("company"):
-        conditions.append("voucher.company = '%s'" % filters.get("company"))
+#     if filters.get("company"):
+#         conditions.append("voucher.company = '%s'" % filters.get("company"))
 
-    if conditions:
-        conditions = " and ".join(conditions)
+#     if conditions:
+#         conditions = " and ".join(conditions)
+#     return conditions
+
+def get_filters(filters):
+    conditions = {}
+    
+    conditions["posting_date"] = ["between", [filters.get('from_date'), filters.get('to_date')]]
+    
+    if filters.get('outlet'):
+        conditions["pos_profile"] = filters.get('outlet')
+    
+    if filters.get('company'):
+        conditions["company"] = filters.get('company')
+
+    conditions["is_sales"] = 1
+
     return conditions
 
 
 def get_data(filters):
-    conditions = get_conditions(filters)
+    conditions = get_filters(filters)
     invoice_type = filters.get('switch_invoice')
-    query_result = frappe.db.sql(
-        """SELECT voucher.posting_date, voucher.name, voucher.customer, voucher.total_qty, voucher.net_total, voucher.total_taxes_and_charges,
-        voucher.pos_profile, voucher.rounded_total FROM `tab%s` voucher WHERE voucher.docstatus=1 and %s""" % (invoice_type, conditions),
-        as_dict=1, debug=1)
+    # query_result = frappe.db.sql(
+    #     """SELECT voucher.posting_date, voucher.name, voucher.customer, voucher.total_qty, voucher.net_total, voucher.total_taxes_and_charges,
+    #     voucher.pos_profile, voucher.rounded_total FROM `tab%s` voucher WHERE voucher.docstatus=1 and %s""" % (invoice_type, conditions),
+    #     as_dict=1, debug=1)
+
+
+    query_result = frappe.db.get_list(invoice_type,
+    fields=['posting_date', 'name', 'customer', 'total_qty', 'net_total', 'total_taxes_and_charges',
+        'pos_profile', 'rounded_total'],
+    filters=conditions)
+    
 
     return query_result

@@ -21,12 +21,23 @@ from erpnext.accounts.doctype.accounting_dimension.accounting_dimension import (
     get_accounting_dimensions,
 )
 
+from bbb.bbb.pos_closing_entry import get_pos_invoices
 
 class CustomPOSClosingEntry(POSClosingEntry):
     def __init__(self, *args, **kwargs):
         super(CustomPOSClosingEntry, self).__init__(*args, **kwargs)
 
     def on_submit(self):
+        start = frappe.utils.get_datetime_str(self.period_start_date)
+        end = frappe.utils.get_datetime_str(frappe.utils.now())
+        pos_profile = self.pos_profile
+        user = self.user
+
+        pos_invoices = get_pos_invoices(start, end, pos_profile, user)
+        if len(pos_invoices) != len(self.pos_transactions):
+            frappe.throw(_("Some invoices are missing or not loaded successfully. You must save the document again"))
+
+
         self.create_gl_entries()
         consolidate_pos_invoices(closing_entry=self)
 

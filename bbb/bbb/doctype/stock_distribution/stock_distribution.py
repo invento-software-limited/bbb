@@ -40,6 +40,8 @@ class StockDistribution(Document):
                 notification.insert(ignore_permissions=True)
             
     def on_submit(self):
+        if self.actual_distribute_qty and self.actual_distribute_qty > self.total_qty:
+            frappe.throw("Palnned qty cannot greater than distribute qty",title="Qty Mismatched")
         if self.ignore_validation:
             self.stock_entry()
         else:
@@ -133,12 +135,15 @@ class StockDistribution(Document):
                             data_dict["item_code"] = item.get("item_code")
                             data_dict["qty"] = value
                             data_dict["transfer_qty_from_stock_distribution"] = value
-                            data_dict["s_warehouse"] = item.get("warehouse")
+                            if item.get("warehouse"):
+                                data_dict["s_warehouse"] = item.get("warehouse")
+                            else:
+                                data_dict["s_warehouse"] = "Stores - BBB"
                             data_dict["t_warehouse"] = final
                             data_dict["uom"] = item.get("uom")
                             data_dict["reference_purchase_receipt"] = purchase_receipt_reference if purchase_receipt_reference else ""
                             items.append(data_dict)
-        
+                            
         for x in set(warehouses):
             update_items = []
             source_warehouse = []
@@ -146,10 +151,8 @@ class StockDistribution(Document):
                 if x == y.get("t_warehouse"):
                     update_items.append(y)
                     source_warehouse.append(y.get("s_warehouse"))
-
             unique_stores = list(set(source_warehouse))
             stores_str = ', '.join(unique_stores)
-            
             stock_entry = frappe.get_doc({
                 "doctype": "Stock Entry",
                 "stock_entry_type": "Material Transfer",  # You can set the purpose as per your use case
@@ -160,7 +163,6 @@ class StockDistribution(Document):
                 "items": update_items
             })
             stock_entry.save(ignore_permissions=True)
-
         
 # Fetch Purchase Order Items
 @frappe.whitelist()
@@ -391,7 +393,7 @@ def get_total_from_upload_excell(excell):
         sheet = workbook.active
         exclude_column_name = "Item Code"
         total_sum = 0
-        for row in sheet.iter_rows(min_row=2, max_row=sheet.max_row, min_col=1, max_col=sheet.max_column):
+        for row in sheet.iter_rows(min_row=2, max_row=sheet.max_row, min_col=2, max_col=sheet.max_column):
             for cell in row:
                 if sheet.cell(1, cell.column).value != exclude_column_name:
                     total_sum += cell.value if cell.value is not None else 0
