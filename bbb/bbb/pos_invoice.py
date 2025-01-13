@@ -5,7 +5,7 @@ import math
 from frappe.utils import money_in_words, flt, cint
 from frappe import _
 from erpnext.accounts.doctype.pricing_rule.utils import filter_pricing_rules_for_qty_amount
-from frappe.utils import today, flt, now, cstr, cint
+from frappe.utils import today, flt, now, cstr, cint,getdate, now, today
 from frappe.defaults import get_defaults
 from erpnext.accounts.utils import get_fiscal_year
 from erpnext.stock.stock_ledger import make_sl_entries
@@ -14,7 +14,35 @@ from erpnext.controllers.stock_controller import StockController
 class CustomerValidationError(frappe.ValidationError): pass
 
 
+def check_opening_entry():
+
+    from datetime import datetime
+    today_date = today()
+    start_time = datetime.combine(datetime.strptime(today_date, "%Y-%m-%d"), datetime.min.time())  # Today 00:00:00
+    end_time = datetime.combine(datetime.strptime(today_date, "%Y-%m-%d"), datetime.max.time())    # Today 23:59:59
+
+    
+    open_vouchers = frappe.db.get_all(
+        "POS Opening Entry",
+        filters={
+            "period_start_date": ["between", start_time, end_time],
+            "user": frappe.session.user,
+            "pos_closing_entry": ["in", ["", None]],
+            "docstatus": 1
+        },
+        fields=["name", "company", "pos_profile", "period_start_date"],
+        order_by="period_start_date desc",
+    )
+    if not open_vouchers:
+        frappe.throw(f"Opening entry for {frappe.session.user} is missing for today. Please create an opening entry to proceed.")
+
+
+        
+        
 def after_insert_or_on_submit(doc, method):
+    
+    check_opening_entry()
+    
     total_advance = doc.total_advance
     grand_total = doc.grand_total
     if grand_total is not None:
