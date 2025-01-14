@@ -16,16 +16,10 @@ class CustomerValidationError(frappe.ValidationError): pass
 
 def check_opening_entry():
 
-    from datetime import datetime
-    today_date = today()
-    start_time = datetime.combine(datetime.strptime(today_date, "%Y-%m-%d"), datetime.min.time())  # Today 00:00:00
-    end_time = datetime.combine(datetime.strptime(today_date, "%Y-%m-%d"), datetime.max.time())    # Today 23:59:59
-
     
     open_vouchers = frappe.db.get_all(
         "POS Opening Entry",
         filters={
-            "period_start_date": ["between", start_time, end_time],
             "user": frappe.session.user,
             "pos_closing_entry": ["in", ["", None]],
             "docstatus": 1
