@@ -6,7 +6,7 @@ locale
 latest_updates.json
 .wnf-lang-status
 *.egg-info
-dist/
+dist/*
 *.swp
 *.swo
 __pycache__
