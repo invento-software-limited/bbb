@@ -1,6 +1,6 @@
 frappe.provide("erpnext.PointOfSale");
 
-frappe.pages["point-of-sale"].on_page_load = function (wrapper) {
+frappe.pages["bbb-point-of-sale"].on_page_load = function (wrapper) {
 	frappe.ui.make_app_page({
 		parent: wrapper,
 		title: __("Point of Sale"),
@@ -13,7 +13,7 @@ frappe.pages["point-of-sale"].on_page_load = function (wrapper) {
 	});
 };
 
-frappe.pages["point-of-sale"].refresh = function (wrapper) {
+frappe.pages["bbb-point-of-sale"].refresh = function (wrapper) {
 	if (document.scannerDetectionData) {
 		onScan.detachFrom(document);
 		wrapper.pos.wrapper.html("");

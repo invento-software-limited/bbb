@@ -24,7 +24,7 @@ app_license = "mit"
 # Includes in <head>
 # ------------------
 app_include_css = "/assets/bbb/css/custom-point-of-sale.css"
-app_include_js = "/assets/bbb/js/custom-app-include-js.js"
+app_include_js = "bbb.bundle.js"
 
 # include js, css files in header of desk.html
 # app_include_css = "/assets/bbb/css/bbb.css"

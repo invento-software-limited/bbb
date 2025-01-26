@@ -1,0 +1,19 @@
+{
+ "content": null,
+ "creation": "2025-01-26 11:41:39.079724",
+ "docstatus": 0,
+ "doctype": "Page",
+ "idx": 0,
+ "modified": "2025-01-26 17:49:55.519933",
+ "modified_by": "Administrator",
+ "module": "Bbb",
+ "name": "bbb-point-of-sale",
+ "owner": "Administrator",
+ "page_name": "bbb-point-of-sale",
+ "roles": [],
+ "script": null,
+ "standard": "Yes",
+ "style": null,
+ "system_page": 0,
+ "title": "Point Of Sale"
+}
