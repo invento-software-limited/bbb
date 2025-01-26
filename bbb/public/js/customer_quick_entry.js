@@ -1,7 +1,5 @@
 frappe.provide('frappe.ui.form');
 
-console.log("Called")
-
 frappe.ui.form.CustomerQuickEntryForm = class ContactAddressQuickEntryForm extends (
 	frappe.ui.form.QuickEntryForm
 )  {

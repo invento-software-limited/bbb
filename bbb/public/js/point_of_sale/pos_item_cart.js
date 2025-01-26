@@ -477,7 +477,7 @@ erpnext.PointOfSale.ItemCart = class {
 			<div class="customer-field"></div>
 		`);
         const me = this;
-        const query = {query: 'bbb.controllers.utils.customer_query'};
+        const query = {query: 'bbb.bbb.controllers.queries.customer_query'};
         const allowed_customer_group = this.allowed_customer_groups || [];
         if (allowed_customer_group.length) {
             query.filters = {
