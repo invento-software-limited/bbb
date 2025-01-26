@@ -1,8 +1,8 @@
 app_name = "bbb"
 app_title = "Bbb"
-app_publisher = "a"
-app_description = "a"
-app_email = "a@mail.com"
+app_publisher = "n"
+app_description = "n"
+app_email = "n@mail.com"
 app_license = "mit"
 
 # Apps
