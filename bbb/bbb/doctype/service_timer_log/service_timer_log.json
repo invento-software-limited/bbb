@@ -1,0 +1,65 @@
+{
+ "actions": [],
+ "allow_rename": 1,
+ "creation": "2023-05-16 16:11:53.706202",
+ "doctype": "DocType",
+ "editable_grid": 1,
+ "engine": "InnoDB",
+ "field_order": [
+  "service_from",
+  "service_to",
+  "pause_from",
+  "pause_to",
+  "total_service_time",
+  "total_pause_time"
+ ],
+ "fields": [
+  {
+   "fieldname": "service_from",
+   "fieldtype": "Datetime",
+   "in_list_view": 1,
+   "label": "Service From"
+  },
+  {
+   "fieldname": "service_to",
+   "fieldtype": "Datetime",
+   "in_list_view": 1,
+   "label": "Service To"
+  },
+  {
+   "fieldname": "pause_from",
+   "fieldtype": "Datetime",
+   "in_list_view": 1,
+   "label": "Pause From"
+  },
+  {
+   "fieldname": "pause_to",
+   "fieldtype": "Datetime",
+   "in_list_view": 1,
+   "label": "Pause To"
+  },
+  {
+   "fieldname": "total_service_time",
+   "fieldtype": "Data",
+   "in_list_view": 1,
+   "label": "Total Service Time"
+  },
+  {
+   "fieldname": "total_pause_time",
+   "fieldtype": "Data",
+   "in_list_view": 1,
+   "label": "Total Pause Time"
+  }
+ ],
+ "index_web_pages_for_search": 1,
+ "istable": 1,
+ "links": [],
+ "modified": "2023-05-16 18:17:59.479793",
+ "modified_by": "Administrator",
+ "module": "Bbb",
+ "name": "Service Timer Log",
+ "owner": "Administrator",
+ "permissions": [],
+ "sort_field": "modified",
+ "sort_order": "DESC"
+}

@@ -1,0 +1,315 @@
+{
+ "actions": [],
+ "allow_rename": 1,
+ "autoname": "SR-.#####",
+ "creation": "2023-05-08 12:57:28.236581",
+ "doctype": "DocType",
+ "editable_grid": 1,
+ "engine": "InnoDB",
+ "field_order": [
+  "service_info_section",
+  "service_code",
+  "service_name",
+  "customer",
+  "location",
+  "invoice_no",
+  "column_break_6",
+  "company",
+  "status",
+  "service_date",
+  "actual_service_date",
+  "service_start_time",
+  "service_end_time",
+  "total_service_time",
+  "pause_time",
+  "service_time",
+  "pause_start_time",
+  "service_person_section",
+  "service_person_1",
+  "service_person_column_break_1",
+  "service_person_2",
+  "service_person_column_break_2",
+  "service_person_3",
+  "service_person_column_break_3",
+  "service_person_4",
+  "service_timer_section",
+  "service_timer_log",
+  "service_consumable_items_section",
+  "service_consumable_items",
+  "timer_section",
+  "service_person_weight_section_section",
+  "service_person_1_weight",
+  "column_break_33",
+  "service_person_2_weight",
+  "column_break_35",
+  "service_person_3_weight",
+  "column_break_37",
+  "service_person_4_weight",
+  "amended_from"
+ ],
+ "fields": [
+  {
+   "fieldname": "service_code",
+   "fieldtype": "Link",
+   "label": "Service Code",
+   "options": "Item",
+   "read_only": 1,
+   "reqd": 1
+  },
+  {
+   "fetch_from": "service_code.name",
+   "fieldname": "service_name",
+   "fieldtype": "Data",
+   "label": "Service Name",
+   "read_only": 1
+  },
+  {
+   "fieldname": "customer",
+   "fieldtype": "Link",
+   "in_list_view": 1,
+   "label": "Customer",
+   "options": "Customer",
+   "read_only": 1,
+   "reqd": 1
+  },
+  {
+   "fieldname": "invoice_no",
+   "fieldtype": "Link",
+   "in_list_view": 1,
+   "label": "Invoice No",
+   "options": "POS Invoice",
+   "read_only": 1,
+   "reqd": 1
+  },
+  {
+   "default": "frappe.defaults.get_user_default(\"Company\")",
+   "fieldname": "company",
+   "fieldtype": "Link",
+   "in_list_view": 1,
+   "label": "Company",
+   "options": "Company",
+   "read_only": 1,
+   "reqd": 1
+  },
+  {
+   "fieldname": "location",
+   "fieldtype": "Link",
+   "label": "Location",
+   "options": "POS Profile",
+   "read_only": 1,
+   "reqd": 1
+  },
+  {
+   "fieldname": "service_timer_section",
+   "fieldtype": "Section Break",
+   "label": "Service Timer",
+   "read_only": 1
+  },
+  {
+   "fieldname": "amended_from",
+   "fieldtype": "Link",
+   "label": "Amended From",
+   "no_copy": 1,
+   "options": "Service Record",
+   "print_hide": 1,
+   "read_only": 1
+  },
+  {
+   "fieldname": "service_consumable_items_section",
+   "fieldtype": "Section Break",
+   "label": "Service Consumable Items",
+   "read_only": 1
+  },
+  {
+   "fetch_from": "service_code.consumable_items",
+   "fieldname": "service_consumable_items",
+   "fieldtype": "Table",
+   "options": "Service Consumable Items",
+   "read_only": 1
+  },
+  {
+   "fieldname": "column_break_6",
+   "fieldtype": "Column Break"
+  },
+  {
+   "fieldname": "service_person_section",
+   "fieldtype": "Section Break",
+   "label": "Service Person"
+  },
+  {
+   "fieldname": "service_person_1",
+   "fieldtype": "Link",
+   "label": "Service Person 1",
+   "mandatory_depends_on": "eval:doc.status == \"Pending For Service\" || doc.service_start_time",
+   "options": "Service Person"
+  },
+  {
+   "fieldname": "service_person_column_break_1",
+   "fieldtype": "Column Break"
+  },
+  {
+   "fieldname": "service_person_2",
+   "fieldtype": "Link",
+   "label": "Service Person 2",
+   "options": "Service Person"
+  },
+  {
+   "fieldname": "service_person_column_break_2",
+   "fieldtype": "Column Break"
+  },
+  {
+   "fieldname": "service_person_3",
+   "fieldtype": "Link",
+   "label": "Service Person 3",
+   "options": "Service Person"
+  },
+  {
+   "fieldname": "service_person_column_break_3",
+   "fieldtype": "Column Break"
+  },
+  {
+   "fieldname": "service_person_4",
+   "fieldtype": "Link",
+   "label": "Service Person 4",
+   "options": "Service Person"
+  },
+  {
+   "fieldname": "pause_start_time",
+   "fieldtype": "Datetime",
+   "hidden": 1,
+   "label": "Pause Start Time"
+  },
+  {
+   "default": "0",
+   "fieldname": "pause_time",
+   "fieldtype": "Int",
+   "hidden": 1,
+   "label": "Total Pause Time In Sec"
+  },
+  {
+   "default": "0",
+   "fieldname": "service_time",
+   "fieldtype": "Int",
+   "hidden": 1,
+   "label": "Total Service Time in Sec"
+  },
+  {
+   "fieldname": "service_start_time",
+   "fieldtype": "Datetime",
+   "label": "Service Start Time",
+   "read_only": 1
+  },
+  {
+   "fieldname": "service_end_time",
+   "fieldtype": "Datetime",
+   "label": "Service End Time",
+   "read_only": 1
+  },
+  {
+   "fieldname": "status",
+   "fieldtype": "Select",
+   "hidden": 1,
+   "in_list_view": 1,
+   "label": "Status",
+   "options": "\nDraft\nPending For Service\nIn Progress\nPaused\nSubmitted\nCancelled"
+  },
+  {
+   "fieldname": "timer_section",
+   "fieldtype": "Section Break"
+  },
+  {
+   "fieldname": "service_date",
+   "fieldtype": "Date",
+   "label": "Service Date"
+  },
+  {
+   "fieldname": "actual_service_date",
+   "fieldtype": "Date",
+   "label": "Actual Service Date"
+  },
+  {
+   "fieldname": "service_timer_log",
+   "fieldtype": "Table",
+   "options": "Service Timer Log",
+   "read_only": 1
+  },
+  {
+   "fieldname": "total_service_time",
+   "fieldtype": "Data",
+   "label": "Total Service Time",
+   "read_only": 1
+  },
+  {
+   "collapsible": 1,
+   "fieldname": "service_info_section",
+   "fieldtype": "Section Break",
+   "label": "Service Info"
+  },
+  {
+   "fieldname": "service_person_weight_section_section",
+   "fieldtype": "Section Break",
+   "label": "Service Person Weight"
+  },
+  {
+   "fetch_from": "service_code.service_person_1",
+   "fieldname": "service_person_1_weight",
+   "fieldtype": "Data",
+   "label": "Service Person 1 weight"
+  },
+  {
+   "fieldname": "column_break_33",
+   "fieldtype": "Column Break"
+  },
+  {
+   "fetch_from": "service_code.service_person_2",
+   "fieldname": "service_person_2_weight",
+   "fieldtype": "Data",
+   "label": "Service Person 2 weight"
+  },
+  {
+   "fieldname": "column_break_35",
+   "fieldtype": "Column Break"
+  },
+  {
+   "fetch_from": "service_code.service_person_3",
+   "fieldname": "service_person_3_weight",
+   "fieldtype": "Data",
+   "label": "Service Person 3 weight"
+  },
+  {
+   "fieldname": "column_break_37",
+   "fieldtype": "Column Break"
+  },
+  {
+   "fetch_from": "service_code.service_person_4",
+   "fieldname": "service_person_4_weight",
+   "fieldtype": "Data",
+   "label": "Service Person 4 weight"
+  }
+ ],
+ "index_web_pages_for_search": 1,
+ "is_submittable": 1,
+ "links": [],
+ "modified": "2023-05-20 22:24:57.304814",
+ "modified_by": "Administrator",
+ "module": "Bbb",
+ "name": "Service Record",
+ "owner": "Administrator",
+ "permissions": [
+  {
+   "create": 1,
+   "delete": 1,
+   "email": 1,
+   "export": 1,
+   "print": 1,
+   "read": 1,
+   "report": 1,
+   "role": "System Manager",
+   "share": 1,
+   "write": 1
+  }
+ ],
+ "sort_field": "modified",
+ "sort_order": "DESC",
+ "track_changes": 1
+}

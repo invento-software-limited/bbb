@@ -1,0 +1,29 @@
+{
+ "add_total_row": 0,
+ "columns": [],
+ "creation": "2023-06-15 10:19:43.113558",
+ "disable_prepared_report": 0,
+ "disabled": 0,
+ "docstatus": 0,
+ "doctype": "Report",
+ "filters": [],
+ "idx": 0,
+ "is_standard": "Yes",
+ "modified": "2023-06-15 10:19:50.367608",
+ "modified_by": "Administrator",
+ "module": "Bbb",
+ "name": "Advance Booking List Report",
+ "owner": "Administrator",
+ "prepared_report": 0,
+ "ref_doctype": "Advance Booking",
+ "report_name": "Advance Booking List Report",
+ "report_type": "Script Report",
+ "roles": [
+  {
+   "role": "System Manager"
+  },
+  {
+   "role": "BBB Admin"
+  }
+ ]
+}

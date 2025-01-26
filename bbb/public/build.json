@@ -1,0 +1,49 @@
+{
+	"css/custom-point-of-sale.css": [
+		"public/css/point-of-sale.scss"
+	],
+	"js/custom-point-of-sale.min.js": [
+		"public/js/point_of_sale/pos_item_selector.js",
+		"public/js/point_of_sale/pos_item_cart.js",
+		"public/js/point_of_sale/pos_item_details.js",
+		"public/js/point_of_sale/pos_number_pad.js",
+		"public/js/point_of_sale/pos_payment.js",
+		"public/js/point_of_sale/pos_past_order_list.js",
+		"public/js/point_of_sale/pos_past_order_summary.js",
+		"public/js/point_of_sale/pos_controller.js"
+	],
+  "js/parlour.min.js": [
+		"public/js/parlour/pos_item_selector.js",
+		"public/js/parlour/pos_item_cart.js",
+		"public/js/parlour/pos_item_details.js",
+		"public/js/parlour/pos_number_pad.js",
+		"public/js/parlour/pos_payment.js",
+		"public/js/parlour/pos_past_order_list.js",
+		"public/js/parlour/pos_past_order_summary.js",
+		"public/js/parlour/pos_controller.js"
+	],
+
+	"js/restaurant.min.js": [
+		"public/js/restaurant/pos_item_selector.js",
+		"public/js/restaurant/pos_item_cart.js",
+		"public/js/restaurant/pos_item_details.js",
+		"public/js/restaurant/pos_number_pad.js",
+		"public/js/restaurant/pos_payment.js",
+		"public/js/restaurant/pos_past_order_list.js",
+		"public/js/restaurant/pos_past_order_summary.js",
+		"public/js/restaurant/pos_controller.js"
+	],
+	"js/custom-app-include-js.js": [
+		"public/js/customer_quick_entry.js"
+	],
+	"js/erp-pos.js": [
+		"bbb/page/erp_pos/pos_item_selector.js",
+		"bbb/page/erp_pos/pos_item_cart.js",
+		"bbb/page/erp_pos/pos_item_details.js",
+		"bbb/page/erp_pos/pos_number_pad.js",
+		"bbb/page/erp_pos/pos_payment.js",
+		"bbb/page/erp_pos/pos_past_order_list.js",
+		"bbb/page/erp_pos/pos_past_order_summary.js",
+		"bbb/page/erp_pos/pos_controller.js"
+	]
+}

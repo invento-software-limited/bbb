@@ -23,6 +23,8 @@ app_license = "mit"
 
 # Includes in <head>
 # ------------------
+app_include_css = "/assets/bbb/css/custom-point-of-sale.css"
+app_include_js = "/assets/bbb/js/custom-app-include-js.js"
 
 # include js, css files in header of desk.html
 # app_include_css = "/assets/bbb/css/bbb.css"
@@ -42,12 +44,44 @@ app_license = "mit"
 # include js in page
 # page_js = {"page" : "public/js/file.js"}
 
+page_js = {
+    # "pos" : "public/js/pos_controller.js",
+    # "point-of-sale": "public/js/pos_controller.js",
+    "point-of-sale": "public/js/point_of_sale.js",
+    # "parlour": "public/js/parlour.js",
+
+}
 # include js in doctype views
 # doctype_js = {"doctype" : "public/js/doctype.js"}
 # doctype_list_js = {"doctype" : "public/js/doctype_list.js"}
 # doctype_tree_js = {"doctype" : "public/js/doctype_tree.js"}
 # doctype_calendar_js = {"doctype" : "public/js/doctype_calendar.js"}
 
+doctype_js = {
+    # "User": 'public/js/user.js',
+    "Role Profile": 'public/js/role_profile.js',
+    # "POS Invoice": [
+    #     'public/js/sales_common.js'
+    # ],
+    "POS Closing Entry": [
+        'public/js/pos_closing_entry.js'
+    ],
+    "Sales Order": [
+        'public/js/sales_order.js'
+    ],
+    "Sales Invoice": [
+        'public/js/sales_invoice.js'
+    ],
+    "Stock Entry": [
+        'public/js/stock_entry.js'
+    ],
+    "Purchase Order": [
+        'public/js/purchase_order.js'
+    ],
+}
+doctype_list_js = {
+    "POS Invoice": "public/js/pos_invoice_list.js"
+}
 # Svg Icons
 # ------------------
 # include app icons in desk
@@ -72,7 +106,15 @@ app_license = "mit"
 
 # Jinja
 # ----------
-
+jinja = {
+    "methods": [
+        "bbb.bbb.controllers.utils.str_to_datetime",
+        "bbb.bbb.controllers.utils.get_current_datetime",
+        "bbb.bbb.controllers.utils.get_invoice_total_discount_amount",
+        "bbb.bbb.controllers.utils.get_item_total_discount_amount",
+        "bbb.bbb.controllers.utils.get_invoice_before_discount_amount",
+    ]
+}
 # add methods and filters to jinja environment
 # jinja = {
 # 	"methods": "bbb.utils.jinja_methods",
@@ -145,6 +187,55 @@ app_license = "mit"
 # 	}
 # }
 
+doc_events = {
+    "Item": {
+        "after_insert": "bbb.bbb.item.after_insert",
+        "on_update": "bbb.bbb.item.on_update",
+        "validate": "bbb.bbb.item.validate",
+    },
+    "Item Price": {
+        "after_insert": "bbb.bbb.item_price_list.after_insert_or_on_update",
+        "on_update": "bbb.bbb.item_price_list.after_insert_or_on_update",
+    },
+    "Sales Invoice": {
+        # "on_submit": "bbb.bbb.sales_invoice.on_submit",
+        # "before_submit": "bbb.bbb.sales_invoice.before_submit",
+    },
+
+    "POS Invoice": {
+        "on_submit": "bbb.bbb.pos_invoice.after_insert_or_on_submit",
+        # "after_insert": "bbb.bbb.pos_invoice.after_insert_or_on_submit",
+        "validate": "bbb.bbb.pos_invoice.validate",
+        "on_cancel": "bbb.bbb.pos_invoice.on_cancel",
+    },
+    # "POS Invoice Merge Log": {
+    #     "on_submit": "bbb.bbb.pos_invoice_merge_log.on_submit"
+    # }
+    "POS Closing Entry":{
+        "validate": "bbb.bbb.pos_closing_entry.validate"
+    },
+    "User":{
+        "validate": "bbb.bbb.user.validate"
+    },
+    "Stock Ledger Entry":{
+        "on_update": "bbb.bbb.controllers.utils.update_woocommerce_stock"
+    },
+    "Stock Entry":{
+        "on_submit": "bbb.bbb.controllers.stock_entry.update_on_submit",
+        "validate" : "bbb.bbb.controllers.stock_entry.update_validate",
+        "on_cancel" : "bbb.bbb.controllers.stock_entry.update_on_cancel"
+    },
+    
+
+}
+override_doctype_class = {
+    "Sales Invoice": "bbb.bbb.controllers.sales_invoice.CustomSalesInvoice",
+    "POS Invoice": "bbb.bbb.controllers.pos_invoice.CustomPOSInvoice",
+    "Sales Order": "bbb.bbb.controllers.sales_order.CustomSalesOrder",
+    "POS Closing Entry": "bbb.bbb.controllers.pos_closing_entry.CustomPOSClosingEntry",
+    # "Stock Ledger Entry": "bbb.bbb.controllers.stock_ledger_entry.CustomStockLedgerEntry",
+    # "Delivery Note": "bbb.bbb.controllers.delivery_note.CustomDeliveryNote",
+}
 # Scheduled Tasks
 # ---------------
 
@@ -206,7 +297,30 @@ app_license = "mit"
 
 # User Data Protection
 # --------------------
-
+boot_session = "bbb.startup.boot.boot_session"
+user_data_fields = [
+    {
+        "doctype": "{doctype_1}",
+        "filter_by": "{filter_by}",
+        "redact_fields": ["{field_1}", "{field_2}"],
+        "partial": 1,
+    },
+    {
+        "doctype": "{doctype_2}",
+        "filter_by": "{filter_by}",
+        "partial": 1,
+    },
+    {
+        "doctype": "{doctype_3}",
+        "strict": False,
+    },
+    {
+        "doctype": "{doctype_4}"
+    }
+]
+fixtures = [
+    "Workflow State", "Workflow", "Workflow Action Master"
+]
 # user_data_fields = [
 # 	{
 # 		"doctype": "{doctype_1}",
