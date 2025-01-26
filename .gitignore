@@ -7,8 +7,6 @@ latest_updates.json
 .wnf-lang-status
 *.egg-info
 dist/
-bbb/public/dist
-bbb/docs/current
 *.swp
 *.swo
 __pycache__
