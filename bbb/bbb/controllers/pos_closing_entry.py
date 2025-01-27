@@ -4,8 +4,7 @@ import frappe
 from frappe.utils import getdate
 from frappe.model.mapper import map_child_doc, map_doc
 from frappe import _
-from frappe.core.page.background_jobs.background_jobs import get_info
-from frappe.utils.background_jobs import enqueue
+from frappe.utils.background_jobs import enqueue, get_jobs
 from frappe.utils.scheduler import is_scheduler_inactive
 from frappe.utils import (
     flt,
@@ -13,6 +12,7 @@ from frappe.utils import (
     getdate,
     now,
 )
+import json
 
 from erpnext.accounts.doctype.pos_closing_entry.pos_closing_entry import POSClosingEntry
 from erpnext.accounts.general_ledger import make_gl_entries, process_gl_map
@@ -226,7 +226,7 @@ def create_merge_logs(pos_invoices, closing_entry=None):
 
         if closing_entry:
             closing_entry.set_status(update=True, status="Failed")
-            closing_entry.db_set("error_message", error_message)
+            closing_entry.db_set("error_message", json.dumps(error_message))
         raise
 
     finally:
@@ -267,7 +267,7 @@ def check_scheduler_status():
 
 
 def job_already_enqueued(job_name):
-    enqueued_jobs = [d.get("job_name") for d in get_info()]
+    enqueued_jobs = [d.get("job_name") for d in get_jobs()]
     if job_name in enqueued_jobs:
         return True
 
