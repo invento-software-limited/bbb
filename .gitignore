@@ -15,4 +15,4 @@ __pycache__
 .vscode/
 node_modules/
 .backportrc.json
-./dist/*
+bbb/public/dist/*
