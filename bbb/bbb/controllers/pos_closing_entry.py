@@ -37,8 +37,11 @@ class CustomPOSClosingEntry(POSClosingEntry):
         if len(pos_invoices) != len(self.pos_transactions):
             frappe.throw(_("Some invoices are missing or not loaded successfully. You must save the document again"))
 
+        # CREATE INDEX idx_sales_invoice_pos ON `tabSales Invoice` (`pos_profile`, `posting_date`);
+        # CREATE INDEX idx_pos_closing_entry_docstatus ON `tabPOS Closing Entry` (`docstatus`);
 
-        self.create_gl_entries()
+
+        # self.create_gl_entries()
         consolidate_pos_invoices(closing_entry=self)
 
     def on_cancel(self):
@@ -168,7 +171,7 @@ def consolidate_pos_invoices(pos_invoices=None, closing_entry=None):
         frappe.throw(_("There must be at lest one invoice"),
                      title=_("Invoice not found"))
 
-    if len(pos_invoices) >= 10 and closing_entry:
+    if len(pos_invoices) >= 1 and closing_entry:
         closing_entry.set_status(update=True, status="Queued")
         enqueue_job(
             create_merge_logs, pos_invoices=pos_invoices, closing_entry=closing_entry
