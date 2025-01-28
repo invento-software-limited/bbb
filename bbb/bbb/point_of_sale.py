@@ -80,6 +80,9 @@ def get_items(start, page_length, price_list, item_group, pos_profile, search_te
 	condition += get_item_group_condition(pos_profile)
 
 	lft, rgt = frappe.db.get_value("Item Group", item_group, ["lft", "rgt"])
+	item_groups = frappe.db.sql_list(
+        "SELECT name FROM `tabItem Group` WHERE lft >= %s AND rgt <= %s", (lft, rgt)
+    )
 
 	bin_join_selection, bin_join_condition = "", ""
 	if hide_unavailable_items:
@@ -108,7 +111,7 @@ def get_items(start, page_length, price_list, item_group, pos_profile, search_te
 			AND item.has_variants = 0
 			AND item.is_sales_item = 1
 			AND item.is_fixed_asset = 0
-			AND item.item_group in (SELECT name FROM `tabItem Group` WHERE lft >= {lft} AND rgt <= {rgt})
+			AND item.item_group IN %(item_groups)s
 			AND {condition}
 			{bin_join_condition}
 		ORDER BY
@@ -123,7 +126,7 @@ def get_items(start, page_length, price_list, item_group, pos_profile, search_te
 			bin_join_selection=bin_join_selection,
 			bin_join_condition=bin_join_condition,
 		),
-		{"warehouse": warehouse},
+		{"warehouse": warehouse, "item_groups": tuple(item_groups)},
 		as_dict=1,
 	)
 
@@ -135,14 +138,26 @@ def get_items(start, page_length, price_list, item_group, pos_profile, search_te
 			filters={"price_list": price_list, "item_code": ["in", items]},
 		)
 
-		item_prices = {}
-		for d in item_prices_data:
-			item_prices[d.item_code] = d
+		item_prices = {d.item_code: d for d in item_prices_data}
+		# item_prices = {}
+		# for d in item_prices_data:
+		# 	item_prices[d.item_code] = d
+		stock_availability = frappe.db.sql(
+			"""
+			SELECT item_code, actual_qty
+			FROM `tabBin`
+			WHERE warehouse = %s AND item_code IN %s
+			""",
+			(warehouse, tuple(items)),
+			as_dict=1,
+		)
+		stock_map = {row.item_code: row.actual_qty for row in stock_availability}
 
 		for item in items_data:
 			item_code = item.item_code
 			item_price = item_prices.get(item_code) or {}
-			item_stock_qty, is_stock_item = get_stock_availability(item_code, warehouse)
+			item_stock_qty = stock_map.get(item_code, 0)
+			# item_stock_qty, is_stock_item = get_stock_availability(item_code, warehouse)
 
 			row = {}
 			row.update(item)
@@ -154,6 +169,11 @@ def get_items(start, page_length, price_list, item_group, pos_profile, search_te
 				}
 			)
 			result.append(row)
+
+	# CREATE INDEX idx_item_group_lft_rgt ON `tabItem Group` (lft, rgt);
+	# CREATE INDEX idx_item_conditions ON `tabItem` (disabled, has_variants, is_sales_item, item_group);
+
+
 
 	return {"items": result}
 
