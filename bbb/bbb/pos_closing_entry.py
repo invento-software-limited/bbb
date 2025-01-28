@@ -67,18 +67,26 @@ def get_pos_invoices(start, end, pos_profile, user):
 	from
 		`tabPOS Invoice`
 	where
-		owner = %s and docstatus = 1 and pos_profile = %s and ifnull(consolidated_invoice,'') = '' order by timestamp asc
+		owner = %s and docstatus = 1 and pos_profile = %s and ifnull(consolidated_invoice,'') = ''
+            AND timestamp(posting_date, posting_time) BETWEEN %s AND %s
+            order by timestamp asc
 	""",
-        (user, pos_profile),
+        (user, pos_profile, start, end),
         as_dict=1,
     )
 
-    data = list(
-        filter(lambda d: get_datetime(start) <= get_datetime(
-            d.timestamp) <= get_datetime(end), data)
-    )
+    # data = list(
+    #     filter(lambda d: get_datetime(start) <= get_datetime(
+    #         d.timestamp) <= get_datetime(end), data)
+    # )
     # need to get taxes and payments so can't avoid get_doc
     data = [frappe.get_doc("POS Invoice", d.name).as_dict() for d in data]
+    
+
+    # TODO: index on `tabPOS Invoice` is not created, create this via a patch
+    # 
+	# CREATE INDEX idx_pos_invoice_optimized ON `tabPOS Invoice` (owner, docstatus, pos_profile, consolidated_invoice, posting_date, posting_time);
+
 
     return data
 
