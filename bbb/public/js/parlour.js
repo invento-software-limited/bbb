@@ -7,14 +7,14 @@ frappe.pages['parlour'].on_page_load = function (wrapper) {
         single_column: true
     });
 
-    frappe.require("assets/js/parlour.min.js", function () {
+    frappe.require("parlour.bundle.js", function () {
         wrapper.pos = new erpnext.PointOfSale.Controller(wrapper);
         window.cur_pos = wrapper.pos;
     });
 };
 
 frappe.pages['parlour'].refresh = function (wrapper) {
-    if (document.scannerDetectionData) {
+    if (document.scannerDetectionData && wrapper.pos) {
         onScan.detachFrom(document);
         wrapper.pos.wrapper.html("");
         wrapper.pos.check_opening_entry();

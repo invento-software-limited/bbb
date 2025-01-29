@@ -3,6 +3,7 @@
 # Read docs to understand patches: https://frappeframework.com/docs/v14/user/en/database-migrations
 
 bbb.patches.pos_and_closing_indexing
+bbb.patches.pos_panel_customer_indexing
 
 [post_model_sync]
 # Patches added in this section will be executed after doctypes are migrated
