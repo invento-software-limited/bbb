@@ -319,8 +319,22 @@ user_data_fields = [
     }
 ]
 fixtures = [
-    "Workflow State", "Workflow", "Workflow Action Master"
+    "Workflow State", "Workflow", "Workflow Action Master",
+    {
+        "dt": "Workspace",
+        "filters": [
+            ["name", "in", [
+                "Orkas Glam Bar And Revive Spa",
+                "Details Sales Report",
+                "BD Budget Beauty Restaurant",
+                "Purchase User BBB",
+                "BBB Retail Team"
+            ]]
+        ]
+    },
 ]
+
+
 # user_data_fields = [
 # 	{
 # 		"doctype": "{doctype_1}",

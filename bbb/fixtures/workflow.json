@@ -7,13 +7,11 @@
   "modified": "2024-01-10 11:37:13.524882",
   "name": "Stock Entry",
   "override_status": 0,
-  "parent": null,
-  "parentfield": null,
-  "parenttype": null,
   "send_email_alert": 0,
   "states": [
    {
     "allow_edit": "All",
+    "avoid_status_override": 0,
     "doc_status": "0",
     "is_optional_state": 0,
     "message": null,
@@ -23,10 +21,12 @@
     "parenttype": "Workflow",
     "state": "Pending",
     "update_field": "workflow_state",
-    "update_value": "Pending"
+    "update_value": "Pending",
+    "workflow_builder_id": null
    },
    {
     "allow_edit": "Stock Manager",
+    "avoid_status_override": 0,
     "doc_status": "0",
     "is_optional_state": 0,
     "message": null,
@@ -36,10 +36,12 @@
     "parenttype": "Workflow",
     "state": "Accepted",
     "update_field": "workflow_state",
-    "update_value": "Accepted"
+    "update_value": "Accepted",
+    "workflow_builder_id": null
    },
    {
     "allow_edit": "Stock Manager",
+    "avoid_status_override": 0,
     "doc_status": "0",
     "is_optional_state": 0,
     "message": null,
@@ -49,10 +51,12 @@
     "parenttype": "Workflow",
     "state": "Partially Accepted",
     "update_field": "workflow_state",
-    "update_value": "Partially Accepted"
+    "update_value": "Partially Accepted",
+    "workflow_builder_id": null
    },
    {
     "allow_edit": "Stock Manager",
+    "avoid_status_override": 0,
     "doc_status": "1",
     "is_optional_state": 0,
     "message": null,
@@ -62,10 +66,12 @@
     "parenttype": "Workflow",
     "state": "Completed",
     "update_field": "workflow_state",
-    "update_value": "Completed"
+    "update_value": "Completed",
+    "workflow_builder_id": null
    },
    {
     "allow_edit": "Stock Manager",
+    "avoid_status_override": 0,
     "doc_status": "1",
     "is_optional_state": 0,
     "message": null,
@@ -75,10 +81,12 @@
     "parenttype": "Workflow",
     "state": "Partially Completed",
     "update_field": "workflow_state",
-    "update_value": "Partially Completed"
+    "update_value": "Partially Completed",
+    "workflow_builder_id": null
    },
    {
     "allow_edit": "Stock Manager",
+    "avoid_status_override": 0,
     "doc_status": "0",
     "is_optional_state": 0,
     "message": null,
@@ -88,10 +96,12 @@
     "parenttype": "Workflow",
     "state": "Rejected",
     "update_field": "workflow_state",
-    "update_value": "Rejected"
+    "update_value": "Rejected",
+    "workflow_builder_id": null
    },
    {
     "allow_edit": "Stock Manager",
+    "avoid_status_override": 0,
     "doc_status": "2",
     "is_optional_state": 0,
     "message": null,
@@ -101,7 +111,8 @@
     "parenttype": "Workflow",
     "state": "Cancelled",
     "update_field": "workflow_state",
-    "update_value": "Cancelled"
+    "update_value": "Cancelled",
+    "workflow_builder_id": null
    }
   ],
   "transitions": [
@@ -114,7 +125,8 @@
     "parent": "Stock Entry",
     "parentfield": "transitions",
     "parenttype": "Workflow",
-    "state": "Pending"
+    "state": "Pending",
+    "workflow_builder_id": null
    },
    {
     "action": "Accpet",
@@ -125,7 +137,8 @@
     "parent": "Stock Entry",
     "parentfield": "transitions",
     "parenttype": "Workflow",
-    "state": "Pending"
+    "state": "Pending",
+    "workflow_builder_id": null
    },
    {
     "action": "Complete",
@@ -136,7 +149,8 @@
     "parent": "Stock Entry",
     "parentfield": "transitions",
     "parenttype": "Workflow",
-    "state": "Partially Accepted"
+    "state": "Partially Accepted",
+    "workflow_builder_id": null
    },
    {
     "action": "Complete",
@@ -147,7 +161,8 @@
     "parent": "Stock Entry",
     "parentfield": "transitions",
     "parenttype": "Workflow",
-    "state": "Partially Accepted"
+    "state": "Partially Accepted",
+    "workflow_builder_id": null
    },
    {
     "action": "Reject",
@@ -158,7 +173,8 @@
     "parent": "Stock Entry",
     "parentfield": "transitions",
     "parenttype": "Workflow",
-    "state": "Pending"
+    "state": "Pending",
+    "workflow_builder_id": null
    },
    {
     "action": "Complete",
@@ -169,7 +185,8 @@
     "parent": "Stock Entry",
     "parentfield": "transitions",
     "parenttype": "Workflow",
-    "state": "Accepted"
+    "state": "Accepted",
+    "workflow_builder_id": null
    },
    {
     "action": "Reject",
@@ -180,7 +197,8 @@
     "parent": "Stock Entry",
     "parentfield": "transitions",
     "parenttype": "Workflow",
-    "state": "Accepted"
+    "state": "Accepted",
+    "workflow_builder_id": null
    },
    {
     "action": "Cancel",
@@ -191,7 +209,8 @@
     "parent": "Stock Entry",
     "parentfield": "transitions",
     "parenttype": "Workflow",
-    "state": "Completed"
+    "state": "Completed",
+    "workflow_builder_id": null
    },
    {
     "action": "Cancel",
@@ -202,9 +221,11 @@
     "parent": "Stock Entry",
     "parentfield": "transitions",
     "parenttype": "Workflow",
-    "state": "Partially Completed"
+    "state": "Partially Completed",
+    "workflow_builder_id": null
    }
   ],
+  "workflow_data": null,
   "workflow_name": "Stock Entry",
   "workflow_state_field": "workflow_state"
  }
