@@ -328,7 +328,8 @@ fixtures = [
                 "Details Sales Report",
                 "BD Budget Beauty Restaurant",
                 "Purchase User BBB",
-                "BBB Retail Team"
+                "BBB Retail Team",
+                "Report User"
             ]]
         ]
     },

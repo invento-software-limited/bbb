@@ -1,0 +1,301 @@
+{
+ "charts": [],
+ "content": "[{\"id\":\"5bWB3avOf3\",\"type\":\"header\",\"data\":{\"text\":\"<span class=\\\"h4\\\">Your Shortcuts</span>\",\"col\":12}},{\"id\":\"9VmjZYJBJV\",\"type\":\"shortcut\",\"data\":{\"shortcut_name\":\"Customers List\",\"col\":4}},{\"id\":\"S1WmYwwAHS\",\"type\":\"shortcut\",\"data\":{\"shortcut_name\":\"Item List\",\"col\":4}},{\"id\":\"ETvDYPCoKf\",\"type\":\"shortcut\",\"data\":{\"shortcut_name\":\"Brands List\",\"col\":4}},{\"id\":\"NhSy3fOyE9\",\"type\":\"shortcut\",\"data\":{\"shortcut_name\":\"Item Category List\",\"col\":4}},{\"id\":\"OZAqqrE8Pt\",\"type\":\"shortcut\",\"data\":{\"shortcut_name\":\"Inter Company Stock Entry\",\"col\":4}},{\"id\":\"NCie0YulTj\",\"type\":\"spacer\",\"data\":{\"col\":12}},{\"id\":\"eYCknJI-lS\",\"type\":\"header\",\"data\":{\"text\":\"<span class=\\\"h4\\\">Reports &amp; Masters</span>\",\"col\":12}},{\"id\":\"0prPKnZWIc\",\"type\":\"card\",\"data\":{\"card_name\":\"User Panel\",\"col\":4}},{\"id\":\"r29f0o52x4\",\"type\":\"card\",\"data\":{\"card_name\":\"Sales\",\"col\":4}},{\"id\":\"zW3XVQWYil\",\"type\":\"card\",\"data\":{\"card_name\":\"Customer Reports\",\"col\":4}},{\"id\":\"OZrWNREnVa\",\"type\":\"card\",\"data\":{\"card_name\":\"Closing Panel\",\"col\":4}},{\"id\":\"u--AGmhAic\",\"type\":\"card\",\"data\":{\"card_name\":\"Data Export/Import\",\"col\":4}},{\"id\":\"tJ5z0ZHYa4\",\"type\":\"card\",\"data\":{\"card_name\":\"Discount Offer\",\"col\":4}},{\"id\":\"IglR9J3zAC\",\"type\":\"card\",\"data\":{\"card_name\":\"Parlour Reports\",\"col\":4}}]",
+ "creation": "2022-08-14 12:52:02.014539",
+ "custom_blocks": [],
+ "docstatus": 0,
+ "doctype": "Workspace",
+ "hide_custom": 0,
+ "idx": 0,
+ "is_hidden": 0,
+ "label": "Admin Panel",
+ "links": [
+  {
+   "hidden": 0,
+   "is_query_report": 0,
+   "label": "User Panel",
+   "link_count": 0,
+   "link_type": "DocType",
+   "onboard": 0,
+   "type": "Card Break"
+  },
+  {
+   "hidden": 0,
+   "is_query_report": 0,
+   "label": "User List",
+   "link_count": 0,
+   "link_to": "User",
+   "link_type": "DocType",
+   "onboard": 0,
+   "type": "Link"
+  },
+  {
+   "hidden": 0,
+   "is_query_report": 0,
+   "label": "Role Profile",
+   "link_count": 0,
+   "link_to": "Role Profile",
+   "link_type": "DocType",
+   "onboard": 0,
+   "type": "Link"
+  },
+  {
+   "hidden": 0,
+   "is_query_report": 0,
+   "label": "Sales",
+   "link_count": 0,
+   "link_type": "DocType",
+   "onboard": 0,
+   "type": "Card Break"
+  },
+  {
+   "hidden": 0,
+   "is_query_report": 0,
+   "label": "POS Invoice List",
+   "link_count": 0,
+   "link_to": "POS Invoice",
+   "link_type": "DocType",
+   "onboard": 0,
+   "type": "Link"
+  },
+  {
+   "hidden": 0,
+   "is_query_report": 0,
+   "label": "Sales Invoice List",
+   "link_count": 0,
+   "link_to": "Sales Invoice",
+   "link_type": "DocType",
+   "onboard": 0,
+   "type": "Link"
+  },
+  {
+   "hidden": 0,
+   "is_query_report": 0,
+   "label": "Customer Reports",
+   "link_count": 0,
+   "link_type": "DocType",
+   "onboard": 0,
+   "only_for": "",
+   "type": "Card Break"
+  },
+  {
+   "hidden": 0,
+   "is_query_report": 1,
+   "label": "Customer Trust By Activity",
+   "link_count": 0,
+   "link_to": "Customer Trust By Activity",
+   "link_type": "Report",
+   "onboard": 0,
+   "type": "Link"
+  },
+  {
+   "hidden": 0,
+   "is_query_report": 1,
+   "label": "Customer Wise Sales Summary",
+   "link_count": 0,
+   "link_to": "Customer Wise Sales Summary",
+   "link_type": "Report",
+   "onboard": 0,
+   "type": "Link"
+  },
+  {
+   "hidden": 0,
+   "is_query_report": 1,
+   "label": "Customer Frequency Report",
+   "link_count": 0,
+   "link_to": "Customer Frequency",
+   "link_type": "Report",
+   "onboard": 0,
+   "type": "Link"
+  },
+  {
+   "hidden": 0,
+   "is_query_report": 0,
+   "label": "Closing Panel",
+   "link_count": 0,
+   "link_type": "DocType",
+   "onboard": 0,
+   "type": "Card Break"
+  },
+  {
+   "hidden": 0,
+   "is_query_report": 0,
+   "label": "POS Opening Entry",
+   "link_count": 0,
+   "link_to": "POS Opening Entry",
+   "link_type": "DocType",
+   "onboard": 0,
+   "type": "Link"
+  },
+  {
+   "hidden": 0,
+   "is_query_report": 0,
+   "label": "POS Closing Entry",
+   "link_count": 0,
+   "link_to": "POS Closing Entry",
+   "link_type": "DocType",
+   "onboard": 0,
+   "type": "Link"
+  },
+  {
+   "hidden": 0,
+   "is_query_report": 0,
+   "label": "Data Export/Import",
+   "link_count": 0,
+   "link_type": "DocType",
+   "onboard": 0,
+   "type": "Card Break"
+  },
+  {
+   "hidden": 0,
+   "is_query_report": 0,
+   "label": "Data Export",
+   "link_count": 0,
+   "link_to": "Data Export",
+   "link_type": "DocType",
+   "onboard": 0,
+   "type": "Link"
+  },
+  {
+   "hidden": 0,
+   "is_query_report": 0,
+   "label": "Data Import",
+   "link_count": 0,
+   "link_to": "Data Import",
+   "link_type": "DocType",
+   "onboard": 0,
+   "type": "Link"
+  },
+  {
+   "hidden": 0,
+   "is_query_report": 0,
+   "label": "Discount Offer",
+   "link_count": 0,
+   "link_type": "DocType",
+   "onboard": 0,
+   "type": "Card Break"
+  },
+  {
+   "hidden": 0,
+   "is_query_report": 0,
+   "label": "Pricing Rule List",
+   "link_count": 0,
+   "link_to": "Pricing Rule",
+   "link_type": "DocType",
+   "onboard": 0,
+   "type": "Link"
+  },
+  {
+   "hidden": 0,
+   "is_query_report": 0,
+   "label": "Parlour Reports",
+   "link_count": 6,
+   "link_type": "DocType",
+   "onboard": 0,
+   "type": "Card Break"
+  },
+  {
+   "hidden": 0,
+   "is_query_report": 1,
+   "label": "Stock Ledger Report",
+   "link_count": 0,
+   "link_to": "Stock Ledger Report",
+   "link_type": "Report",
+   "onboard": 0,
+   "type": "Link"
+  },
+  {
+   "hidden": 0,
+   "is_query_report": 1,
+   "label": "Parlour All Outlet Sales Summary Report For Retail Ops",
+   "link_count": 0,
+   "link_to": "Parlour All Outlet Sales Summary Report For Retail Ops",
+   "link_type": "Report",
+   "onboard": 0,
+   "type": "Link"
+  },
+  {
+   "hidden": 0,
+   "is_query_report": 1,
+   "label": "Service Record Detail Report",
+   "link_count": 0,
+   "link_to": "Service Record Detail Report",
+   "link_type": "Report",
+   "onboard": 0,
+   "type": "Link"
+  },
+  {
+   "hidden": 0,
+   "is_query_report": 1,
+   "label": "Service Record Report",
+   "link_count": 0,
+   "link_to": "Service Record Report",
+   "link_type": "Report",
+   "onboard": 0,
+   "type": "Link"
+  },
+  {
+   "hidden": 0,
+   "is_query_report": 1,
+   "label": "Service Person Detail Report",
+   "link_count": 0,
+   "link_to": "Service Person Detail Report",
+   "link_type": "Report",
+   "onboard": 0,
+   "type": "Link"
+  },
+  {
+   "hidden": 0,
+   "is_query_report": 1,
+   "label": "Stock Ledger Summary Report",
+   "link_count": 0,
+   "link_to": "Stock Ledger Summary Report",
+   "link_type": "Report",
+   "onboard": 0,
+   "type": "Link"
+  }
+ ],
+ "modified": "2025-01-30 12:43:54.438191",
+ "modified_by": "Administrator",
+ "module": "Bbb",
+ "name": "Admin Panel",
+ "number_cards": [],
+ "owner": "munim@invento.com.bd",
+ "public": 1,
+ "quick_lists": [],
+ "roles": [],
+ "sequence_id": 19.0,
+ "shortcuts": [
+  {
+   "doc_view": "",
+   "label": "Customers List",
+   "link_to": "Customer",
+   "type": "DocType"
+  },
+  {
+   "doc_view": "",
+   "label": "Item List",
+   "link_to": "Item",
+   "type": "DocType"
+  },
+  {
+   "doc_view": "",
+   "label": "Brands List",
+   "link_to": "Brand",
+   "type": "DocType"
+  },
+  {
+   "doc_view": "",
+   "label": "Item Category List",
+   "link_to": "Item Group",
+   "type": "DocType"
+  },
+  {
+   "doc_view": "List",
+   "label": "Inter Company Stock Entry",
+   "link_to": "Inter Company Stock Entry",
+   "type": "DocType"
+  }
+ ],
+ "title": "Admin Panel"
+}
