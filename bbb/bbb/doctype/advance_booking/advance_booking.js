@@ -8,18 +8,21 @@
 // });
 
 
-{% include 'erpnext/selling/sales_common.js' %};
+// {% include 'erpnext/selling/sales_common.js' %};
 frappe.provide("erpnext.accounts");
 
-erpnext.selling.AdvanceBooking = erpnext.selling.SellingController.extend({
+erpnext.selling.AdvanceBooking = class SalesInvoiceController extends (
+	erpnext.selling.SellingController
+) {
+
 	setup(doc) {
 		this.setup_posting_date_time_check();
 		this._super(doc);
-	},
+	}
 
-	company: function() {
+	company() {
 		erpnext.accounts.dimensions.update_dimension(this.frm, this.frm.doctype);
-	},
+	}
 
 	onload(doc) {
 		this._super();
@@ -32,10 +35,10 @@ erpnext.selling.AdvanceBooking = erpnext.selling.SellingController.extend({
 		erpnext.accounts.dimensions.setup_dimension_filters(this.frm, this.frm.doctype);
 		this.check_opening_entry()
 		
-	},
+	}
 	fetch_opening_entry() {
 		return frappe.call("erpnext.selling.page.point_of_sale.point_of_sale.check_opening_entry", { "user": frappe.session.user });
-	},
+	}
 
 	check_opening_entry() {
 		this.fetch_opening_entry().then((r) => {
@@ -46,7 +49,7 @@ erpnext.selling.AdvanceBooking = erpnext.selling.SellingController.extend({
 				this.create_opening_voucher();
 			}
 		});
-	},
+	}
 
 
 
@@ -134,7 +137,7 @@ erpnext.selling.AdvanceBooking = erpnext.selling.SellingController.extend({
 			query: 'erpnext.accounts.doctype.pos_profile.pos_profile.pos_profile_query',
 			filters: { company: dialog.fields_dict.company.get_value() }
 		};
-	},
+	}
 	refresh(doc) {
 		this._super();
 		if (doc.docstatus == 1 && !doc.is_return) {
@@ -146,13 +149,13 @@ erpnext.selling.AdvanceBooking = erpnext.selling.SellingController.extend({
 			this.frm.return_print_format = "Sales Invoice Return";
 			this.frm.set_value('consolidated_invoice', '');
 		}
-	},
+	}
 
-	is_pos: function() {
+	is_pos() {
 		this.set_pos_data();
-	},
+	}
 
-	set_pos_data: async function() {
+	set_pos_data() {
 		if(this.frm.doc.is_pos) {
 			this.frm.set_value("allocate_advances_automatically", 0);
 			if(!this.frm.doc.company) {
@@ -179,7 +182,7 @@ erpnext.selling.AdvanceBooking = erpnext.selling.SellingController.extend({
 				}
 			}
 		}
-	},
+	}
 
 	customer() {
 		if (!this.frm.doc.customer) return
@@ -196,13 +199,13 @@ erpnext.selling.AdvanceBooking = erpnext.selling.SellingController.extend({
 			}, () => {
 				this.apply_pricing_rule();
 			});
-	},
+	}
 
-	amount: function(){
+	amount(){
 		this.write_off_outstanding_amount_automatically()
-	},
+	}
 
-	change_amount: function(){
+	change_amount(){
 		if(this.frm.doc.paid_amount > this.frm.doc.grand_total){
 			this.calculate_write_off_amount();
 		}else {
@@ -211,14 +214,14 @@ erpnext.selling.AdvanceBooking = erpnext.selling.SellingController.extend({
 		}
 
 		this.frm.refresh_fields();
-	},
+	}
 
-	loyalty_amount: function(){
+	loyalty_amount(){
 		this.calculate_outstanding_amount();
 		this.frm.refresh_field("outstanding_amount");
 		this.frm.refresh_field("paid_amount");
 		this.frm.refresh_field("base_paid_amount");
-	},
+	}
 
 	write_off_outstanding_amount_automatically() {
 		if (cint(this.frm.doc.write_off_outstanding_amount_automatically)) {
@@ -231,15 +234,15 @@ erpnext.selling.AdvanceBooking = erpnext.selling.SellingController.extend({
 
 		this.calculate_outstanding_amount(false);
 		this.frm.refresh_fields();
-	},
+	}
 
-	make_sales_return: function() {
+	make_sales_return() {
 		frappe.model.open_mapped_doc({
 			method: "erpnext.accounts.doctype.pos_invoice.pos_invoice.make_sales_return",
 			frm: cur_frm
 		})
-	},
-})
+	}
+}
 
 $.extend(cur_frm.cscript, new erpnext.selling.AdvanceBooking({ frm: cur_frm }))
 

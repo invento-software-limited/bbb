@@ -841,19 +841,22 @@ erpnext.PointOfSale.Controller = class {
         const name = urlParams.get('name');
         const type = urlParams.get('type');
         const status = 'Ordered'
-        frappe.db.get_value("POS Invoice", name, 'status', (r) => {
-            frappe.db.get_doc('POS Invoice', name)
-            .then(doc => {
-                frappe.run_serially([
-                    // () => me.frm.refresh($(this).attr('name')),
-                    () => me.frm.refresh(doc.name),
-                    () => me.frm.call('reset_mode_of_payments'),
-                    () => me.cart.load_invoice(),
-                    () => type == 'view' ? me.cart.$component.find(".checkout-btn").click() : ''
-                ]);
-            })
+        if(name){
+        
+            frappe.db.get_value("POS Invoice", name, 'status', (r) => {
+                frappe.db.get_doc('POS Invoice', name)
+                .then(doc => {
+                    frappe.run_serially([
+                        // () => me.frm.refresh($(this).attr('name')),
+                        () => me.frm.refresh(doc.name),
+                        () => me.frm.call('reset_mode_of_payments'),
+                        () => me.cart.load_invoice(),
+                        () => type == 'view' ? me.cart.$component.find(".checkout-btn").click() : ''
+                    ]);
+                })
 
-        });
+            });
+        }
 
     }
     removed_query_string(){

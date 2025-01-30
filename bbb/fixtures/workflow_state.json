@@ -2,12 +2,18 @@
  {
   "docstatus": 0,
   "doctype": "Workflow State",
+  "icon": "",
+  "modified": "2024-01-08 14:41:14.600935",
+  "name": "Applied",
+  "style": "Info",
+  "workflow_state_name": "Applied"
+ },
+ {
+  "docstatus": 0,
+  "doctype": "Workflow State",
   "icon": "question-sign",
   "modified": "2023-12-13 08:33:25.626243",
   "name": "Pending",
-  "parent": null,
-  "parentfield": null,
-  "parenttype": null,
   "style": "",
   "workflow_state_name": "Pending"
  },
@@ -17,9 +23,6 @@
   "icon": "ok-sign",
   "modified": "2023-12-13 08:33:25.630006",
   "name": "Approved",
-  "parent": null,
-  "parentfield": null,
-  "parenttype": null,
   "style": "Success",
   "workflow_state_name": "Approved"
  },
@@ -29,9 +32,6 @@
   "icon": "remove",
   "modified": "2023-12-13 08:33:25.633531",
   "name": "Rejected",
-  "parent": null,
-  "parentfield": null,
-  "parenttype": null,
   "style": "Danger",
   "workflow_state_name": "Rejected"
  },
@@ -41,9 +41,6 @@
   "icon": "",
   "modified": "2023-09-13 16:35:59.849065",
   "name": "Completed",
-  "parent": null,
-  "parentfield": null,
-  "parenttype": null,
   "style": "Success",
   "workflow_state_name": "Completed"
  },
@@ -53,9 +50,6 @@
   "icon": "",
   "modified": "2023-09-27 12:11:33.325153",
   "name": "Cancelled",
-  "parent": null,
-  "parentfield": null,
-  "parenttype": null,
   "style": "Danger",
   "workflow_state_name": "Cancelled"
  },
@@ -65,9 +59,6 @@
   "icon": "",
   "modified": "2024-01-08 17:06:38.515455",
   "name": "Partially Completed",
-  "parent": null,
-  "parentfield": null,
-  "parenttype": null,
   "style": "Warning",
   "workflow_state_name": "Partially Completed"
  },
@@ -77,9 +68,6 @@
   "icon": "",
   "modified": "2024-01-08 16:31:12.703939",
   "name": "Partially Accepted",
-  "parent": null,
-  "parentfield": null,
-  "parenttype": null,
   "style": "",
   "workflow_state_name": "Partially Accepted"
  },
@@ -89,9 +77,6 @@
   "icon": "",
   "modified": "2023-09-13 16:36:13.804349",
   "name": "Accepted",
-  "parent": null,
-  "parentfield": null,
-  "parenttype": null,
   "style": "Info",
   "workflow_state_name": "Accepted"
  }
