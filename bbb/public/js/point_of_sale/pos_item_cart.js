@@ -1043,6 +1043,9 @@ erpnext.PointOfSale.ItemCart = class {
     }
 
     render_grand_total(value) {
+        if (typeof value !== "number" || isNaN(value)) {
+            value = 0;  // Default to 0 if value is invalid
+        }
         const currency = this.events.get_frm().doc.currency;
         this.$totals_section.find('.grand-total-container').html(
             `<div>Grand Total</div><div>${value.toFixed(2)}</div>`
