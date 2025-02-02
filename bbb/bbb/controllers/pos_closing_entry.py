@@ -270,7 +270,11 @@ def check_scheduler_status():
 
 
 def job_already_enqueued(job_name):
-    enqueued_jobs = [d.get("job_name") for d in get_jobs()]
+    # Check for enqueued jobs in the BackgroundJob doctype
+    enqueued_jobs = frappe.get_all('BackgroundJob', filters={'status': 'Queued'}, fields=['job_name'])
+    enqueued_jobs = [job['job_name'] for job in enqueued_jobs]
+    
+    # enqueued_jobs = [d.get("job_name") for d in get_jobs()]
     if job_name in enqueued_jobs:
         return True
 
