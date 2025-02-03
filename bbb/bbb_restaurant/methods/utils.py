@@ -492,7 +492,7 @@ def update_customers_dob():
 
 def update_woocommerce_stock(doc, method):
     from woocommerce import API
-    woocommerce_settings = frappe.get_doc("Woocommerce Settings")
+    woocommerce_settings = frappe.get_doc("WooCommerce Config")
     bbb_settings = frappe.get_doc("BBB Settings")
     
     if doc.voucher_type != 'Woocommerce Order' and bbb_settings.woocommerce_status == "Enabled":
