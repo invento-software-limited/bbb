@@ -7,11 +7,18 @@
 // 	// }
 // });
 
-
-// {% include 'erpnext/selling/sales_common.js' %};
 frappe.provide("erpnext.accounts");
+cur_frm.cscript.tax_table = "Sales Taxes and Charges";
 
-erpnext.selling.AdvanceBooking = class SalesInvoiceController extends (
+erpnext.accounts.taxes.setup_tax_validations("Sales Invoice");
+erpnext.accounts.payment_triggers.setup("Sales Invoice");
+erpnext.accounts.pos.setup("Sales Invoice");
+erpnext.accounts.taxes.setup_tax_filters("Sales Taxes and Charges");
+erpnext.sales_common.setup_selling_controller();
+erpnext.accounts.pos.setup("POS Invoice");
+
+
+erpnext.selling.AdvanceBooking = class AdvanceBookingController extends (
 	erpnext.selling.SellingController
 ) {
 
@@ -162,7 +169,7 @@ erpnext.selling.AdvanceBooking = class SalesInvoiceController extends (
 				this.frm.set_value("is_pos", 0);
 				frappe.msgprint(__("Please specify Company to proceed"));
 			} else {
-				const r = await this.frm.call({
+				const r =  this.frm.call({
 					doc: this.frm.doc,
 					method: "set_missing_values",
 					freeze: true
@@ -247,6 +254,10 @@ erpnext.selling.AdvanceBooking = class SalesInvoiceController extends (
 $.extend(cur_frm.cscript, new erpnext.selling.AdvanceBooking({ frm: cur_frm }))
 
 frappe.ui.form.on('Advance Booking', {
+	setup: function (frm) {
+        frm.script_manager.make(erpnext.selling.AdvanceBooking);
+    },
+
 	redeem_loyalty_points: function(frm) {
 		frm.events.get_loyalty_details(frm);
 	},
