@@ -16,7 +16,7 @@ class CustomStockLedgerEntry(StockLedgerEntry):
 	def on_update(self):
 		# super(CustomStockLedgerEntry, self).on_submit()
   
-		woocommerce_settings = frappe.get_doc("Woocommerce Settings")
+		woocommerce_settings = frappe.get_doc("WooCommerce Config")
 		item_doc = frappe.get_doc('Item', {'item_code': self.item_code})
 
 		if item_doc.woocommerce_id and woocommerce_settings.warehouse == self.warehouse:
