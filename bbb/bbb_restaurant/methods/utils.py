@@ -505,9 +505,9 @@ def update_woocommerce_stock(doc, method):
 
             if woocommerce_id:
                 wcapi = API(
-                    url=woocommerce_settings.woocommerce_server_url,
-                    consumer_key=woocommerce_settings.api_consumer_key,
-                    consumer_secret=woocommerce_settings.api_consumer_secret,
+                    url=woocommerce_settings.woocommerce_url,
+                    consumer_key=woocommerce_settings.api_key,
+                    consumer_secret=woocommerce_settings.api_secret,
                     wp_api=True,
                     version="wc/v3",
                     query_string_auth=True,
