@@ -24,7 +24,7 @@ from erpnext.accounts.doctype.loyalty_program.loyalty_program import (
 )
 # from erpnext.stock.doctype.batch.batch import set_batch_nos
 
-from erpnext.accounts.doctype.sales_invoice.sales_invoice import SalesInvoice
+from bbb.bbb.controllers.erp_doctype.sales_invoice import SalesInvoice
 
 form_grid_templates = {
     "items": "templates/form_grid/item_grid.html"

@@ -16,7 +16,7 @@ from bbb.bbb.controllers.pricing_rule.utils import (
     get_applied_pricing_rules,
 )
 
-from erpnext.accounts.doctype.pos_invoice.pos_invoice import POSInvoice
+from bbb.bbb.controllers.erp_doctype.pos_invoice import POSInvoice
 from erpnext.stock.doctype.serial_no.serial_no import get_pos_reserved_serial_nos, get_serial_nos
 
 from bbb.bbb.controllers.get_item_details import (

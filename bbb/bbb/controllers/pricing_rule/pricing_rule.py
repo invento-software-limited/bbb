@@ -208,6 +208,7 @@ class PricingRule(Document):
 			"Territory",
 			"Sales Partner",
 			"Campaign",
+			"Tag"
 		]:
 			throw(
 				_("Selling must be checked, if Applicable For is selected as {0}").format(self.applicable_for)

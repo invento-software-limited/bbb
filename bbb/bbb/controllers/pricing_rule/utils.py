@@ -16,6 +16,8 @@ from erpnext.setup.doctype.item_group.item_group import get_child_item_groups
 from erpnext.stock.doctype.warehouse.warehouse import get_child_warehouses
 from erpnext.stock.get_item_details import get_conversion_factor
 
+from bbb.bbb.controllers.pricing_rule.apply_pricing_rule_on_tag import apply_pricing_rule_on_tag
+
 
 class MultiplePricingRuleConflict(frappe.ValidationError):
 	pass
@@ -174,12 +176,12 @@ def _get_pricing_rules(apply_on, args, values):
 	)
 
 	if apply_on_field in ["tag"]:
-		pricing_rules = apply_pricing_rule_on_tag(pricing_rules=pricing_rules, args=args)
+		pricing_rules = apply_pricing_rule_for_tag(pricing_rules=pricing_rules, args=args)
 
 	return pricing_rules
 
 
-def apply_pricing_rule_on_tag(pricing_rules, args):
+def apply_pricing_rule_for_tag(pricing_rules, args):
 	try:
 		start_date, end_date, price_rule_tag, discount_amount = frappe.db.get_value("Item", {'item_code': args.item_code}, ["start_date", "end_date", "price_rule_tag", "discount_amount"])
 		pricing_rules[0]['discount_amount'] = discount_amount
@@ -560,6 +562,16 @@ def get_qty_amount_data_for_cumulative(pr_doc, doc, items=None):
 
 
 def apply_pricing_rule_on_transaction(doc):
+	print("Called")
+	print("Called")
+	print("Called")
+	print("Called")
+	print("Called")
+	print("Called")
+	apply_rule_on_tag = apply_pricing_rule_on_tag(doc)
+	if apply_rule_on_tag:
+		return
+
 	conditions = "apply_on = 'Transaction'"
 
 	values = {}
@@ -581,6 +593,10 @@ def apply_pricing_rule_on_transaction(doc):
 			remove_free_item(doc)
 
 		for d in pricing_rules:
+			# rabiul
+			if d.applicable_for == "Tag":
+				continue
+
 			if d.price_or_product_discount == "Price":
 				if d.apply_discount_on:
 					doc.set("apply_discount_on", d.apply_discount_on)

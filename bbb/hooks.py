@@ -78,6 +78,9 @@ doctype_js = {
     "Purchase Order": [
         'public/js/purchase_order.js'
     ],
+    "Pricing Rule": [
+        'public/js/pricing_rule.js'
+    ],
 }
 doctype_list_js = {
     "POS Invoice": "public/js/pos_invoice_list.js"
