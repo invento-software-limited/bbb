@@ -22,9 +22,9 @@ class CustomStockLedgerEntry(StockLedgerEntry):
 		if item_doc.woocommerce_id and woocommerce_settings.warehouse == self.warehouse:
 			from woocommerce import API
 			wcapi = API(
-				url=woocommerce_settings.woocommerce_server_url,
-				consumer_key=woocommerce_settings.api_consumer_key,
-				consumer_secret=woocommerce_settings.api_consumer_secret,
+                    url=woocommerce_settings.woocommerce_url,
+                    consumer_key=woocommerce_settings.api_key,
+                    consumer_secret=woocommerce_settings.api_secret,
 				wp_api=True,
 				version="wc/v3",
 				query_string_auth=True,
