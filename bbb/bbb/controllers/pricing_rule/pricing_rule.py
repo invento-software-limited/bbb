@@ -17,7 +17,7 @@ apply_on_dict = {"Item Code": "items", "Item Group": "item_groups", "Brand": "br
 other_fields = ["other_item_code", "other_item_group", "other_brand"]
 
 
-class CustomPricingRule(Document):
+class PricingRule(Document):
 	# begin: auto-generated types
 	# This code is auto-generated. Do not modify anything in this block.
 
@@ -345,7 +345,6 @@ def apply_pricing_rule(args, doc=None):
 
 	args = frappe._dict(args)
 
-
 	if not args.transaction_type:
 		set_transaction_type(args)
 
@@ -397,6 +396,7 @@ def get_pricing_rule_for_item(args, doc=None, for_validate=False):
 		get_pricing_rules,
 		get_product_discount_rule,
 	)
+
 	if isinstance(doc, str):
 		doc = json.loads(doc)
 
@@ -415,8 +415,6 @@ def get_pricing_rule_for_item(args, doc=None, for_validate=False):
 			"parent": args.parent,
 			"parenttype": args.parenttype,
 			"child_docname": args.get("child_docname"),
-			"discount_percentage": 0.0,
-			"discount_amount": 0,
 		}
 	)
 	item_tag = frappe.db.get_value("Item", args.get("item_code"), "price_rule_tag")
@@ -433,6 +431,7 @@ def get_pricing_rule_for_item(args, doc=None, for_validate=False):
 		return item_details
 
 	update_args_for_pricing_rule(args)
+
 	pricing_rules = (
 		get_applied_pricing_rules(args.get("pricing_rules"))
 		if for_validate and args.get("pricing_rules")
@@ -519,11 +518,11 @@ def get_pricing_rule_for_item(args, doc=None, for_validate=False):
 
 def update_args_for_pricing_rule(args):
 	if not (args.item_group and args.brand):
-		item = frappe.get_cached_value("Item", args.item_code, ("item_group", "brand", "price_rule_tag"))
+		item = frappe.get_cached_value("Item", args.item_code, ("item_group", "brand"))
 		if not item:
 			return
 
-		args.item_group, args.brand, args.tag = item
+		args.item_group, args.brand = item
 
 		if not args.item_group:
 			frappe.throw(_("Item Group not mentioned in item master for item {0}").format(args.item_code))
@@ -610,6 +609,7 @@ def apply_price_discount_rule(pricing_rule, item_details, args):
 				field = "discount_amount"
 				value = args.price_list_rate * (value / 100)
 				calculate_discount_percentage = True
+
 			if field not in item_details:
 				item_details.setdefault(field, 0)
 
@@ -629,7 +629,7 @@ def apply_price_discount_rule(pricing_rule, item_details, args):
 
 @frappe.whitelist()
 def remove_pricing_rule_for_item(pricing_rules, item_details, item_code=None, rate=None):
-	from bbb.bbb.controllers.pricing_rule.utils import (
+	from erpnext.accounts.doctype.pricing_rule.utils import (
 		get_applied_pricing_rules,
 		get_pricing_rule_items,
 	)
@@ -642,6 +642,7 @@ def remove_pricing_rule_for_item(pricing_rules, item_details, item_code=None, ra
 		if not d or not frappe.db.exists("Pricing Rule", d):
 			continue
 		pricing_rule = frappe.get_cached_doc("Pricing Rule", d)
+
 		if pricing_rule.price_or_product_discount == "Price":
 			if pricing_rule.rate_or_discount == "Discount Percentage":
 				item_details.discount_percentage = 0.0
@@ -671,7 +672,6 @@ def remove_pricing_rule_for_item(pricing_rules, item_details, item_code=None, ra
 	item_details.pricing_rules = ""
 	item_details.pricing_rule_removed = True
 
-	item_details.discount_amount = 200
 	return item_details
 
 

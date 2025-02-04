@@ -462,7 +462,7 @@ erpnext.PointOfSale.Controller = class {
                 get_initial_paid_amount: () => this.initial_paid_amount,
                 set_initial_paid_amount: (paid_amount) => this.set_initial_paid_amount(paid_amount),
                 check_free_item_pricing_rules: () => this.check_free_item_pricing_rules(),
-                update_additional_discount_on_tag: () => this.update_additional_discount_on_tag()
+                // update_additional_discount_on_tag: () => this.update_additional_discount_on_tag()
             }
         })
     }
@@ -860,9 +860,9 @@ erpnext.PointOfSale.Controller = class {
 					this.update_cart_html(item_row);
 				}
                 const me = this
-                setTimeout(function (){
-                    me.update_additional_discount_on_tag(item_row)
-                }, 1000)
+                // setTimeout(function (){
+                //     me.update_additional_discount_on_tag(item_row)
+                // }, 1000)
                 this.insert_search_product_log(item_code);
 
 			} else {
@@ -905,9 +905,9 @@ erpnext.PointOfSale.Controller = class {
 				// if (this.check_serial_batch_selection_needed(item_row) && !this.item_details.$component.is(':visible'))
 				// 	this.edit_item_details_of(item_row);
                 const me = this
-                setTimeout(function (){
-                    me.update_additional_discount_on_tag(item_row)
-                }, 500)
+                // setTimeout(function (){
+                //     me.update_additional_discount_on_tag(item_row)
+                // }, 500)
 
                 this.insert_search_product_log(item_code);
 			}
@@ -925,21 +925,21 @@ erpnext.PointOfSale.Controller = class {
         frappe.model.set_value("POS Invoice Item", item_row.child_docname, 'price_rule_tag', tag)
     }
 
-    update_additional_discount_on_tag(item_row=undefined){
-        const me = this
-        let res= me.apply_pricing_rule_on_tag(this.frm.doc)
-        let additional_discount = (parseFloat(res.discount_amount)).toFixed(2)
-        let tag_name_list = res.tag_name_list || []
-        let rules_name_list = res.rules_name_list || []
-        if(additional_discount !== undefined){
-            let tag_name = tag_name_list.join(',');
-            let rules_name = rules_name_list.join(',');
-            frappe.model.set_value('POS Invoice', me.frm.docname, 'additional_discount_tag_name', tag_name)
-            frappe.model.set_value('POS Invoice', me.frm.docname, 'additional_discount_pricing_rule_name', rules_name)
-            me.cart.update_additional_discount(me.cart, {value: flt(additional_discount)}, me.frm, 'discount_amount');
-            me.cart.update_totals_section(me.frm);
-        }
-    }
+    // update_additional_discount_on_tag(item_row=undefined){
+    //     const me = this
+    //     let res= me.apply_pricing_rule_on_tag(this.frm.doc)
+    //     let additional_discount = (parseFloat(res.discount_amount)).toFixed(2)
+    //     let tag_name_list = res.tag_name_list || []
+    //     let rules_name_list = res.rules_name_list || []
+    //     if(additional_discount !== undefined){
+    //         let tag_name = tag_name_list.join(',');
+    //         let rules_name = rules_name_list.join(',');
+    //         frappe.model.set_value('POS Invoice', me.frm.docname, 'additional_discount_tag_name', tag_name)
+    //         frappe.model.set_value('POS Invoice', me.frm.docname, 'additional_discount_pricing_rule_name', rules_name)
+    //         me.cart.update_additional_discount(me.cart, {value: flt(additional_discount)}, me.frm, 'discount_amount');
+    //         me.cart.update_totals_section(me.frm);
+    //     }
+    // }
     async update_paid_amount(){
         let payments = this.frm.doc.payments
         frappe.model.set_value(this.frm.doctype, this.frm.docname, 'paid_amount', this.base_rounded_total);
@@ -1131,7 +1131,7 @@ erpnext.PointOfSale.Controller = class {
                 frappe.model.clear_doc(doctype, name);
                 this.update_cart_html(current_item, true);
                 this.item_details.toggle_item_details_section(null);
-                this.update_additional_discount_on_tag()
+                // this.update_additional_discount_on_tag()
                 frappe.dom.unfreeze();
             })
             .catch(e => console.log(e));
@@ -1239,27 +1239,27 @@ erpnext.PointOfSale.Controller = class {
             }
         })
     }
-    apply_pricing_rule_on_tag(doc){
-        var discount_amount = 0
-        var tag_name_list = undefined
-        var rules_name_list = undefined
-        frappe.call({
-                method: 'bbb.bbb.pos_invoice.apply_pricing_rule_on_tag',
-                async:false,
-                args: {
-                    "doc": doc,
-                },
-                callback: function(r) {
-                    let res = r.message
-                    if(res){
-                        discount_amount = res.discount_amount
-                        tag_name_list = res.tag_name_list
-                        rules_name_list = res.rules_name_list
-                    }
-                }
-            });
-        return {discount_amount, tag_name_list, rules_name_list}
-    }
+    // apply_pricing_rule_on_tag(doc){
+    //     var discount_amount = 0
+    //     var tag_name_list = undefined
+    //     var rules_name_list = undefined
+    //     frappe.call({
+    //             method: 'bbb.bbb.pos_invoice.apply_pricing_rule_on_tag',
+    //             async:false,
+    //             args: {
+    //                 "doc": doc,
+    //             },
+    //             callback: function(r) {
+    //                 let res = r.message
+    //                 if(res){
+    //                     discount_amount = res.discount_amount
+    //                     tag_name_list = res.tag_name_list
+    //                     rules_name_list = res.rules_name_list
+    //                 }
+    //             }
+    //         });
+    //     return {discount_amount, tag_name_list, rules_name_list}
+    // }
 
     reload_item_cart(frm){
         let items = frm.doc.items;

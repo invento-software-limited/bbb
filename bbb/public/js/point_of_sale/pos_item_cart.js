@@ -1321,11 +1321,11 @@ erpnext.PointOfSale.ItemCart = class {
                                     // frappe.model.set_value("POS Invoice Item", docname, 'discount_percentage', r.message.discount_percentage)
 
                                 }
-                                console.log(me.events.get_frm())
+                                // console.log(me.events.get_frm())
                             // }
                         // })
                     }
-                    me.events.update_additional_discount_on_tag()
+                    // me.events.update_additional_discount_on_tag()
 
                 }else{
                     const message = __('Item quantity must be a number');
@@ -1363,7 +1363,7 @@ erpnext.PointOfSale.ItemCart = class {
                             frappe.model.set_value("POS Invoice Item", docname, 'damaged_cost', (-1 * item_wise_cost));
                             frappe.model.set_value("POS Invoice Item", docname, 'rate', new_rate);
                             frappe.model.set_value("POS Invoice Item", docname, 'total_damaged_cost', total_damaged_cost);
-                            me.events.update_additional_discount_on_tag();
+                            // me.events.update_additional_discount_on_tag();
                         } else {
                             $(".damaged_cost").val(0);
                         }
@@ -1392,7 +1392,7 @@ erpnext.PointOfSale.ItemCart = class {
                 // () => frappe.model.clear_doc(doctype, docname),
                 () => me.toggle_ignore_pricing_rule_button(),
                 () => me.update_item_cart_total_section(frm),
-                () => me.events.update_additional_discount_on_tag(),
+                // () => me.events.update_additional_discount_on_tag(),
                 () => frappe.dom.unfreeze()
             ])
         });

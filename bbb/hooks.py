@@ -203,10 +203,10 @@ doc_events = {
     },
 
     "POS Invoice": {
-        # "on_submit": "bbb.bbb.pos_invoice.after_insert_or_on_submit",
-        # # "after_insert": "bbb.bbb.pos_invoice.after_insert_or_on_submit",
-        # "validate": "bbb.bbb.pos_invoice.validate",
-        # "on_cancel": "bbb.bbb.pos_invoice.on_cancel",
+        "on_submit": "bbb.bbb.pos_invoice.after_insert_or_on_submit",
+        # "after_insert": "bbb.bbb.pos_invoice.after_insert_or_on_submit",
+        "validate": "bbb.bbb.pos_invoice.validate",
+        "on_cancel": "bbb.bbb.pos_invoice.on_cancel",
     },
     # "POS Invoice Merge Log": {
     #     "on_submit": "bbb.bbb.pos_invoice_merge_log.on_submit"
@@ -229,10 +229,10 @@ doc_events = {
 
 }
 override_doctype_class = {
-    # "Sales Invoice": "bbb.bbb.controllers.sales_invoice.CustomSalesInvoice",
-    # "POS Invoice": "bbb.bbb.controllers.pos_invoice.CustomPOSInvoice",
-    # "Sales Order": "bbb.bbb.controllers.sales_order.CustomSalesOrder",
-    # "POS Closing Entry": "bbb.bbb.controllers.pos_closing_entry.CustomPOSClosingEntry",
+    "Sales Invoice": "bbb.bbb.controllers.sales_invoice.CustomSalesInvoice",
+    "POS Invoice": "bbb.bbb.controllers.pos_invoice.CustomPOSInvoice",
+    "Sales Order": "bbb.bbb.controllers.sales_order.CustomSalesOrder",
+    "POS Closing Entry": "bbb.bbb.controllers.pos_closing_entry.CustomPOSClosingEntry",
 }
 # Scheduled Tasks
 # ---------------
@@ -264,10 +264,10 @@ override_doctype_class = {
 # ------------------------------
 #
 override_whitelisted_methods = {
-    # "erpnext.accounts.doctype.pricing_rule.pricing_rule.apply_pricing_rule": "bbb.bbb.controllers.pricing_rule.pricing_rule.apply_pricing_rule",
-    # "erpnext.accounts.doctype.pricing_rule.pricing_rule.remove_pricing_rule_for_item": "bbb.bbb.controllers.pricing_rule.pricing_rule.remove_pricing_rule_for_item",
-    # "erpnext.stock.get_item_details.apply_price_list": "bbb.bbb.controllers.get_item_details.apply_price_list",
-    # "erpnext.stock.get_item_details.get_item_details": "bbb.bbb.controllers.get_item_details.get_item_details",
+    "erpnext.accounts.doctype.pricing_rule.pricing_rule.apply_pricing_rule": "bbb.bbb.controllers.pricing_rule.pricing_rule.apply_pricing_rule",
+    "erpnext.accounts.doctype.pricing_rule.pricing_rule.remove_pricing_rule_for_item": "bbb.bbb.controllers.pricing_rule.pricing_rule.remove_pricing_rule_for_item",
+    "erpnext.stock.get_item_details.apply_price_list": "bbb.bbb.controllers.get_item_details.apply_price_list",
+    "erpnext.stock.get_item_details.get_item_details": "bbb.bbb.controllers.get_item_details.get_item_details",
 }
 
 #
