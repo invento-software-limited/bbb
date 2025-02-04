@@ -10,7 +10,7 @@ import requests
 from frappe import _
 from frappe.utils import cint, flt, get_link_to_form, getdate, nowdate
 
-from erpnext.accounts.doctype.pricing_rule.utils import (
+from bbb.bbb.controllers.pricing_rule.utils import (
     apply_pricing_rule_for_free_items,
     apply_pricing_rule_on_transaction,
     get_applied_pricing_rules,
@@ -19,6 +19,26 @@ from erpnext.accounts.doctype.pricing_rule.utils import (
 from erpnext.accounts.doctype.pos_invoice.pos_invoice import POSInvoice
 from erpnext.stock.doctype.serial_no.serial_no import get_pos_reserved_serial_nos, get_serial_nos
 
+from bbb.bbb.controllers.get_item_details import (
+	_get_item_tax_template,
+	get_conversion_factor,
+	get_item_details,
+	get_item_tax_map,
+	get_item_warehouse,
+)
+
+
+force_item_fields = (
+	"item_group",
+	"brand",
+	"stock_uom",
+	"is_fixed_asset",
+	"pricing_rules",
+	"weight_per_unit",
+	"weight_uom",
+	"total_weight",
+	"valuation_rate",
+)
 
 class CustomPOSInvoice(POSInvoice):
     def __init__(self, *args, **kwargs):
@@ -33,49 +53,54 @@ class CustomPOSInvoice(POSInvoice):
     # if self.is_pos and self.is_return:
     #     self.verify_payment_amount_is_negative()
 
-    def apply_pricing_rule_on_items(self, item, pricing_rule_args):
-        if not pricing_rule_args.get("validate_applied_rule", 0):
-            # if user changed the discount percentage then set user's discount percentage ?
-            if pricing_rule_args.get("price_or_product_discount") == "Price":
-                item.set("pricing_rules", pricing_rule_args.get("pricing_rules"))
-                item.set("discount_percentage", pricing_rule_args.get("discount_percentage"))
-                item.set("discount_amount", pricing_rule_args.get("discount_amount"))
-                if pricing_rule_args.get("pricing_rule_for") == "Rate":
-                    item.set("price_list_rate", pricing_rule_args.get("price_list_rate"))
+    # def apply_pricing_rule_on_items(self, item, pricing_rule_args):
+    #     print(pricing_rule_args)
+    #     if not pricing_rule_args.get("validate_applied_rule", 0):
+    #         # if user changed the discount percentage then set user's discount percentage ?
+    #         if pricing_rule_args.get("price_or_product_discount") == "Price":
+    #             item.set("pricing_rules", pricing_rule_args.get("pricing_rules"))
+    #             item.set("discount_percentage", pricing_rule_args.get("discount_percentage"))
+    #             item.set("discount_amount", pricing_rule_args.get("discount_amount"))
+    #             if pricing_rule_args.get("pricing_rule_for") == "Rate":
+    #                 item.set("price_list_rate", pricing_rule_args.get("price_list_rate"))
+    #
+    #             if item.get("price_list_rate"):
+    #                 item.rate = flt(
+    #                     item.price_list_rate * (1.0 - (flt(item.discount_percentage) / 100.0)),
+    #                     item.precision("rate"),
+    #                 )
+    #
+    #                 if item.get("discount_amount"):
+    #                     item.rate = item.price_list_rate - item.discount_amount
+    #
+    #             if item.get("apply_discount_on_discounted_rate") and pricing_rule_args.get("rate"):
+    #                 item.rate = pricing_rule_args.get("rate")
+    #
+    #         elif pricing_rule_args.get("free_item_data"):
+    #             apply_pricing_rule_for_free_items(self, pricing_rule_args.get("free_item_data"))
+    #
+    #     elif pricing_rule_args.get("validate_applied_rule"):
+    #         for pricing_rule in get_applied_pricing_rules(item.get("pricing_rules")):
+    #             pricing_rule_doc = frappe.get_cached_doc("Pricing Rule", pricing_rule)
+    #             for field in ["discount_percentage", "discount_amount", "rate"]:
+    #                 if item.get(field) < pricing_rule_doc.get(field):
+    #                     title = get_link_to_form("Pricing Rule", pricing_rule)
+    #
+    #                     frappe.msgprint(
+    #                         _("Row {0}: user has not applied the rule {1} on the item {2}").format(
+    #                             item.idx, frappe.bold(title), frappe.bold(item.item_code)
+    #                         )
+    #                     )
+    #
+    #     # item_doc = frappe.get_doc("Item", item.item_code)
+    #     # today = datetime.datetime.today().date()
+    #     # if item_doc.start_date and item_doc.end_date and item_doc.discount_amount and item_doc.start_date <= today and item_doc.end_date >= today:
+    #     #     item.rate = item_doc.standard_rate - item_doc.discount_amount
+    #     #     item.set('rate', item_doc.standard_rate - item_doc.discount_amount)
 
-                if item.get("price_list_rate"):
-                    item.rate = flt(
-                        item.price_list_rate * (1.0 - (flt(item.discount_percentage) / 100.0)),
-                        item.precision("rate"),
-                    )
 
-                    if item.get("discount_amount"):
-                        item.rate = item.price_list_rate - item.discount_amount
 
-                if item.get("apply_discount_on_discounted_rate") and pricing_rule_args.get("rate"):
-                    item.rate = pricing_rule_args.get("rate")
 
-            elif pricing_rule_args.get("free_item_data"):
-                apply_pricing_rule_for_free_items(self, pricing_rule_args.get("free_item_data"))
-
-        elif pricing_rule_args.get("validate_applied_rule"):
-            for pricing_rule in get_applied_pricing_rules(item.get("pricing_rules")):
-                pricing_rule_doc = frappe.get_cached_doc("Pricing Rule", pricing_rule)
-                for field in ["discount_percentage", "discount_amount", "rate"]:
-                    if item.get(field) < pricing_rule_doc.get(field):
-                        title = get_link_to_form("Pricing Rule", pricing_rule)
-
-                        frappe.msgprint(
-                            _("Row {0}: user has not applied the rule {1} on the item {2}").format(
-                                item.idx, frappe.bold(title), frappe.bold(item.item_code)
-                            )
-                        )
-
-        # item_doc = frappe.get_doc("Item", item.item_code)
-        # today = datetime.datetime.today().date()
-        # if item_doc.start_date and item_doc.end_date and item_doc.discount_amount and item_doc.start_date <= today and item_doc.end_date >= today:
-        #     item.rate = item_doc.standard_rate - item_doc.discount_amount
-        #     item.set('rate', item_doc.standard_rate - item_doc.discount_amount)
 
     def validate_qty(self):
         """Validates qty at row level"""
@@ -305,3 +330,124 @@ class CustomPOSInvoice(POSInvoice):
         # self.paid_amount = flt(self.rounded_total - advance_booking_doc.total_advance)
         self.set("outstanding_amount", 0)
         self.set("advances", [advance_row])
+
+    def set_missing_item_details(self, for_validate=False):
+        """set missing item values"""
+        from erpnext.stock.doctype.serial_no.serial_no import get_serial_nos
+
+        if hasattr(self, "items"):
+            parent_dict = {}
+            for fieldname in self.meta.get_valid_columns():
+                parent_dict[fieldname] = self.get(fieldname)
+
+            if self.doctype in ["Quotation", "Sales Order", "Delivery Note", "Sales Invoice"]:
+                document_type = f"{self.doctype} Item"
+                parent_dict.update({"document_type": document_type})
+
+            # party_name field used for customer in quotation
+            if (
+                    self.doctype == "Quotation"
+                    and self.quotation_to == "Customer"
+                    and parent_dict.get("party_name")
+            ):
+                parent_dict.update({"customer": parent_dict.get("party_name")})
+
+            self.pricing_rules = []
+
+            for item in self.get("items"):
+                if item.get("item_code"):
+                    args = parent_dict.copy()
+                    args.update(item.as_dict())
+
+                    args["doctype"] = self.doctype
+                    args["name"] = self.name
+                    args["child_doctype"] = item.doctype
+                    args["child_docname"] = item.name
+                    args["ignore_pricing_rule"] = (
+                        self.ignore_pricing_rule if hasattr(self, "ignore_pricing_rule") else 0
+                    )
+
+                    if not args.get("transaction_date"):
+                        args["transaction_date"] = args.get("posting_date")
+
+                    if self.get("is_subcontracted"):
+                        args["is_subcontracted"] = self.is_subcontracted
+
+                    ret = get_item_details(args, self, for_validate=for_validate, overwrite_warehouse=False)
+                    for fieldname, value in ret.items():
+                        if item.meta.get_field(fieldname) and value is not None:
+                            if (
+                                    item.get(fieldname) is None
+                                    or fieldname in force_item_fields
+                                    or (
+                                    fieldname in ["serial_no", "batch_no"]
+                                    and item.get("use_serial_batch_fields")
+                            )
+                            ):
+                                item.set(fieldname, value)
+
+                            elif fieldname in ["cost_center", "conversion_factor"] and not item.get(
+                                    fieldname
+                            ):
+                                item.set(fieldname, value)
+                            elif fieldname == "item_tax_rate" and not (
+                                    self.get("is_return") and self.get("return_against")
+                            ):
+                                item.set(fieldname, value)
+                            elif fieldname == "serial_no":
+                                # Ensure that serial numbers are matched against Stock UOM
+                                item_conversion_factor = item.get("conversion_factor") or 1.0
+                                item_qty = abs(item.get("qty")) * item_conversion_factor
+
+                                if item_qty != len(get_serial_nos(item.get("serial_no"))):
+                                    item.set(fieldname, value)
+
+                            elif (
+                                    ret.get("pricing_rule_removed")
+                                    and value is not None
+                                    and fieldname
+                                    in [
+                                        "discount_percentage",
+                                        "discount_amount",
+                                        "rate",
+                                        "margin_rate_or_amount",
+                                        "margin_type",
+                                        "remove_free_item",
+                                    ]
+                            ):
+                                # reset pricing rule fields if pricing_rule_removed
+                                item.set(fieldname, value)
+
+                    if self.doctype in ["Purchase Invoice", "Sales Invoice"] and item.meta.get_field(
+                            "is_fixed_asset"
+                    ):
+                        item.set("is_fixed_asset", ret.get("is_fixed_asset", 0))
+
+                    # Double check for cost center
+                    # Items add via promotional scheme may not have cost center set
+                    if hasattr(item, "cost_center") and not item.get("cost_center"):
+                        item.set(
+                            "cost_center",
+                            self.get("cost_center") or erpnext.get_default_cost_center(self.company),
+                        )
+
+                    if ret.get("pricing_rules"):
+                        self.apply_pricing_rule_on_items(item, ret)
+                        self.set_pricing_rule_details(item, ret)
+                else:
+                    # Transactions line item without item code
+
+                    uom = item.get("uom")
+                    stock_uom = item.get("stock_uom")
+                    if bool(uom) != bool(stock_uom):  # xor
+                        item.stock_uom = item.uom = uom or stock_uom
+
+                    # UOM cannot be zero so substitute as 1
+                    item.conversion_factor = (
+                            get_uom_conv_factor(item.get("uom"), item.get("stock_uom"))
+                            or item.get("conversion_factor")
+                            or 1
+                    )
+
+            if self.doctype == "Purchase Invoice":
+                self.set_expense_account(for_validate)

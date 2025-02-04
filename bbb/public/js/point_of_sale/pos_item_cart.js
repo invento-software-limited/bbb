@@ -1311,7 +1311,7 @@ erpnext.PointOfSale.ItemCart = class {
                                         damaged_cost_div.val(total_damaged_cost);
                                         me.update_item_cart_total_section(frm)
                                         me.update_totals_section(frm)
-                                        frappe.model.set_value("POS Invoice Item", docname, "pricing_rules", "")
+                                        // frappe.model.set_value("POS Invoice Item", docname, "pricing_rules", "")
                                     // })
                                 }else {
                                     // let item_rate_discount = me.get_item_rate_discount(frm.doc.return_against, item_code)
