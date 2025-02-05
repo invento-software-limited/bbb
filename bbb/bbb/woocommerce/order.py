@@ -31,7 +31,7 @@ def update_or_cancel(*args, **kwargs):
 		raise
 
 def verify_request():
-	woocommerce_settings = frappe.get_doc("WooCommerce Config")
+	woocommerce_settings = frappe.get_doc("Woocommerce Settings")
 	sig = base64.b64encode(
 		hmac.new(
 			woocommerce_settings.secret.encode("utf8"), frappe.request.data, hashlib.sha256
@@ -107,7 +107,7 @@ def update_stock_ledger(items, status, doc):
 
 
 def get_item_list(items, status, doc):
-	woocommerce_settings = frappe.get_doc("WooCommerce Config")
+	woocommerce_settings = frappe.get_doc("Woocommerce Settings")
 	default_source_warehouse, default_target_warehouse = woocommerce_settings.warehouse, woocommerce_settings.warehouse
 	il = []
 	for d in items:
