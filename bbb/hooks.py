@@ -236,6 +236,7 @@ override_doctype_class = {
     "POS Invoice": "bbb.bbb.controllers.pos_invoice.CustomPOSInvoice",
     "Sales Order": "bbb.bbb.controllers.sales_order.CustomSalesOrder",
     "POS Closing Entry": "bbb.bbb.controllers.pos_closing_entry.CustomPOSClosingEntry",
+    "POS Closing Merge Log": "bbb.bbb.controllers.pos_closing_merge_log.POSInvoiceMergeLog",
 }
 # Scheduled Tasks
 # ---------------
