@@ -527,7 +527,7 @@ def split_item(item):
 def get_tag_conditions(values):
     today = datetime.datetime.today().date()
     conditions = '''apply_on = "Transaction"'''
-    conditions += ''' and `tabPricing Rule`.applicable_for="Tag" and disable=0'''
+    conditions += ''' and disable=0 and `tabPricing Rule`.applicable_for="Tag" and disable=0'''
     conditions += ''' and "{}" between ifnull(`tabPricing Rule`.valid_from, '2000-01-01')
 		and ifnull(`tabPricing Rule`.valid_upto, '2500-12-31')'''.format(today)
 
@@ -551,104 +551,89 @@ def calculate_discount_amount(doc, pricing_rule):
 
 
 # Transaction base discount
-# @frappe.whitelist()
-# def apply_pricing_rule_on_tag(doc):
-#     values = {}
-#     conditions = get_tag_conditions(values)
-#     doc = json.loads(doc)
-#     pricing_rules = frappe.db.sql(
-#         """ Select `tabPricing Rule`.* from `tabPricing Rule`
-#         where  {conditions} and `tabPricing Rule`.disable = 0 order by `tabPricing Rule`.priority desc
-#     """.format(
-#             conditions=conditions
-#         ),
-#         values,
-#         as_dict=1,
-#     )
-#     if pricing_rules:
-#         total_amount = 0
-#         total_qty = 0
-#         discount_amount = 0
-#
-#         items = doc.get('items', [])
-#         for item in items:
-#             if not item.get('price_rule_tag', None):
-#                 continue
-#             if item.get('price_rule_tag') == pricing_rules[0].get('tag', None):
-#                 if cint(item.get('qty')) < 0:
-#                     qty = (-1) * cint(item.get('qty'))
-#                 else:
-#                     qty = cint(item.get('qty'))
-#
-#                 total_amount += cint(item.get('rate')) * cint(qty)
-#                 total_qty += cint(qty)
-#
-#         pricing_rules = filter_pricing_rules_for_qty_amount(total_qty, total_amount, pricing_rules)
-#         rules_name_list = []
-#         tag_name_list = []
-#         for d in pricing_rules:
-#             if d.price_or_product_discount == "Price":
-#                 discount_amount += calculate_discount_amount(doc, d)
-#                 rules_name_list.append(d.title)
-#                 tag_name_list.append(d.tag)
-#         return {'discount_amount': discount_amount, 'rules_name_list': rules_name_list, 'tag_name_list': tag_name_list}
-#
-#             # if d.apply_discount_on:
-#             # 	doc.set("apply_discount_on", d.apply_discount_on)
-#             # 	doc.set("additional_discount_percentage", None)
-#             # 	doc.set("discount_amount", flt(discount_amount))
-#             # for field in ["additional_discount_percentage", "discount_amount"]:
-#             # 	pr_field = "discount_percentage" if field == "additional_discount_percentage" else field
-#             #
-#             #
-#             #
-#             # 	if not d.get(pr_field):
-#             # 		continue
-#             # 	if (
-#             # 		d.validate_applied_rule and doc.get(field) is not None and doc.get(field) < d.get(pr_field)
-#             # 	):
-#             # 		frappe.msgprint(_("User has not applied rule on the invoice {0}").format(doc.name))
-#             # 	else:
-#             # 		if not d.coupon_code_based:
-#             # 			doc.set(field, d.get(pr_field))
-#             # 		elif doc.get("coupon_code"):
-#             # 			# coupon code based pricing rule
-#             # 			coupon_code_pricing_rule = frappe.db.get_value(
-#             # 				"Coupon Code", doc.get("coupon_code"), "pricing_rule"
-#             # 			)
-#             # 			if coupon_code_pricing_rule == d.name:
-#             # 				# if selected coupon code is linked with pricing rule
-#             # 				doc.set(field, d.get(pr_field))
-#             # 			else:
-#             # 				# reset discount if not linked
-#             # 				doc.set(field, 0)
-#             # 		else:
-#             # 			# if coupon code based but no coupon code selected
-#             # 			doc.set(field, 0)
-#
-#             # doc.calculate_taxes_and_totals()
-#         # elif d.price_or_product_discount == "Product":
-#         # 	item_details = frappe._dict({"parenttype": doc.doctype, "free_item_data": []})
-#         # 	get_product_discount_rule(d, item_details, doc=doc)
-#         # 	apply_pricing_rule_for_free_items(doc, item_details.free_item_data)
-#         # 	doc.set_missing_values()
-#         # 	doc.calculate_taxes_and_totals()
-#
-
-
 @frappe.whitelist()
 def apply_pricing_rule_on_tag(doc):
-    from bbb.bbb.controllers.pricing_rule.utils import (
-        get_applied_pricing_rules,
-        get_pricing_rule_items,
-        get_pricing_rules,
-        get_product_discount_rule,
+    values = {}
+    conditions = get_tag_conditions(values)
+    doc = json.loads(doc)
+    pricing_rules = frappe.db.sql(
+        """ Select `tabPricing Rule`.* from `tabPricing Rule`
+        where  {conditions} and `tabPricing Rule`.disable = 0 order by `tabPricing Rule`.priority desc
+    """.format(
+            conditions=conditions
+        ),
+        values,
+        as_dict=1,
     )
-    # pricing_rules = get_applied_pricing_rules(pricing_rules)
-    # print(pricing_rules)
-    data = json.loads(doc)
-    print("doc ", data.get("items"))
-    return {'discount_amount': 30, 'rules_name_list': 50, 'tag_name_list': "tag_name_list"}
+    if pricing_rules:
+        total_amount = 0
+        total_qty = 0
+        discount_amount = 0
+
+        items = doc.get('items', [])
+        for item in items:
+            if not item.get('price_rule_tag', None):
+                continue
+            if item.get('price_rule_tag') == pricing_rules[0].get('tag', None):
+                if cint(item.get('qty')) < 0:
+                    qty = (-1) * cint(item.get('qty'))
+                else:
+                    qty = cint(item.get('qty'))
+
+                total_amount += cint(item.get('rate')) * cint(qty)
+                total_qty += cint(qty)
+
+        pricing_rules = filter_pricing_rules_for_qty_amount(total_qty, total_amount, pricing_rules)
+        rules_name_list = []
+        tag_name_list = []
+        for d in pricing_rules:
+            if d.price_or_product_discount == "Price":
+                discount_amount += calculate_discount_amount(doc, d)
+                rules_name_list.append(d.title)
+                tag_name_list.append(d.tag)
+        return {'discount_amount': discount_amount, 'rules_name_list': rules_name_list, 'tag_name_list': tag_name_list}
+
+            # if d.apply_discount_on:
+            # 	doc.set("apply_discount_on", d.apply_discount_on)
+            # 	doc.set("additional_discount_percentage", None)
+            # 	doc.set("discount_amount", flt(discount_amount))
+            # for field in ["additional_discount_percentage", "discount_amount"]:
+            # 	pr_field = "discount_percentage" if field == "additional_discount_percentage" else field
+            #
+            #
+            #
+            # 	if not d.get(pr_field):
+            # 		continue
+            # 	if (
+            # 		d.validate_applied_rule and doc.get(field) is not None and doc.get(field) < d.get(pr_field)
+            # 	):
+            # 		frappe.msgprint(_("User has not applied rule on the invoice {0}").format(doc.name))
+            # 	else:
+            # 		if not d.coupon_code_based:
+            # 			doc.set(field, d.get(pr_field))
+            # 		elif doc.get("coupon_code"):
+            # 			# coupon code based pricing rule
+            # 			coupon_code_pricing_rule = frappe.db.get_value(
+            # 				"Coupon Code", doc.get("coupon_code"), "pricing_rule"
+            # 			)
+            # 			if coupon_code_pricing_rule == d.name:
+            # 				# if selected coupon code is linked with pricing rule
+            # 				doc.set(field, d.get(pr_field))
+            # 			else:
+            # 				# reset discount if not linked
+            # 				doc.set(field, 0)
+            # 		else:
+            # 			# if coupon code based but no coupon code selected
+            # 			doc.set(field, 0)
+
+            # doc.calculate_taxes_and_totals()
+        # elif d.price_or_product_discount == "Product":
+        # 	item_details = frappe._dict({"parenttype": doc.doctype, "free_item_data": []})
+        # 	get_product_discount_rule(d, item_details, doc=doc)
+        # 	apply_pricing_rule_for_free_items(doc, item_details.free_item_data)
+        # 	doc.set_missing_values()
+        # 	doc.calculate_taxes_and_totals()
+
 
 
 @frappe.whitelist()
