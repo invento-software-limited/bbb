@@ -8,7 +8,6 @@ from frappe.utils import cint, cstr, now
 from frappe.utils import cint, flt, fmt_money, get_link_to_form, getdate, today, cstr
 from frappe.model.naming import set_name_from_naming_options
 from frappe.model.mapper import get_mapped_doc
-from woocommerceconnector.woocommerce_requests import put_request
 
 from erpnext.accounts.doctype.pricing_rule.utils import filter_pricing_rules_for_qty_amount
 
@@ -494,7 +493,7 @@ def update_customers_dob():
 
 def update_woocommerce_stock(doc, method):
     from woocommerce import API
-    woocommerce_settings = frappe.get_doc("WooCommerce Config")
+    woocommerce_settings = frappe.get_doc("Woocommerce Settings")
     bbb_settings = frappe.get_doc("BBB Settings")
 
     if doc.voucher_type != 'Woocommerce Order' and bbb_settings.woocommerce_status == "Enabled":
@@ -518,7 +517,8 @@ def update_woocommerce_stock(doc, method):
                     "stock_quantity": flt(pre_qty) + flt(incoming_value) if incoming_value else flt(doc.qty_after_transaction),
                     "manage_stock": True
                 }
-                put_request("products/" + str(woocommerce_id),data)
+                url = "products/" + str(woocommerce_id)
+                wcapi.put(url, data).json()
         
         
 @frappe.whitelist()    
