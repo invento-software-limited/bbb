@@ -34,7 +34,7 @@ def verify_request():
 	woocommerce_settings = frappe.get_doc("WooCommerce Config")
 	sig = base64.b64encode(
 		hmac.new(
-			woocommerce_settings.api_secret.encode("utf8"), frappe.request.data, hashlib.sha256
+			woocommerce_settings.secret.encode("utf8"), frappe.request.data, hashlib.sha256
 		).digest()
 	)
 

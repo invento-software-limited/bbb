@@ -21,6 +21,15 @@ class CustomStockLedgerEntry(StockLedgerEntry):
 		item_doc = frappe.get_doc('Item', {'item_code': self.item_code})
 
 		if item_doc.woocommerce_id and woocommerce_settings.warehouse == self.warehouse:
+			from woocommerce import API
+			wcapi = API(
+				url=woocommerce_settings.woocommerce_server_url,
+				consumer_key=woocommerce_settings.api_consumer_key,
+				consumer_secret=woocommerce_settings.api_consumer_secret,
+				wp_api=True,
+				version="wc/v3",
+				query_string_auth=True,
+			)
 			data = {
 				"stock_quantity": self.qty_after_transaction,
 				"manage_stock": True
