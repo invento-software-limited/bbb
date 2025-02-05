@@ -7,7 +7,7 @@ from erpnext.stock.get_item_details import get_conversion_factor
 def get_tag_conditions(values):
     conditions = '''apply_on = "Transaction"'''
     conditions += ''' and `tabPricing Rule`.applicable_for="Tag" '''
-    conditions += ''' and disable=0 and "{}" between ifnull(`tabPricing Rule`.valid_from, '2000-01-01')
+    conditions += ''' and "{}" between ifnull(`tabPricing Rule`.valid_from, '2000-01-01')
 		and ifnull(`tabPricing Rule`.valid_upto, '2500-12-31')'''.format(today)
 
     return conditions

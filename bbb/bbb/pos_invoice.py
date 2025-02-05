@@ -527,7 +527,7 @@ def split_item(item):
 def get_tag_conditions(values):
     today = datetime.datetime.today().date()
     conditions = '''apply_on = "Transaction"'''
-    conditions += ''' and disable=0 and `tabPricing Rule`.applicable_for="Tag" and disable=0'''
+    conditions += ''' and `tabPricing Rule`.applicable_for="Tag" and disable=0'''
     conditions += ''' and "{}" between ifnull(`tabPricing Rule`.valid_from, '2000-01-01')
 		and ifnull(`tabPricing Rule`.valid_upto, '2500-12-31')'''.format(today)
 
