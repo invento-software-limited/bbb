@@ -169,8 +169,6 @@
   "debit_to",
   "party_account_currency",
   "is_opening",
-  "c_form_applicable",
-  "c_form_no",
   "column_break8",
   "remarks",
   "sales_team_section_break",
@@ -266,6 +264,7 @@
    "fieldname": "pos_profile",
    "fieldtype": "Link",
    "label": "POS Profile",
+   "link_filters": "[[\"pos_profile\", \"company\", \"=\", \"Orkas Glam Bar And Revive Spa\"]]",
    "options": "POS Profile",
    "print_hide": 1
   },
@@ -586,6 +585,7 @@
    "fieldname": "set_warehouse",
    "fieldtype": "Link",
    "label": "Source Warehouse",
+   "link_filters": "[[\"set_warehouse\", \"company\", \"=\", \"Orkas Glam Bar And Revive Spa\"]]",
    "options": "Warehouse",
    "print_hide": 1
   },
@@ -1395,6 +1395,7 @@
    "fieldname": "debit_to",
    "fieldtype": "Link",
    "label": "Debit To",
+   "link_filters": "[[\"debit_to\", \"company\", \"=\", \"Orkas Glam Bar And Revive Spa\"]]",
    "oldfieldname": "debit_to",
    "oldfieldtype": "Link",
    "options": "Account",
@@ -1587,6 +1588,7 @@
    "fieldname": "served_by",
    "fieldtype": "Link",
    "label": "Served By",
+   "link_filters": "[[\"served_by\", \"company\", \"=\", \"Orkas Glam Bar And Revive Spa\"]]",
    "options": "Served By",
    "reqd": 1
   },
@@ -1614,11 +1616,12 @@
  "index_web_pages_for_search": 1,
  "is_submittable": 1,
  "links": [],
- "modified": "2023-07-26 12:36:53.960291",
+ "modified": "2025-02-10 18:00:08.526544",
  "modified_by": "Administrator",
  "module": "Bbb",
  "name": "Advance Booking",
  "name_case": "Title Case",
+ "naming_rule": "By \"Naming Series\" field",
  "owner": "Administrator",
  "permissions": [
   {
@@ -1638,6 +1641,7 @@
  "show_name_in_global_search": 1,
  "sort_field": "modified",
  "sort_order": "DESC",
+ "states": [],
  "timeline_field": "customer",
  "title_field": "title",
  "track_changes": 1,
