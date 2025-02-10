@@ -290,7 +290,7 @@ erpnext.PointOfSale.ItemCart = class {
             frappe.model.set_value(frm.doctype, frm.docname, 'paid_amount', rounded_total);
             $(".add-discount-wrapper").attr('can_click','disabled');
             $(".add-discount-amount-wrapper").attr('can_click','disabled');
-            me.wrapper.find('.customer-cart-container').css('grid-column', 'span 7 / span 7');
+            me.wrapper.find('.customer-cart-container').css('grid-column', 'span 5 / span 5');
             me.events.checkout();
             me.toggle_checkout_btn(false);
             //rabi
@@ -315,7 +315,7 @@ erpnext.PointOfSale.ItemCart = class {
             if(frm.doc.discount_amount || frm.doc.discount_percentage){
                 // me.hide_discount_control(frm.doc.discount_percentage);
                 this.$add_discount_elem.css({
-                    'border': '1px dashed var(--dark-green-500)',
+                    'border': '1px dashed var(--green-500)',
                     'padding': 'var(--padding-sm) var(--padding-md)'
                 });
                 this.$add_discount_elem.html(
@@ -326,7 +326,7 @@ erpnext.PointOfSale.ItemCart = class {
                 // me.hide_discount_amount_control(frm.doc.discount_amount);
 
                 this.$add_discount_amount_elem.css({
-                    'border': '1px dashed var(--dark-green-500)',
+                    'border': '1px dashed var(--green-500)',
                     'padding': 'var(--padding-sm) var(--padding-md)'
                 });
                 this.$add_discount_amount_elem.html(
@@ -889,7 +889,7 @@ erpnext.PointOfSale.ItemCart = class {
             );
         } else {
             this.$add_discount_elem.css({
-                'border': '1px dashed var(--dark-green-500)',
+                'border': '1px dashed var(--green-500)',
                 'padding': 'var(--padding-sm) var(--padding-md)'
             });
             this.$add_discount_elem.html(
@@ -907,7 +907,7 @@ erpnext.PointOfSale.ItemCart = class {
             );
         } else {
             this.$add_discount_amount_elem.css({
-                'border': '1px dashed var(--dark-green-500)',
+                'border': '1px dashed var(--green-500)',
                 'padding': 'var(--padding-sm) var(--padding-md)'
             });
             this.$add_discount_amount_elem.html(
