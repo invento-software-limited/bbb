@@ -290,7 +290,7 @@ erpnext.PointOfSale.ItemCart = class {
             frappe.model.set_value(frm.doctype, frm.docname, 'paid_amount', rounded_total);
             $(".add-discount-wrapper").attr('can_click','disabled');
             $(".add-discount-amount-wrapper").attr('can_click','disabled');
-            me.wrapper.find('.customer-cart-container').css('grid-column', 'span 5 / span 5');
+            me.wrapper.find('.customer-cart-container').css('grid-column', 'span 7 / span 7');
             me.events.checkout();
             me.toggle_checkout_btn(false);
             //rabi
@@ -425,7 +425,7 @@ erpnext.PointOfSale.ItemCart = class {
         frappe.ui.keys.add_shortcut({
             shortcut: "ctrl+enter",
             action: () => this.$component.find(".checkout-btn").click(),
-            condition: () => this.$component.is(":visible") && !this.$totals_section.find('.edit-cart-btn').is(':visible') && this.wrapper.find('.customer-cart-container').css('grid-column', 'span 5 / span 5'),
+            condition: () => this.$component.is(":visible") && !this.$totals_section.find('.edit-cart-btn').is(':visible') && this.wrapper.find('.customer-cart-container').css('grid-column', 'span 7 / span 7'),
             description: __("Checkout Order / Submit Order / New Order"),
             ignore_inputs: true,
             page: cur_page.page.page
