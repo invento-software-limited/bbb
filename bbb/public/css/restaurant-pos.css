@@ -1027,7 +1027,7 @@
     display: flex;
     align-items: center;
     font-weight: 500;
-    color: var(--dark-green-500);
+    color: var(--green-500);
   }
   .point-of-sale-app > .customer-cart-container > .cart-container > .abs-cart-container > .cart-totals-section > .additional-discount-section > .add-discount-amount-wrapper {
     display: flex;
@@ -1048,7 +1048,7 @@
     display: flex;
     align-items: center;
     font-weight: 500;
-    color: var(--dark-green-500);
+    color: var(--green-500);
   }
   .point-of-sale-app > .customer-cart-container > .cart-container > .abs-cart-container > .cart-totals-section > .row {
     display: flex;
@@ -1308,7 +1308,7 @@
     padding: 3px var(--padding-sm);
     border-radius: var(--border-radius-sm);
     background-color: var(--green-100);
-    color: var(--dark-green-500);
+    color: var(--green-500);
     font-size: var(--text-sm);
     font-weight: 700;
   }
@@ -1620,7 +1620,7 @@
     justify-content: flex-end;
   }
   .point-of-sale-app > .past-order-summary > .invoice-summary-wrapper > .abs-container > .summary-container > .item-row-wrapper > .item-rate-disc > .item-disc {
-    color: var(--dark-green-500);
+    color: var(--green-500);
   }
   .point-of-sale-app > .past-order-summary > .invoice-summary-wrapper > .abs-container > .summary-container > .item-row-wrapper > .item-rate-disc > .item-rate {
     font-weight: 500;

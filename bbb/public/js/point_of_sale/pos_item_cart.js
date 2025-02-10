@@ -315,7 +315,7 @@ erpnext.PointOfSale.ItemCart = class {
             if(frm.doc.discount_amount || frm.doc.discount_percentage){
                 // me.hide_discount_control(frm.doc.discount_percentage);
                 this.$add_discount_elem.css({
-                    'border': '1px dashed var(--dark-green-500)',
+                    'border': '1px dashed var(--green-500)',
                     'padding': 'var(--padding-sm) var(--padding-md)'
                 });
                 this.$add_discount_elem.html(
@@ -326,7 +326,7 @@ erpnext.PointOfSale.ItemCart = class {
                 // me.hide_discount_amount_control(frm.doc.discount_amount);
 
                 this.$add_discount_amount_elem.css({
-                    'border': '1px dashed var(--dark-green-500)',
+                    'border': '1px dashed var(--green-500)',
                     'padding': 'var(--padding-sm) var(--padding-md)'
                 });
                 this.$add_discount_amount_elem.html(
@@ -425,7 +425,7 @@ erpnext.PointOfSale.ItemCart = class {
         frappe.ui.keys.add_shortcut({
             shortcut: "ctrl+enter",
             action: () => this.$component.find(".checkout-btn").click(),
-            condition: () => this.$component.is(":visible") && !this.$totals_section.find('.edit-cart-btn').is(':visible') && this.wrapper.find('.customer-cart-container').css('grid-column', 'span 5 / span 5'),
+            condition: () => this.$component.is(":visible") && !this.$totals_section.find('.edit-cart-btn').is(':visible') && this.wrapper.find('.customer-cart-container').css('grid-column', 'span 7 / span 7'),
             description: __("Checkout Order / Submit Order / New Order"),
             ignore_inputs: true,
             page: cur_page.page.page
@@ -889,7 +889,7 @@ erpnext.PointOfSale.ItemCart = class {
             );
         } else {
             this.$add_discount_elem.css({
-                'border': '1px dashed var(--dark-green-500)',
+                'border': '1px dashed var(--green-500)',
                 'padding': 'var(--padding-sm) var(--padding-md)'
             });
             this.$add_discount_elem.html(
@@ -907,7 +907,7 @@ erpnext.PointOfSale.ItemCart = class {
             );
         } else {
             this.$add_discount_amount_elem.css({
-                'border': '1px dashed var(--dark-green-500)',
+                'border': '1px dashed var(--green-500)',
                 'padding': 'var(--padding-sm) var(--padding-md)'
             });
             this.$add_discount_amount_elem.html(
