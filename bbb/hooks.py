@@ -78,6 +78,9 @@ doctype_js = {
     "Purchase Order": [
         'public/js/purchase_order.js'
     ],
+    "Pricing Rule": [
+        'public/js/pricing_rule.js'
+    ],
 }
 doctype_list_js = {
     "POS Invoice": "public/js/pos_invoice_list.js"
@@ -233,8 +236,7 @@ override_doctype_class = {
     "POS Invoice": "bbb.bbb.controllers.pos_invoice.CustomPOSInvoice",
     "Sales Order": "bbb.bbb.controllers.sales_order.CustomSalesOrder",
     "POS Closing Entry": "bbb.bbb.controllers.pos_closing_entry.CustomPOSClosingEntry",
-    # "Stock Ledger Entry": "bbb.bbb.controllers.stock_ledger_entry.CustomStockLedgerEntry",
-    # "Delivery Note": "bbb.bbb.controllers.delivery_note.CustomDeliveryNote",
+    "POS Closing Merge Log": "bbb.bbb.controllers.pos_closing_merge_log.POSInvoiceMergeLog",
 }
 # Scheduled Tasks
 # ---------------
@@ -265,9 +267,13 @@ override_doctype_class = {
 # Overriding Methods
 # ------------------------------
 #
-# override_whitelisted_methods = {
-# 	"frappe.desk.doctype.event.event.get_events": "bbb.event.get_events"
-# }
+override_whitelisted_methods = {
+    "erpnext.accounts.doctype.pricing_rule.pricing_rule.apply_pricing_rule": "bbb.bbb.controllers.pricing_rule.pricing_rule.apply_pricing_rule",
+    "erpnext.accounts.doctype.pricing_rule.pricing_rule.remove_pricing_rule_for_item": "bbb.bbb.controllers.pricing_rule.pricing_rule.remove_pricing_rule_for_item",
+    "erpnext.stock.get_item_details.apply_price_list": "bbb.bbb.controllers.get_item_details.apply_price_list",
+    "erpnext.stock.get_item_details.get_item_details": "bbb.bbb.controllers.get_item_details.get_item_details",
+}
+
 #
 # each overriding function accepts a `data` argument;
 # generated from the base implementation of the doctype dashboard,
@@ -329,7 +335,8 @@ fixtures = [
                 "BD Budget Beauty Restaurant",
                 "Purchase User BBB",
                 "BBB Retail Team",
-                "Report User"
+                "Report User",
+                "Admin Panel",
             ]]
         ]
     },
@@ -370,4 +377,3 @@ fixtures = [
 # default_log_clearing_doctypes = {
 # 	"Logging DocType Name": 30  # days to retain logs
 # }
-

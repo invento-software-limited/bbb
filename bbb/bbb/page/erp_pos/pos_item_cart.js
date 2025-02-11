@@ -413,7 +413,7 @@ erpnext.PointOfSale.ItemCart = class {
 			);
 		} else {
 			this.$add_discount_elem.css({
-				'border': '1px dashed var(--dark-green-500)',
+				'border': '1px dashed var(--green-500)',
 				'padding': 'var(--padding-sm) var(--padding-md)'
 			});
 			this.$add_discount_elem.html(

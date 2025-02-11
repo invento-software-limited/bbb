@@ -322,6 +322,10 @@ erpnext.PointOfSale.Controller = class {
         });
         d.show();
         d.$wrapper.find('.modal-dialog').css("max-width", "800px");
+        d.$wrapper.removeAttr("aria-hidden");
+        d.$wrapper.on("hidden.bs.modal", function() {
+            d.$wrapper.attr("aria-hidden", "true");
+        });
     }
 
     add_damaged_product(){

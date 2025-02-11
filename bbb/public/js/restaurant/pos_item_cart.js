@@ -371,7 +371,7 @@ erpnext.PointOfSale.ItemCart = class {
             if(frm.doc.discount_amount || frm.doc.discount_percentage){
                 // me.hide_discount_control(frm.doc.discount_percentage);
                 this.$add_discount_elem.css({
-                    'border': '1px dashed var(--dark-green-500)',
+                    'border': '1px dashed var(--green-500)',
                     'padding': 'var(--padding-sm) var(--padding-md)'
                 });
                 this.$add_discount_elem.html(
@@ -382,7 +382,7 @@ erpnext.PointOfSale.ItemCart = class {
                 // me.hide_discount_amount_control(frm.doc.discount_amount);
 
                 this.$add_discount_amount_elem.css({
-                    'border': '1px dashed var(--dark-green-500)',
+                    'border': '1px dashed var(--green-500)',
                     'padding': 'var(--padding-sm) var(--padding-md)'
                 });
                 this.$add_discount_amount_elem.html(
@@ -1048,7 +1048,7 @@ erpnext.PointOfSale.ItemCart = class {
             );
         } else {
             this.$add_discount_elem.css({
-                'border': '1px dashed var(--dark-green-500)',
+                'border': '1px dashed var(--green-500)',
                 'padding': 'var(--padding-sm) var(--padding-md)'
             });
             this.$add_discount_elem.html(
@@ -1066,7 +1066,7 @@ erpnext.PointOfSale.ItemCart = class {
             );
         } else {
             this.$add_discount_amount_elem.css({
-                'border': '1px dashed var(--dark-green-500)',
+                'border': '1px dashed var(--green-500)',
                 'padding': 'var(--padding-sm) var(--padding-md)'
             });
             this.$add_discount_amount_elem.html(

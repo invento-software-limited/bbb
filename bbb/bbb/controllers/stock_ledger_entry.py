@@ -8,6 +8,7 @@ from frappe.utils import flt
 
 from erpnext.stock.doctype.stock_ledger_entry.stock_ledger_entry import StockLedgerEntry
 
+
 class CustomStockLedgerEntry(StockLedgerEntry):
 	def __init__(self, *args, **kwargs):
 		super(CustomStockLedgerEntry, self).__init__(*args, **kwargs)

@@ -270,9 +270,18 @@ def check_scheduler_status():
 
 
 def job_already_enqueued(job_name):
-    enqueued_jobs = [d.get("job_name") for d in get_jobs()]
-    if job_name in enqueued_jobs:
-        return True
+    # Get the list of jobs for the current site
+    jobs = get_jobs()
+    # Check if the current site exists in the jobs dictionary
+    if frappe.local.site in jobs:
+        # Check if the job_name exists in the list of jobs for the current site
+        if job_name in jobs[frappe.local.site]:
+            # Throw an error if the job is already enqueued
+            return True
+
+    # If the job is not enqueued, return False
+    return False
+
 
 
 def safe_load_json(message):

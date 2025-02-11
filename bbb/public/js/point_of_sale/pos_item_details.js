@@ -166,7 +166,14 @@ erpnext.PointOfSale.ItemDetails = class {
 			)
 
 			const field_meta = this.item_meta.fields.find(df => df.fieldname === fieldname);
-			fieldname === 'discount_percentage' ? (field_meta.label = __('Discount (%)')) : '';
+			if (!field_meta) {
+				console.log(`Field metadata not found for: ${fieldname}`);
+				return;
+			}
+			if (fieldname === 'discount_percentage') {
+				field_meta.label = __('Discount (%)');
+			}
+		
 			const me = this;
 
 			this[`${fieldname}_control`] = frappe.ui.form.make_control({
@@ -237,21 +244,24 @@ erpnext.PointOfSale.ItemDetails = class {
 				if (this.value) {
 					me.events.form_updated(me.current_item, 'warehouse', this.value).then(() => {
 						me.item_stock_map = me.events.get_item_stock_map();
-						const available_qty = me.item_stock_map[me.item_row.item_code][this.value];
-						if (available_qty === undefined) {
-							me.events.get_available_stock(me.item_row.item_code, this.value).then(() => {
-								// item stock map is updated now reset warehouse
-								me.warehouse_control.set_value(this.value);
-							})
-						} else if (available_qty === 0) {
-							me.warehouse_control.set_value('');
-							const bold_item_code = me.item_row.item_code.bold();
-							const bold_warehouse = this.value.bold();
-							frappe.throw(
-								__('Item Code: {0} is not available under warehouse {1}.', [bold_item_code, bold_warehouse])
-							);
+						if(me.item_stock_map[me.item_row.item_code] != undefined){
+						
+							const available_qty = me.item_stock_map[me.item_row.item_code][this.value];
+							if (available_qty === undefined) {
+								me.events.get_available_stock(me.item_row.item_code, this.value).then(() => {
+									// item stock map is updated now reset warehouse
+									me.warehouse_control.set_value(this.value);
+								})
+							} else if (available_qty === 0) {
+								me.warehouse_control.set_value('');
+								const bold_item_code = me.item_row.item_code.bold();
+								const bold_warehouse = this.value.bold();
+								frappe.throw(
+									__('Item Code: {0} is not available under warehouse {1}.', [bold_item_code, bold_warehouse])
+								);
+							}
+							me.actual_qty_control.set_value(available_qty);
 						}
-						me.actual_qty_control.set_value(available_qty);
 					});
 				}
 			}

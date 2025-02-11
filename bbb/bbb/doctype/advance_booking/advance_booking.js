@@ -7,11 +7,18 @@
 // 	// }
 // });
 
-
-// {% include 'erpnext/selling/sales_common.js' %};
 frappe.provide("erpnext.accounts");
+cur_frm.cscript.tax_table = "Sales Taxes and Charges";
 
-erpnext.selling.AdvanceBooking = class SalesInvoiceController extends (
+erpnext.accounts.taxes.setup_tax_validations("Sales Invoice");
+erpnext.accounts.payment_triggers.setup("Sales Invoice");
+erpnext.accounts.pos.setup("Sales Invoice");
+erpnext.accounts.taxes.setup_tax_filters("Sales Taxes and Charges");
+erpnext.sales_common.setup_selling_controller();
+erpnext.accounts.pos.setup("POS Invoice");
+
+
+erpnext.selling.AdvanceBooking = class AdvanceBookingController extends (
 	erpnext.selling.SellingController
 ) {
 
@@ -25,7 +32,6 @@ erpnext.selling.AdvanceBooking = class SalesInvoiceController extends (
 	}
 
 	onload(doc) {
-		this._super();
 		this.frm.ignore_doctypes_on_cancel_all = ['POS Invoice Merge Log'];
 		if(doc.__islocal && doc.is_pos && frappe.get_route_str() !== 'point-of-sale') {
 			this.frm.script_manager.trigger("is_pos");
@@ -139,7 +145,6 @@ erpnext.selling.AdvanceBooking = class SalesInvoiceController extends (
 		};
 	}
 	refresh(doc) {
-		this._super();
 		if (doc.docstatus == 1 && !doc.is_return) {
 			this.frm.add_custom_button(__('Return'), this.make_sales_return, __('Create'));
 			this.frm.page.set_inner_btn_group_as_primary(__('Create'));
@@ -162,7 +167,7 @@ erpnext.selling.AdvanceBooking = class SalesInvoiceController extends (
 				this.frm.set_value("is_pos", 0);
 				frappe.msgprint(__("Please specify Company to proceed"));
 			} else {
-				const r = await this.frm.call({
+				const r =  this.frm.call({
 					doc: this.frm.doc,
 					method: "set_missing_values",
 					freeze: true
@@ -247,6 +252,10 @@ erpnext.selling.AdvanceBooking = class SalesInvoiceController extends (
 $.extend(cur_frm.cscript, new erpnext.selling.AdvanceBooking({ frm: cur_frm }))
 
 frappe.ui.form.on('Advance Booking', {
+	setup: function (frm) {
+        frm.script_manager.make(erpnext.selling.AdvanceBooking);
+    },
+
 	redeem_loyalty_points: function(frm) {
 		frm.events.get_loyalty_details(frm);
 	},
