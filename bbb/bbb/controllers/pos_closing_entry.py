@@ -303,7 +303,7 @@ def enqueue_job(job, **kwargs):
         enqueue(
             job,
             **kwargs,
-            queue="long",
+            queue="default",
             timeout=50000,
             event="processing_merge_logs",
             job_name=job_name,
