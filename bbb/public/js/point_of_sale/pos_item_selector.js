@@ -132,7 +132,7 @@ erpnext.PointOfSale.ItemSelector = class {
 				data-item-code="${escape(item.item_code)}" data-serial-no="${escape(serial_no)}"
 				data-batch-no="${escape(batch_no)}" data-uom="${escape(stock_uom)}" data-start-date="${escape(item.start_date)}"
 				data-end-date="${escape(item.end_date)}" data-discount-amount="${escape(item.discount_amount)}"
-				data-rate="${escape(price_list_rate || 0)}" data-mrp="${escape(price_list_rate || 0)}" data-tag="${escape(tag || '')}"
+				data-rate="${escape(price_list_rate || 0)}" data-mrp="${escape(price_list_rate || 0)}" data-tag="${tag || ''}"
 				title="${item.item_name}">
 
 				${get_item_image_html()}
