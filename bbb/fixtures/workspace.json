@@ -485,7 +485,7 @@
     "description": null,
     "hidden": 0,
     "icon": null,
-    "is_query_report": 1,
+    "is_query_report": 0,
     "label": "Customer Feedback Details",
     "link_count": 0,
     "link_to": "Customer Feedback Details",
@@ -495,7 +495,7 @@
     "parent": "Admin Panel",
     "parentfield": "links",
     "parenttype": "Workspace",
-    "report_ref_doctype": null,
+    "report_ref_doctype": "Customer Feedback",
     "type": "Link"
    },
    {
@@ -503,7 +503,7 @@
     "description": null,
     "hidden": 0,
     "icon": null,
-    "is_query_report": 1,
+    "is_query_report": 0,
     "label": "Product Feedback from Customer",
     "link_count": 0,
     "link_to": "Product Feedback from Customer",
@@ -513,7 +513,7 @@
     "parent": "Admin Panel",
     "parentfield": "links",
     "parenttype": "Workspace",
-    "report_ref_doctype": null,
+    "report_ref_doctype": "Customer Feedback",
     "type": "Link"
    },
    {
@@ -521,7 +521,7 @@
     "description": null,
     "hidden": 0,
     "icon": null,
-    "is_query_report": 1,
+    "is_query_report": 0,
     "label": "Product Scan Log Report",
     "link_count": 0,
     "link_to": "Product Scan Log Report",
@@ -531,7 +531,7 @@
     "parent": "Admin Panel",
     "parentfield": "links",
     "parenttype": "Workspace",
-    "report_ref_doctype": null,
+    "report_ref_doctype": "Product Search Log",
     "type": "Link"
    },
    {
@@ -539,7 +539,7 @@
     "description": null,
     "hidden": 0,
     "icon": null,
-    "is_query_report": 1,
+    "is_query_report": 0,
     "label": "Scan Vs Bill",
     "link_count": 0,
     "link_to": "Scan Vs Bill",
@@ -549,11 +549,11 @@
     "parent": "Admin Panel",
     "parentfield": "links",
     "parenttype": "Workspace",
-    "report_ref_doctype": null,
+    "report_ref_doctype": "Product Search Log",
     "type": "Link"
    }
   ],
-  "modified": "2025-02-11 14:36:50.886806",
+  "modified": "2025-02-12 14:34:22.745508",
   "module": "Bbb",
   "name": "Admin Panel",
   "number_cards": [],
@@ -773,7 +773,7 @@
     "description": null,
     "hidden": 0,
     "icon": null,
-    "is_query_report": 1,
+    "is_query_report": 0,
     "label": "Customer Feedback Details",
     "link_count": 0,
     "link_to": "Customer Feedback Details",
@@ -783,7 +783,7 @@
     "parent": "Report User",
     "parentfield": "links",
     "parenttype": "Workspace",
-    "report_ref_doctype": null,
+    "report_ref_doctype": "Customer Feedback",
     "type": "Link"
    },
    {
@@ -791,7 +791,7 @@
     "description": null,
     "hidden": 0,
     "icon": null,
-    "is_query_report": 1,
+    "is_query_report": 0,
     "label": "Product Feedback from Customer",
     "link_count": 0,
     "link_to": "Product Feedback from Customer",
@@ -801,7 +801,7 @@
     "parent": "Report User",
     "parentfield": "links",
     "parenttype": "Workspace",
-    "report_ref_doctype": null,
+    "report_ref_doctype": "Customer Feedback",
     "type": "Link"
    },
    {
@@ -809,7 +809,7 @@
     "description": null,
     "hidden": 0,
     "icon": null,
-    "is_query_report": 1,
+    "is_query_report": 0,
     "label": "Product Scan Log Report",
     "link_count": 0,
     "link_to": "Product Scan Log Report",
@@ -819,7 +819,7 @@
     "parent": "Report User",
     "parentfield": "links",
     "parenttype": "Workspace",
-    "report_ref_doctype": null,
+    "report_ref_doctype": "Product Search Log",
     "type": "Link"
    },
    {
@@ -827,7 +827,7 @@
     "description": null,
     "hidden": 0,
     "icon": null,
-    "is_query_report": 1,
+    "is_query_report": 0,
     "label": "Scan Vs Bill",
     "link_count": 0,
     "link_to": "Scan Vs Bill",
@@ -837,11 +837,11 @@
     "parent": "Report User",
     "parentfield": "links",
     "parenttype": "Workspace",
-    "report_ref_doctype": null,
+    "report_ref_doctype": "Product Search Log",
     "type": "Link"
    }
   ],
-  "modified": "2025-02-11 14:34:39.620151",
+  "modified": "2025-02-12 14:32:28.293952",
   "module": "Bbb",
   "name": "Report User",
   "number_cards": [],
