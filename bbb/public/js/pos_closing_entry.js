@@ -1,4 +1,4 @@
-frappe.ui.form.off("POS Closing Entry", "pos_opening_entry");
+// frappe.ui.form.off("POS Closing Entry", "pos_opening_entry");
 frappe.ui.form.on('POS Closing Entry', {
     onload:function(frm){
         frm.set_df_property('period_end_date', 'read_only', 0)
