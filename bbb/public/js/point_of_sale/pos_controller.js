@@ -599,8 +599,13 @@ erpnext.PointOfSale.Controller = class {
                     indicator: 'green',
                     message: __('POS invoice {0} created successfully', [r.doc.name])
                 });
-                this.print_receipt(this.frm);
-                frappe.ui.toolbar.clear_cache();
+                frappe.run_serially([
+                    () => this.print_receipt(this.frm),
+                    () => $(window).off('beforeunload'),
+                    () => frappe.ui.toolbar.clear_cache()
+                ]);
+
+
 
             })
     }
