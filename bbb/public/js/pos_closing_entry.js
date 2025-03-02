@@ -2,6 +2,7 @@
 frappe.ui.form.on('POS Closing Entry', {
     onload:function(frm){
         frm.set_df_property('period_end_date', 'read_only', 0)
+		frm.set_value('posting_time', frappe.datetime.now_datetime())
     },
 	validate(frm, cdn, cdt){
 
