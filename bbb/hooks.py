@@ -325,7 +325,7 @@ user_data_fields = [
     }
 ]
 fixtures = [
-    "Workflow State", "Workflow", "Workflow Action Master",
+    "Workflow State", "Workflow", "Workflow Action Master", "Role", "Custom DocPerm", "Custom Role",
     {
         "dt": "Workspace",
         "filters": [
