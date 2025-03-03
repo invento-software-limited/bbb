@@ -1,0 +1,595 @@
+[
+ {
+  "docstatus": 0,
+  "doctype": "Custom Role",
+  "modified": "2022-09-17 16:57:18.941609",
+  "name": "59efe3d683",
+  "page": null,
+  "ref_doctype": "Sales Invoice",
+  "report": "Detail Sales Report For Management",
+  "roles": [
+   {
+    "parent": "59efe3d683",
+    "parentfield": "roles",
+    "parenttype": "Custom Role",
+    "role": "BBB Admin"
+   },
+   {
+    "parent": "59efe3d683",
+    "parentfield": "roles",
+    "parenttype": "Custom Role",
+    "role": "System Manager"
+   }
+  ]
+ },
+ {
+  "docstatus": 0,
+  "doctype": "Custom Role",
+  "modified": "2025-01-02 14:43:43.040023",
+  "name": "4fd2fee1ee",
+  "page": "detail-sales-report",
+  "ref_doctype": null,
+  "report": null,
+  "roles": [
+   {
+    "parent": "4fd2fee1ee",
+    "parentfield": "roles",
+    "parenttype": "Custom Role",
+    "role": "System Manager"
+   },
+   {
+    "parent": "4fd2fee1ee",
+    "parentfield": "roles",
+    "parenttype": "Custom Role",
+    "role": "Accounts Manager"
+   },
+   {
+    "parent": "4fd2fee1ee",
+    "parentfield": "roles",
+    "parenttype": "Custom Role",
+    "role": "Report User"
+   },
+   {
+    "parent": "4fd2fee1ee",
+    "parentfield": "roles",
+    "parenttype": "Custom Role",
+    "role": "Detail Sales Report"
+   },
+   {
+    "parent": "4fd2fee1ee",
+    "parentfield": "roles",
+    "parenttype": "Custom Role",
+    "role": "Report Pr"
+   }
+  ]
+ },
+ {
+  "docstatus": 0,
+  "doctype": "Custom Role",
+  "modified": "2024-06-03 17:41:35.225220",
+  "name": "a388398c69",
+  "page": null,
+  "ref_doctype": "POS Invoice",
+  "report": "Outlet Sales Summary",
+  "roles": [
+   {
+    "parent": "a388398c69",
+    "parentfield": "roles",
+    "parenttype": "Custom Role",
+    "role": "System Manager"
+   },
+   {
+    "parent": "a388398c69",
+    "parentfield": "roles",
+    "parenttype": "Custom Role",
+    "role": "Accounts Manager"
+   },
+   {
+    "parent": "a388398c69",
+    "parentfield": "roles",
+    "parenttype": "Custom Role",
+    "role": "Report User"
+   }
+  ]
+ },
+ {
+  "docstatus": 0,
+  "doctype": "Custom Role",
+  "modified": "2023-09-07 18:46:01.186796",
+  "name": "6e52e5d1de",
+  "page": null,
+  "ref_doctype": "Sales Invoice",
+  "report": "All Outlet Sales Summary Report For Retail Ops",
+  "roles": [
+   {
+    "parent": "6e52e5d1de",
+    "parentfield": "roles",
+    "parenttype": "Custom Role",
+    "role": "System Manager"
+   },
+   {
+    "parent": "6e52e5d1de",
+    "parentfield": "roles",
+    "parenttype": "Custom Role",
+    "role": "BBB Admin"
+   },
+   {
+    "parent": "6e52e5d1de",
+    "parentfield": "roles",
+    "parenttype": "Custom Role",
+    "role": "Accounts Manager"
+   },
+   {
+    "parent": "6e52e5d1de",
+    "parentfield": "roles",
+    "parenttype": "Custom Role",
+    "role": "Retail Report User"
+   },
+   {
+    "parent": "6e52e5d1de",
+    "parentfield": "roles",
+    "parenttype": "Custom Role",
+    "role": "Report User"
+   }
+  ]
+ },
+ {
+  "docstatus": 0,
+  "doctype": "Custom Role",
+  "modified": "2022-12-11 18:06:03.183526",
+  "name": "396db3968d",
+  "page": null,
+  "ref_doctype": "Item",
+  "report": "Item Price Stock Report",
+  "roles": [
+   {
+    "parent": "396db3968d",
+    "parentfield": "roles",
+    "parenttype": "Custom Role",
+    "role": "Item Manager"
+   },
+   {
+    "parent": "396db3968d",
+    "parentfield": "roles",
+    "parenttype": "Custom Role",
+    "role": "Stock Manager"
+   },
+   {
+    "parent": "396db3968d",
+    "parentfield": "roles",
+    "parenttype": "Custom Role",
+    "role": "BBB Admin"
+   },
+   {
+    "parent": "396db3968d",
+    "parentfield": "roles",
+    "parenttype": "Custom Role",
+    "role": "Report User"
+   }
+  ]
+ },
+ {
+  "docstatus": 0,
+  "doctype": "Custom Role",
+  "modified": "2023-09-12 14:45:54.172822",
+  "name": "831de8b48e",
+  "page": null,
+  "ref_doctype": "POS Closing Entry",
+  "report": "POS Closing Report",
+  "roles": [
+   {
+    "parent": "831de8b48e",
+    "parentfield": "roles",
+    "parenttype": "Custom Role",
+    "role": "System Manager"
+   },
+   {
+    "parent": "831de8b48e",
+    "parentfield": "roles",
+    "parenttype": "Custom Role",
+    "role": "Administrator"
+   },
+   {
+    "parent": "831de8b48e",
+    "parentfield": "roles",
+    "parenttype": "Custom Role",
+    "role": "BBB Admin"
+   }
+  ]
+ },
+ {
+  "docstatus": 0,
+  "doctype": "Custom Role",
+  "modified": "2022-12-21 17:24:12.482957",
+  "name": "1c9037357b",
+  "page": null,
+  "ref_doctype": "Stock Ledger Entry",
+  "report": "Stock Ledger",
+  "roles": [
+   {
+    "parent": "1c9037357b",
+    "parentfield": "roles",
+    "parenttype": "Custom Role",
+    "role": "Accounts Manager"
+   }
+  ]
+ },
+ {
+  "docstatus": 0,
+  "doctype": "Custom Role",
+  "modified": "2022-12-21 17:24:22.718465",
+  "name": "2d86c74d5c",
+  "page": null,
+  "ref_doctype": "Stock Ledger Entry",
+  "report": "Stock Balance",
+  "roles": [
+   {
+    "parent": "2d86c74d5c",
+    "parentfield": "roles",
+    "parenttype": "Custom Role",
+    "role": "Accounts Manager"
+   }
+  ]
+ },
+ {
+  "docstatus": 0,
+  "doctype": "Custom Role",
+  "modified": "2023-12-07 17:43:03.379855",
+  "name": "5e6d63d7a8",
+  "page": null,
+  "ref_doctype": "Sales Invoice",
+  "report": "Served By Summary Report",
+  "roles": [
+   {
+    "parent": "5e6d63d7a8",
+    "parentfield": "roles",
+    "parenttype": "Custom Role",
+    "role": "System Manager"
+   },
+   {
+    "parent": "5e6d63d7a8",
+    "parentfield": "roles",
+    "parenttype": "Custom Role",
+    "role": "BBB Admin"
+   },
+   {
+    "parent": "5e6d63d7a8",
+    "parentfield": "roles",
+    "parenttype": "Custom Role",
+    "role": "Executive BBB"
+   },
+   {
+    "parent": "5e6d63d7a8",
+    "parentfield": "roles",
+    "parenttype": "Custom Role",
+    "role": "Retail Report User"
+   }
+  ]
+ },
+ {
+  "docstatus": 0,
+  "doctype": "Custom Role",
+  "modified": "2023-09-12 14:46:09.175486",
+  "name": "dae12a8c21",
+  "page": null,
+  "ref_doctype": "Sales Invoice",
+  "report": "Brand Wise Sell And Percentage",
+  "roles": [
+   {
+    "parent": "dae12a8c21",
+    "parentfield": "roles",
+    "parenttype": "Custom Role",
+    "role": "System Manager"
+   },
+   {
+    "parent": "dae12a8c21",
+    "parentfield": "roles",
+    "parenttype": "Custom Role",
+    "role": "BBB Admin"
+   },
+   {
+    "parent": "dae12a8c21",
+    "parentfield": "roles",
+    "parenttype": "Custom Role",
+    "role": "Report User"
+   }
+  ]
+ },
+ {
+  "docstatus": 0,
+  "doctype": "Custom Role",
+  "modified": "2023-09-25 14:41:58.282638",
+  "name": "088ef15dca",
+  "page": null,
+  "ref_doctype": "Stock Entry",
+  "report": "Stock Summary Report",
+  "roles": [
+   {
+    "parent": "088ef15dca",
+    "parentfield": "roles",
+    "parenttype": "Custom Role",
+    "role": "System Manager"
+   },
+   {
+    "parent": "088ef15dca",
+    "parentfield": "roles",
+    "parenttype": "Custom Role",
+    "role": "Report User BBB"
+   },
+   {
+    "parent": "088ef15dca",
+    "parentfield": "roles",
+    "parenttype": "Custom Role",
+    "role": "BBB Admin"
+   },
+   {
+    "parent": "088ef15dca",
+    "parentfield": "roles",
+    "parenttype": "Custom Role",
+    "role": "Report User"
+   },
+   {
+    "parent": "088ef15dca",
+    "parentfield": "roles",
+    "parenttype": "Custom Role",
+    "role": "Report Pr"
+   }
+  ]
+ },
+ {
+  "docstatus": 0,
+  "doctype": "Custom Role",
+  "modified": "2023-04-12 14:30:17.664968",
+  "name": "5c06536c01",
+  "page": null,
+  "ref_doctype": "Sales Order",
+  "report": "Sales Order Report for Distribution",
+  "roles": [
+   {
+    "parent": "5c06536c01",
+    "parentfield": "roles",
+    "parenttype": "Custom Role",
+    "role": "System Manager"
+   },
+   {
+    "parent": "5c06536c01",
+    "parentfield": "roles",
+    "parenttype": "Custom Role",
+    "role": "BBB Admin"
+   },
+   {
+    "parent": "5c06536c01",
+    "parentfield": "roles",
+    "parenttype": "Custom Role",
+    "role": "Distribution"
+   }
+  ]
+ },
+ {
+  "docstatus": 0,
+  "doctype": "Custom Role",
+  "modified": "2023-05-17 10:31:45.517527",
+  "name": "b9333258d6",
+  "page": "parlour",
+  "ref_doctype": null,
+  "report": null,
+  "roles": [
+   {
+    "parent": "b9333258d6",
+    "parentfield": "roles",
+    "parenttype": "Custom Role",
+    "role": "BBB Admin"
+   },
+   {
+    "parent": "b9333258d6",
+    "parentfield": "roles",
+    "parenttype": "Custom Role",
+    "role": "System Manager"
+   },
+   {
+    "parent": "b9333258d6",
+    "parentfield": "roles",
+    "parenttype": "Custom Role",
+    "role": "Sales User"
+   },
+   {
+    "parent": "b9333258d6",
+    "parentfield": "roles",
+    "parenttype": "Custom Role",
+    "role": "Sales Manager"
+   },
+   {
+    "parent": "b9333258d6",
+    "parentfield": "roles",
+    "parenttype": "Custom Role",
+    "role": "Accounts User"
+   },
+   {
+    "parent": "b9333258d6",
+    "parentfield": "roles",
+    "parenttype": "Custom Role",
+    "role": "Accounts Manager"
+   }
+  ]
+ },
+ {
+  "docstatus": 0,
+  "doctype": "Custom Role",
+  "modified": "2025-01-02 14:45:55.371230",
+  "name": "87634e54b9",
+  "page": null,
+  "ref_doctype": "Sales Invoice",
+  "report": "Item Wise Sales Report For Retail Ops",
+  "roles": [
+   {
+    "parent": "87634e54b9",
+    "parentfield": "roles",
+    "parenttype": "Custom Role",
+    "role": "System Manager"
+   },
+   {
+    "parent": "87634e54b9",
+    "parentfield": "roles",
+    "parenttype": "Custom Role",
+    "role": "BBB Admin"
+   },
+   {
+    "parent": "87634e54b9",
+    "parentfield": "roles",
+    "parenttype": "Custom Role",
+    "role": "Accounts Manager"
+   },
+   {
+    "parent": "87634e54b9",
+    "parentfield": "roles",
+    "parenttype": "Custom Role",
+    "role": "Report User"
+   },
+   {
+    "parent": "87634e54b9",
+    "parentfield": "roles",
+    "parenttype": "Custom Role",
+    "role": "Report Pr"
+   }
+  ]
+ },
+ {
+  "docstatus": 0,
+  "doctype": "Custom Role",
+  "modified": "2023-09-04 12:30:44.438651",
+  "name": "115705386a",
+  "page": "bbb-restaurant",
+  "ref_doctype": null,
+  "report": null,
+  "roles": [
+   {
+    "parent": "115705386a",
+    "parentfield": "roles",
+    "parenttype": "Custom Role",
+    "role": "System Manager"
+   },
+   {
+    "parent": "115705386a",
+    "parentfield": "roles",
+    "parenttype": "Custom Role",
+    "role": "BBB Admin"
+   },
+   {
+    "parent": "115705386a",
+    "parentfield": "roles",
+    "parenttype": "Custom Role",
+    "role": "Sales User"
+   }
+  ]
+ },
+ {
+  "docstatus": 0,
+  "doctype": "Custom Role",
+  "modified": "2023-09-12 14:45:38.273743",
+  "name": "3705e321a6",
+  "page": null,
+  "ref_doctype": "Sales Invoice",
+  "report": "ALL Outlet  Sale Summary Report",
+  "roles": [
+   {
+    "parent": "3705e321a6",
+    "parentfield": "roles",
+    "parenttype": "Custom Role",
+    "role": "System Manager"
+   },
+   {
+    "parent": "3705e321a6",
+    "parentfield": "roles",
+    "parenttype": "Custom Role",
+    "role": "BBB Admin"
+   }
+  ]
+ },
+ {
+  "docstatus": 0,
+  "doctype": "Custom Role",
+  "modified": "2023-11-27 18:18:22.692411",
+  "name": "28dcde8c1e",
+  "page": null,
+  "ref_doctype": "Woocommerce Order",
+  "report": "Woocommerce Order Summary Report",
+  "roles": [
+   {
+    "parent": "28dcde8c1e",
+    "parentfield": "roles",
+    "parenttype": "Custom Role",
+    "role": "System Manager"
+   },
+   {
+    "parent": "28dcde8c1e",
+    "parentfield": "roles",
+    "parenttype": "Custom Role",
+    "role": "BBB Admin"
+   },
+   {
+    "parent": "28dcde8c1e",
+    "parentfield": "roles",
+    "parenttype": "Custom Role",
+    "role": "Executive BBB"
+   }
+  ]
+ },
+ {
+  "docstatus": 0,
+  "doctype": "Custom Role",
+  "modified": "2023-11-28 12:21:12.285795",
+  "name": "88ede81e81",
+  "page": null,
+  "ref_doctype": "Stock Ledger Entry",
+  "report": "Woocommerce Stock Balance Log",
+  "roles": [
+   {
+    "parent": "88ede81e81",
+    "parentfield": "roles",
+    "parenttype": "Custom Role",
+    "role": "System Manager"
+   },
+   {
+    "parent": "88ede81e81",
+    "parentfield": "roles",
+    "parenttype": "Custom Role",
+    "role": "BBB Admin"
+   },
+   {
+    "parent": "88ede81e81",
+    "parentfield": "roles",
+    "parenttype": "Custom Role",
+    "role": "Executive BBB"
+   }
+  ]
+ },
+ {
+  "docstatus": 0,
+  "doctype": "Custom Role",
+  "modified": "2024-01-14 13:36:58.072250",
+  "name": "eb9b993cd7",
+  "page": null,
+  "ref_doctype": "Product Search Log",
+  "report": "Product Search Log Report",
+  "roles": [
+   {
+    "parent": "eb9b993cd7",
+    "parentfield": "roles",
+    "parenttype": "Custom Role",
+    "role": "System Manager"
+   },
+   {
+    "parent": "eb9b993cd7",
+    "parentfield": "roles",
+    "parenttype": "Custom Role",
+    "role": "Sales Manager"
+   },
+   {
+    "parent": "eb9b993cd7",
+    "parentfield": "roles",
+    "parenttype": "Custom Role",
+    "role": "Sales Master Manager"
+   }
+  ]
+ }
+]
