@@ -27,6 +27,9 @@ from bbb.bbb.controllers.get_item_details import (
 	get_item_warehouse,
 )
 
+from erpnext.accounts.doctype.pricing_rule.utils import filter_pricing_rules_for_qty_amount
+
+from bbb.bbb.pos_invoice import get_tag_conditions, calculate_discount_amount
 
 force_item_fields = (
 	"item_group",
@@ -44,9 +47,20 @@ class CustomPOSInvoice(POSInvoice):
     def __init__(self, *args, **kwargs):
         super(CustomPOSInvoice, self).__init__(*args, **kwargs)
 
-    # def validate(self):
+    def validate(self):
     # run on validate method of selling controller
-    # super(CustomPOSInvoice, self).validate()
+        super(CustomPOSInvoice, self).validate()
+
+
+        if self.discount_amount == 0:
+            discount_amount, rules_name_list, tag_name_list = self.validate_apply_pricing_rule_on_tag()
+            tag_name = ','.join(tag_name_list)
+            rules_name = ','.join(rules_name_list)
+            self.additional_discount_tag_name = tag_name
+            self.additional_discount_pricing_rule_name = rules_name
+            self.discount_amount = discount_amount
+            self.calculate_taxes_and_totals()
+
     # self.validate_pos_return()
     # munim fine
     # validate amount in mode of payments for returned invoices for pos must be negative
@@ -451,3 +465,59 @@ class CustomPOSInvoice(POSInvoice):
 
             if self.doctype == "Purchase Invoice":
                 self.set_expense_account(for_validate)
+
+
+    def validate_apply_pricing_rule_on_tag(self):
+        values = {}
+        conditions = get_tag_conditions(values)
+        pricing_rules = frappe.db.sql(
+            """ Select `tabPricing Rule`.* from `tabPricing Rule`
+            where  {conditions} and `tabPricing Rule`.disable = 0 order by `tabPricing Rule`.priority desc
+        """.format(
+                conditions=conditions
+            ),
+            values,
+            as_dict=1,
+        )
+        if pricing_rules:
+            total_amount = 0
+            total_qty = 0
+            discount_amount = 0
+
+            items = self.items
+            for item in items:
+                if not item.price_rule_tag:
+                    continue
+                if item.price_rule_tag == pricing_rules[0].get('tag', None):
+                    if cint(item.get('qty')) < 0:
+                        qty = (-1) * cint(item.get('qty'))
+                    else:
+                        qty = cint(item.get('qty'))
+
+                    total_amount += cint(item.get('rate')) * cint(qty)
+                    total_qty += cint(qty)
+
+            pricing_rules = filter_pricing_rules_for_qty_amount(total_qty, total_amount, pricing_rules)
+            rules_name_list = []
+            tag_name_list = []
+            for d in pricing_rules:
+                if d.price_or_product_discount == "Price":
+                    discount_amount += self.calculate_applied_tag_discount_amount(d)
+                    rules_name_list.append(d.title)
+                    tag_name_list.append(d.tag)
+            return discount_amount, rules_name_list, tag_name_list
+
+    def calculate_applied_tag_discount_amount(self, pricing_rule):
+        items = self.items
+        total_amount = 0
+        discount_amount = 0
+        for item in items:
+            if item.get('price_rule_tag') == pricing_rule.tag:
+                total_amount += cint(item.get('rate')) * cint(item.get('qty'))
+
+        if pricing_rule.get('discount_percentage'):
+            discount_amount = (total_amount * (pricing_rule.get('discount_percentage') / 100))
+        elif pricing_rule.get('discount_amount'):
+            discount_amount = pricing_rule.get('discount_amount')
+
+        return discount_amount
