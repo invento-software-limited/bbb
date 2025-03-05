@@ -503,7 +503,8 @@ class CustomPOSInvoice(POSInvoice):
         total_amount = 0
         discount_amount = 0
         for item in items:
-            if item.get('price_rule_tag') == pricing_rule.tag:
+            item_price_rule_tag = frappe.db.get_value("Item", {'item_code': item.item_code}, "price_rule_tag")
+            if item_price_rule_tag == pricing_rule.tag:
                 total_amount += cint(item.get('rate')) * cint(item.get('qty'))
 
         if pricing_rule.get('discount_percentage'):
@@ -521,3 +522,8 @@ class CustomPOSInvoice(POSInvoice):
         self.additional_discount_pricing_rule_name = rules_name
         self.discount_amount = discount_amount
         self.calculate_taxes_and_totals()
+        self.validate_paid_amount()
+
+    def validate_paid_amount(self):
+        if self.paid_amount < self.rounded_total:
+            frappe.throw("The discount may not have been applied properly. Please refresh the page and try again.")
