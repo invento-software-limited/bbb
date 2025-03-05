@@ -51,16 +51,7 @@ class CustomPOSInvoice(POSInvoice):
     # run on validate method of selling controller
         super(CustomPOSInvoice, self).validate()
 
-
-        if self.discount_amount == 0:
-            discount_amount, rules_name_list, tag_name_list = self.validate_apply_pricing_rule_on_tag()
-            tag_name = ','.join(tag_name_list)
-            rules_name = ','.join(rules_name_list)
-            self.additional_discount_tag_name = tag_name
-            self.additional_discount_pricing_rule_name = rules_name
-            self.discount_amount = discount_amount
-            self.calculate_taxes_and_totals()
-
+        self.update_special_discount_amount()
     # self.validate_pos_return()
     # munim fine
     # validate amount in mode of payments for returned invoices for pos must be negative
@@ -521,3 +512,12 @@ class CustomPOSInvoice(POSInvoice):
             discount_amount = pricing_rule.get('discount_amount')
 
         return discount_amount
+
+    def update_special_discount_amount(self):
+        discount_amount, rules_name_list, tag_name_list = self.validate_apply_pricing_rule_on_tag()
+        tag_name = ','.join(tag_name_list)
+        rules_name = ','.join(rules_name_list)
+        self.additional_discount_tag_name = tag_name
+        self.additional_discount_pricing_rule_name = rules_name
+        self.discount_amount = discount_amount
+        self.calculate_taxes_and_totals()
