@@ -371,8 +371,8 @@ erpnext.PointOfSale.ItemCart = class {
 
             if(can_click === 'enabled'){
                 if (!this.discount_field || can_edit_discount){
-                    // this.show_discount_amount_control();
-                    // this.show_discount_control();
+                    this.show_discount_amount_control();
+                    this.show_discount_control();
                 }
             }
         });
@@ -381,8 +381,8 @@ erpnext.PointOfSale.ItemCart = class {
             const can_click = $(".add-discount-amount-wrapper").attr('can_click');
             if(can_click === 'enabled'){
                 if (!this.discount_field || can_edit_discount){
-                    // this.show_discount_control();
-                    // this.show_discount_amount_control();
+                    this.show_discount_control();
+                    this.show_discount_amount_control();
                 }
             }
 

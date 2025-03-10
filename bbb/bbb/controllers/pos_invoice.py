@@ -525,5 +525,6 @@ class CustomPOSInvoice(POSInvoice):
         self.validate_paid_amount()
 
     def validate_paid_amount(self):
-        if self.paid_amount < self.rounded_total:
-            frappe.throw("The discount may not have been applied properly. Please refresh the page and try again.")
+        if not self.is_return:
+            if self.paid_amount < self.rounded_total:
+                frappe.throw("The discount may not have been applied properly. Please refresh the page and try again.")
