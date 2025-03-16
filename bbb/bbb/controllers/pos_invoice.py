@@ -51,7 +51,8 @@ class CustomPOSInvoice(POSInvoice):
     # run on validate method of selling controller
         super(CustomPOSInvoice, self).validate()
 
-        self.update_special_discount_amount()
+        if not self.discount_amount:
+            self.update_special_discount_amount()
     # self.validate_pos_return()
     # munim fine
     # validate amount in mode of payments for returned invoices for pos must be negative
