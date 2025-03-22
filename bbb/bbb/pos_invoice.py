@@ -5,18 +5,17 @@ import math
 from frappe.utils import money_in_words, flt, cint
 from frappe import _
 from erpnext.accounts.doctype.pricing_rule.utils import filter_pricing_rules_for_qty_amount
-from frappe.utils import today, flt, now, cstr, cint,getdate, now, today
+from frappe.utils import today, flt, now, cstr, cint, getdate, now, today
 from frappe.defaults import get_defaults
 from erpnext.accounts.utils import get_fiscal_year
 from erpnext.stock.stock_ledger import make_sl_entries
 from erpnext.controllers.stock_controller import StockController
 
+
 class CustomerValidationError(frappe.ValidationError): pass
 
 
 def check_opening_entry():
-
-    
     open_vouchers = frappe.db.get_all(
         "POS Opening Entry",
         filters={
@@ -28,15 +27,13 @@ def check_opening_entry():
         order_by="period_start_date desc",
     )
     if not open_vouchers:
-        frappe.throw(f"Opening entry for {frappe.session.user} is missing for today. Please create an opening entry to proceed.")
+        frappe.throw(
+            f"Opening entry for {frappe.session.user} is missing for today. Please create an opening entry to proceed.")
 
 
-        
-        
 def after_insert_or_on_submit(doc, method):
-    
     check_opening_entry()
-    
+
     total_advance = doc.total_advance
     grand_total = doc.grand_total
     if grand_total is not None:
@@ -54,7 +51,7 @@ def after_insert_or_on_submit(doc, method):
         change_amount = paid_amount - rounded_total
         # change_amount = (paid_amount - divisible_number) if (paid_amount - divisible_number) > 0 else 0
         outstanding_amount = (rounded_total - paid_amount) if (rounded_total - paid_amount) > 0 else 0
-        
+
         in_words = money_in_words(rounded_total)
         frappe.db.set_value("POS Invoice", doc.name, "in_words", in_words)
         frappe.db.set_value("POS Invoice", doc.name, "rounded_total", rounded_total)
@@ -69,20 +66,28 @@ def after_insert_or_on_submit(doc, method):
         frappe.db.set_value("POS Invoice", doc.name, "base_rounding_adjustment", adjustment)
 
     # update product search log
-    for item in doc.items:
-        search_items = frappe.db.get_all("Product Search Log", filters={"location": doc.pos_profile, "served_by":doc.served_by, "date": doc.posting_date, "product": item.item_code}, fields=["name"], order_by="creation desc")
-        if search_items:
-            frappe.db.set_value("Product Search Log", search_items[0].get('name'), 'is_sale', 1)
-
+    frappe.enqueue(method=update_product_search_log, queue="default", now=False, doc=doc)
 
     if doc.company == 'BBB Restaurant':
         for item in doc.items:
             update_stock_ledger(doc, item)
 
+
+def update_product_search_log(doc):
+    for item in doc.items:
+        search_items = frappe.db.get_list("Product Search Log",
+                                          filters={"location": doc.pos_profile, "served_by": doc.served_by,
+                                                   "date": doc.posting_date, "product": item.item_code},
+                                          fields=["name"], order_by="creation desc")
+        if search_items:
+            frappe.db.set_value("Product Search Log", search_items[0].get('name'), 'is_sale', 1)
+
+
 def on_cancel(doc, method):
     if doc.company == 'BBB Restaurant':
         for item in doc.items:
             update_stock_ledger(doc, item, cancelled=1)
+
 
 def get_item_list(doc, item):
     item_code = frappe.get_doc('Item', item.item_code)
@@ -119,6 +124,7 @@ def get_item_list(doc, item):
 
     return il
 
+
 def update_stock_ledger(doc, item, submitted=0, cancelled=0):
     # self.update_reserved_qty()
 
@@ -126,26 +132,29 @@ def update_stock_ledger(doc, item, submitted=0, cancelled=0):
     # Loop over items and packed items table
     for d in get_item_list(doc, item):
         # if submitted:
-        sl_entries.append(get_sle_for_source_warehouse(doc, d, cancelled = cancelled))
+        sl_entries.append(get_sle_for_source_warehouse(doc, d, cancelled=cancelled))
         # elif cancelled:
         #     sl_entries.append(self.get_sle_for_target_warehouse(d, cancelled = cancelled))
     if sl_entries:
         make_sl_entries(sl_entries, allow_negative_stock=True)
 
+
 def get_sle_for_source_warehouse(doc, item_row, cancelled):
     sle = get_sl_entries(
-        doc, item_row,{
-                "actual_qty": -1 * flt(item_row.qty),
-                "incoming_rate": item_row.incoming_rate,
-                "recalculate_rate":cancelled,
-                "is_cancelled": cancelled
+        doc, item_row, {
+            "actual_qty": -1 * flt(item_row.qty),
+            "incoming_rate": item_row.incoming_rate,
+            "recalculate_rate": cancelled,
+            "is_cancelled": cancelled
         },
     )
     return sle
 
+
 def get_sle_for_target_warehouse(self, item_row, cancelled):
     sle = self.get_sl_entries(
-        doc, item_row, {"actual_qty": -1 * flt(item_row.qty), "warehouse": item_row.target_warehouse, 'is_cancelled': cancelled}
+        doc, item_row,
+        {"actual_qty": -1 * flt(item_row.qty), "warehouse": item_row.target_warehouse, 'is_cancelled': cancelled}
     )
 
     if self.docstatus == 1:
@@ -157,6 +166,7 @@ def get_sle_for_target_warehouse(self, item_row, cancelled):
                 sle.dependant_sle_voucher_detail_no = item_row.name
 
     return sle
+
 
 def get_sl_entries(doc, d, args):
     valuation_rate = frappe.db.get_value('Item', d.get('item_code'), 'valuation_rate')
@@ -188,6 +198,8 @@ def get_sl_entries(doc, d, args):
     )
     sl_dict.update(args)
     return sl_dict
+
+
 @frappe.whitelist()
 def set_pos_cached_data(invoice_data=None):
     invoice_data = json.loads(invoice_data)
@@ -435,7 +447,8 @@ def validate(doc, method):
     if not doc.customer:
         frappe.throw(_("You must select a customer before submit"), CustomerValidationError, title="Missing")
     if doc.status == "Ordered":
-        if frappe.db.exists("POS Invoice",{"status" : "Ordered","restaurant_table_number" : doc.restaurant_table_number}):
+        if frappe.db.exists("POS Invoice",
+                            {"status": "Ordered", "restaurant_table_number": doc.restaurant_table_number}):
             frappe.throw("Already Ordered a Order in Table {}".format(doc.restaurant_table_number))
     if doc.company == 'BBB Restaurant' and doc.docstatus == 0:
         doc.status = 'Ordered'
@@ -453,7 +466,7 @@ def validate(doc, method):
                     additional_qty = "+ <span style='color:red';>{}</span>".format(item.get("restaurant_new_qty"))
                 else:
                     additional_qty = ""
-                str_app = "{item} --- {qty}<br>".format(item=item.get("item_name"),qty=item.get("qty"))
+                str_app = "{item} --- {qty}<br>".format(item=item.get("item_name"), qty=item.get("qty"))
                 item_str += str_app
             else:
                 previous_qty += item.get("qty")
@@ -463,12 +476,12 @@ def validate(doc, method):
                     additional_qty = "+ <span style='color:red';>{}</span>".format(item.get("restaurant_new_qty"))
                 else:
                     additional_qty = ""
-                str_app = "{item} --- {qty} {new_qty}<br>".format(item=item.get("item_name"),qty=(item.get("qty")- item.get("restaurant_new_qty")),new_qty = additional_qty)
+                str_app = "{item} --- {qty} {new_qty}<br>".format(item=item.get("item_name"), qty=(
+                            item.get("qty") - item.get("restaurant_new_qty")), new_qty=additional_qty)
                 old_str += str_app
-                
-            
+
         if len(old_str) > 0:
-            all =  old_str + "<hr>" + item_str
+            all = old_str + "<hr>" + item_str
         else:
             all = item_str
         if doc.previous_qty != doc.total_qty:
@@ -499,17 +512,19 @@ def validate(doc, method):
         # else:
         #     doc.restaurant_order_item_html = restaurant_old_order_item_html
 
+
 def restaurant_order_item(doc):
     items_html = ''
     for item in doc.items:
         items_html += (item.item_name + " * " + str(item.qty) + "<br>")
+
+
 def get_new_order_item(old_item, doc):
     # Create a dictionary to store items from old_item for easy lookup
     old_dict = []
     for item in old_item:
-        if item  not in ['<br>', '<hr>']:
+        if item not in ['<br>', '<hr>']:
             old_split_item = split_item(item)
-
 
     # Find the differences
     differences = []
@@ -518,11 +533,13 @@ def get_new_order_item(old_item, doc):
 
     return differences
 
+
 # Function to split each item into its name and integer value
 def split_item(item):
     # print(item)
     name, value = item.split(' * ')
     return name, int(value)
+
 
 def get_tag_conditions(values):
     today = datetime.datetime.today().date()
@@ -593,47 +610,46 @@ def apply_pricing_rule_on_tag(doc):
                 tag_name_list.append(d.tag)
         return {'discount_amount': discount_amount, 'rules_name_list': rules_name_list, 'tag_name_list': tag_name_list}
 
-            # if d.apply_discount_on:
-            # 	doc.set("apply_discount_on", d.apply_discount_on)
-            # 	doc.set("additional_discount_percentage", None)
-            # 	doc.set("discount_amount", flt(discount_amount))
-            # for field in ["additional_discount_percentage", "discount_amount"]:
-            # 	pr_field = "discount_percentage" if field == "additional_discount_percentage" else field
-            #
-            #
-            #
-            # 	if not d.get(pr_field):
-            # 		continue
-            # 	if (
-            # 		d.validate_applied_rule and doc.get(field) is not None and doc.get(field) < d.get(pr_field)
-            # 	):
-            # 		frappe.msgprint(_("User has not applied rule on the invoice {0}").format(doc.name))
-            # 	else:
-            # 		if not d.coupon_code_based:
-            # 			doc.set(field, d.get(pr_field))
-            # 		elif doc.get("coupon_code"):
-            # 			# coupon code based pricing rule
-            # 			coupon_code_pricing_rule = frappe.db.get_value(
-            # 				"Coupon Code", doc.get("coupon_code"), "pricing_rule"
-            # 			)
-            # 			if coupon_code_pricing_rule == d.name:
-            # 				# if selected coupon code is linked with pricing rule
-            # 				doc.set(field, d.get(pr_field))
-            # 			else:
-            # 				# reset discount if not linked
-            # 				doc.set(field, 0)
-            # 		else:
-            # 			# if coupon code based but no coupon code selected
-            # 			doc.set(field, 0)
+        # if d.apply_discount_on:
+        # 	doc.set("apply_discount_on", d.apply_discount_on)
+        # 	doc.set("additional_discount_percentage", None)
+        # 	doc.set("discount_amount", flt(discount_amount))
+        # for field in ["additional_discount_percentage", "discount_amount"]:
+        # 	pr_field = "discount_percentage" if field == "additional_discount_percentage" else field
+        #
+        #
+        #
+        # 	if not d.get(pr_field):
+        # 		continue
+        # 	if (
+        # 		d.validate_applied_rule and doc.get(field) is not None and doc.get(field) < d.get(pr_field)
+        # 	):
+        # 		frappe.msgprint(_("User has not applied rule on the invoice {0}").format(doc.name))
+        # 	else:
+        # 		if not d.coupon_code_based:
+        # 			doc.set(field, d.get(pr_field))
+        # 		elif doc.get("coupon_code"):
+        # 			# coupon code based pricing rule
+        # 			coupon_code_pricing_rule = frappe.db.get_value(
+        # 				"Coupon Code", doc.get("coupon_code"), "pricing_rule"
+        # 			)
+        # 			if coupon_code_pricing_rule == d.name:
+        # 				# if selected coupon code is linked with pricing rule
+        # 				doc.set(field, d.get(pr_field))
+        # 			else:
+        # 				# reset discount if not linked
+        # 				doc.set(field, 0)
+        # 		else:
+        # 			# if coupon code based but no coupon code selected
+        # 			doc.set(field, 0)
 
-            # doc.calculate_taxes_and_totals()
+        # doc.calculate_taxes_and_totals()
         # elif d.price_or_product_discount == "Product":
         # 	item_details = frappe._dict({"parenttype": doc.doctype, "free_item_data": []})
         # 	get_product_discount_rule(d, item_details, doc=doc)
         # 	apply_pricing_rule_for_free_items(doc, item_details.free_item_data)
         # 	doc.set_missing_values()
         # 	doc.calculate_taxes_and_totals()
-
 
 
 @frappe.whitelist()
