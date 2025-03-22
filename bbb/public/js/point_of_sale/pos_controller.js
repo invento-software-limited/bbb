@@ -446,6 +446,8 @@ erpnext.PointOfSale.Controller = class {
 
                 edit_cart: () => this.payment.edit_cart(),
 
+                toggle_item_details_section: () => this.item_details.toggle_item_details_section(),
+
                 customer_details_updated: (details) => {
                     this.customer_details = details;
                     // will add/remove LP payment method

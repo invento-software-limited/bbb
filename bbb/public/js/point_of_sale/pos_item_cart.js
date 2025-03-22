@@ -1152,7 +1152,7 @@ erpnext.PointOfSale.ItemCart = class {
 
         if (!$item_to_update.length) {
             this.$cart_items_wrapper.prepend(
-                `<div class="cart-item-wrapper" data-row-name="${escape(item_data.name)}"></div>
+                `<div class="cart-item-wrapper" data-row-name="${escape(item_data?.name)}"></div>
 				<div class="seperator"></div>`
             )
             $item_to_update = this.get_cart_item(item_data);
@@ -1220,12 +1220,12 @@ erpnext.PointOfSale.ItemCart = class {
             let damaged_cost = (item_data.damaged_cost) || 0
             let actual_discount_amount = discount_amount - damaged_cost // after adding damaged cost
             return `
-					<div class="item-row-mrp"><span>${item_data.price_list_rate || 0}</span></div>
-					<div class="item-row-disc"><span>${actual_discount_amount || 0}</span></div>
+					<div class="item-row-mrp"><span>${flt(item_data.price_list_rate, 0) || 0}</span></div>
+					<div class="item-row-disc"><span>${flt(actual_discount_amount, 0) || 0}</span></div>
 					<div class="item-row-damaged"><!--<span>${item_data.qty || 0}</span>-->
 					<input class="form-control item-row-damaged damaged_cost" type="text" ${is_return} data-item-code="${item_data.item_code}" data-index="${item_data.idx}" data-rate="${item_data.rate || 0}" data-damaged-rate="" data-discount="" value="${item_data.total_damaged_cost || 0}" item_mrp_rate="${item_data.price_list_rate}" docname="${item_data.name}" discount_amount="${item_data.discount_amount}" style="width: 50px;text-align: center;" item_qty="${item_data.qty || 'undefined'}">
 					</div>
-					<div class="item-row-rate"><span>${item_data.rate || 0}</span></div>
+					<div class="item-row-rate"><span>${flt(item_data.rate, 0) || 0}</span></div>
 					<div class="item-row-qty"><!--<span>${item_data.qty || 0}</span>-->
 					<input class="form-control item_qty" type="text" data-tag="${item_data.price_rule_tag}"data-rate="${item_data.rate || 0}" value="${item_data.qty || 0}" item_code="${item_data.item_code}" docname="${item_data.name}" style="width: 50px;text-align: center;" free_item="${item_data.free_item_rules || 'undefined'}">
 					</div>
@@ -1233,7 +1233,7 @@ erpnext.PointOfSale.ItemCart = class {
 					<!--<div class="item-row-damaged-cost">
 					<input class="form-control damaged-cost" type="text" value="${item_data.qty || 0}" item_code="${item_data.item_code}" docname="${item_data.name}" style="width: 50px;text-align: center;">
 					</div> -->
-					<div class="item-row-amount"><span>${item_data.amount || 0}</span></div>`
+					<div class="item-row-amount"><span>${flt(item_data.amount, 0) || 0}</span></div>`
             // }
         }
 
@@ -1321,11 +1321,11 @@ erpnext.PointOfSale.ItemCart = class {
                                     // frappe.model.set_value("POS Invoice Item", docname, 'discount_percentage', r.message.discount_percentage)
 
                                 }
-                                console.log(me.events.get_frm())
+                                // console.log(me.events.get_frm())
                             // }
                         // })
                     }
-                    me.events.update_additional_discount_on_tag()
+                    // me.events.update_additional_discount_on_tag()
 
                 }else{
                     const message = __('Item quantity must be a number');
@@ -1551,8 +1551,8 @@ erpnext.PointOfSale.ItemCart = class {
 
     toggle_numpad(show) {
         if (show) {
-            this.$totals_section.css('display', 'none');
-            this.$numpad_section.css('display', 'flex');
+            this.$totals_section.css('display', 'flex');
+            this.$numpad_section.css('display', 'none');
         } else {
             this.$totals_section.css('display', 'flex');
             this.$numpad_section.css('display', 'none');
@@ -1809,37 +1809,7 @@ erpnext.PointOfSale.ItemCart = class {
         });
         // }
         this.$cart_items_wrapper.html('');
-        // pos return
-        // if(frm.doc.is_return == 1) {
-        // frappe.model.set_value(frm.doc.doctype, frm.doc.name, 'ignore_pricing_rule', 0);
-        // }
 
-        // pos return
-        // if(frm.doc.is_return){
-        //     const item_data = frm.doc.items;
-        //     frm.doc.items = [];
-        //     frm.refresh_field('ignore_pricing_rule');
-        //     item_data.forEach(item => {
-        //         frappe.db.get_value('Item', {'item_code': item.item_code}, ['start_date', 'end_date', 'discount_amount']).then(res=>{
-        //             let new_item = {'item_code':item.item_code, 'batch_no': item.batch_no, 'rate':item.item_code, 'item_actual_qty': item.qty, 'mrp': item.price_list_rate, 'title': item.item_name, 'discount_amount': res.message.discount_amount, 'start_date': new Date(res.message.start_date), 'end_date': new Date(res.message.end_date), update_rules: 0}
-        //             var args = {
-        //             'field': "qty",
-        //             'item': new_item,
-        //             'value': item.qty
-        //             }
-        //             me.events.on_cart_update(args);
-        //         })
-        //     });
-        // }else{
-        //     if (frm.doc.items.length) {
-        //         frm.doc.items.forEach(item => {
-        //             this.update_item_html(item);
-        //         });
-        //     } else {
-        //         this.make_no_items_placeholder();
-        //         this.highlight_checkout_btn(false);
-        //     }
-        // }
 
         if (frm.doc.items.length) {
             frm.doc.items.forEach(item => {
@@ -1852,32 +1822,6 @@ erpnext.PointOfSale.ItemCart = class {
          me.update_totals_section(frm);
 
 
-        // setTimeout(function (){
-        //     if (frm.doc.items.length) {
-        //         frm.doc.items.forEach(item => {
-        //             if(item.pricing_rules && item.discount_percentage <= 0){
-        //                 frappe.call({
-        //                     method: "bbb.bbb.controllers.utils.get_pricing_rule_discount",
-        //                     args: {"name": item.pricing_rules},
-        //                     callback: (r) => {
-        //                         frappe.model.set_value(item.doctype, item.name, 'discount_percentage', r.message.discount_percentage)
-        //                         me.update_item_html(item);
-        //                     }
-        //                 })
-        //             }else{
-        //                 me.update_item_html(item);
-        //             }
-        //         })
-        //     } else {
-        //         me.make_no_items_placeholder();
-        //         me.highlight_checkout_btn(false);
-        //     }
-        //
-        //     me.update_totals_section(frm);
-        // }, 5000);
-
-
-
         if (frm.doc.docstatus === 1) {
             this.$totals_section.find('.checkout-btn').css('display', 'none');
             this.$totals_section.find('.edit-cart-btn').css('display', 'none');
@@ -1887,22 +1831,6 @@ erpnext.PointOfSale.ItemCart = class {
         }
         this.make_pos_profile();
         this.toggle_component(true);
-        // if(cached_data){
-        //     const items = cached_data.pos_items ? cached_data.pos_items : {}
-        //     frm.doc.items = [];
-        //     frm.refresh_field('items');
-        //     frm.reload_doc();
-        //     items.forEach(item_dict => {
-        //         const values = Object.values(item_dict)[0];
-        //         var qty = values.qty;
-        //         var args = {
-        //         'field': "qty",
-        //         'item': values,
-        //         'value': "+" + qty
-        //         }
-        //         this.events.update_cached_item_data(args);
-        //     });
-        // }
     }
 
     toggle_component(show) {
